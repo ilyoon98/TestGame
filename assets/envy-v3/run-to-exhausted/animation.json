@@ -1,0 +1,70 @@
+{
+  "name": "envy-run-to-exhausted",
+  "spriteSheet": "envy-run-to-exhausted-sheet.png",
+  "facing": "right, three-quarter",
+  "frameSize": [
+    512,
+    512
+  ],
+  "originPx": [
+    253.25,
+    463
+  ],
+  "columns": 7,
+  "rows": 2,
+  "frameCount": 14,
+  "frameDurationMs": 44,
+  "frameDurationsMs": [
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    44,
+    70
+  ],
+  "durationMs": 642,
+  "loop": false,
+  "entry": {
+    "when": "grounded sprint with depleted stamina",
+    "animation": "../run-v2/animation.json",
+    "afterFrame": 15,
+    "matchesFrame": 0
+  },
+  "exit": {
+    "animation": "../exhausted/animation.json",
+    "matchesFrame": 0,
+    "nextFrame": 1,
+    "matchedFrameDurationMs": 70
+  },
+  "rootTravelPxByFrame": [
+    0,
+    16,
+    31,
+    44,
+    55,
+    64,
+    71,
+    76,
+    79,
+    82,
+    84,
+    86,
+    87,
+    87
+  ],
+  "events": {
+    "rightFootBrakes": 0,
+    "leftFootPlants": 5,
+    "rightHandOnKnee": 8,
+    "leftHandOnKnee": 10,
+    "breathingLoopEntry": 13
+  }
+}

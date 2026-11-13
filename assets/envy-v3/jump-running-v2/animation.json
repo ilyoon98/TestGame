@@ -1,0 +1,218 @@
+{
+  "name": "envy-jump-running",
+  "spriteSheet": "envy-jump-running-sheet.png",
+  "facing": "right, three-quarter",
+  "originPx": [
+    253.25,
+    463
+  ],
+  "frameSize": [
+    512,
+    512
+  ],
+  "columns": 5,
+  "rows": 4,
+  "frameCount": 20,
+  "frameDurationMs": 44,
+  "durationMs": 880,
+  "loop": false,
+  "events": {
+    "takeoff": 6,
+    "apex": 10,
+    "land": 14
+  },
+  "footContactsByFrame": [
+    [
+      [
+        "right",
+        291.08,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        275.08,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        259.08,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        243.08,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        227.08,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        211.08,
+        463
+      ]
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      [
+        "left",
+        292.08,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        276.08,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        260.08,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        244.08,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        228.08,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        212.08,
+        461
+      ]
+    ]
+  ],
+  "previewRootOffsetsPx": [
+    [
+      0,
+      0
+    ],
+    [
+      16,
+      0
+    ],
+    [
+      32,
+      0
+    ],
+    [
+      48,
+      0
+    ],
+    [
+      64,
+      0
+    ],
+    [
+      80,
+      0
+    ],
+    [
+      96,
+      -16
+    ],
+    [
+      112,
+      -30
+    ],
+    [
+      128,
+      -39
+    ],
+    [
+      144,
+      -48
+    ],
+    [
+      160,
+      -50
+    ],
+    [
+      176,
+      -41
+    ],
+    [
+      192,
+      -32
+    ],
+    [
+      208,
+      -15
+    ],
+    [
+      224,
+      0
+    ],
+    [
+      240,
+      0
+    ],
+    [
+      256,
+      0
+    ],
+    [
+      272,
+      0
+    ],
+    [
+      288,
+      0
+    ],
+    [
+      304,
+      0
+    ]
+  ],
+  "poseReference": "../references/envy-jump-key-poses.png",
+  "orientationReference": "../references/envy-turnaround-hood-fit.png",
+  "runTransition": {
+    "source": "../run-v2/animation.json",
+    "entrySourceFrames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "exitSourceFrames": [
+      12,
+      13
+    ],
+    "resumeSourceFrame": 14
+  }
+}

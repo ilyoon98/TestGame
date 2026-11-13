@@ -1,0 +1,21 @@
+{
+  "name": "envy-exhausted",
+  "spriteSheet": "envy-exhausted-sheet.png",
+  "poseReference": "../references/envy-exhausted-open-hood.png",
+  "orientationReference": "../references/envy-turnaround-hood-fit.png",
+  "facing": "right, three-quarter",
+  "originPx": [
+    253.25,
+    463
+  ],
+  "frameSize": [
+    512,
+    512
+  ],
+  "columns": 6,
+  "rows": 4,
+  "frameCount": 24,
+  "frameDurationMs": 70,
+  "durationMs": 1680,
+  "loop": true
+}

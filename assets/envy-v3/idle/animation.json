@@ -1,0 +1,50 @@
+{
+  "name": "envy-idle",
+  "art_source": "code",
+  "texture": "../master_rgba.png",
+  "spriteSheet": "envy-idle-sheet.png",
+  "frameSize": [
+    512,
+    512
+  ],
+  "columns": 6,
+  "rows": 4,
+  "frameCount": 24,
+  "framesPerSecond": 12,
+  "durationsMs": [
+    83,
+    84,
+    83,
+    83,
+    84,
+    83,
+    83,
+    84,
+    83,
+    83,
+    84,
+    83,
+    83,
+    84,
+    83,
+    83,
+    84,
+    83,
+    83,
+    84,
+    83,
+    83,
+    84,
+    83
+  ],
+  "originPx": [
+    253.25,
+    463.0
+  ],
+  "loop": true,
+  "checks": {
+    "feetFixed": true,
+    "baselineFixed": true,
+    "uniqueFrames": 24
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "name": "envy-walk",
+  "facing": "right, three-quarter",
+  "originPx": [
+    253.25,
+    463
+  ],
+  "frameSize": [
+    512,
+    512
+  ],
+  "spriteSheet": "envy-walk-sheet.png",
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "frameDurationMs": 75,
+  "durationMs": 1200,
+  "loop": true,
+  "artSource": "master sprite and ImageGen cutouts, animated by a two-bone leg rig",
+  "suggestedTravelPerCyclePx": 100,
+  "footContactsByFrame": [
+    [
+      [
+        "far",
+        222.25,
+        461
+      ],
+      [
+        "near",
+        298.25,
+        463
+      ]
+    ],
+    [
+      [
+        "far",
+        216.0,
+        461
+      ],
+      [
+        "near",
+        292.0,
+        463
+      ]
+    ],
+    [
+      [
+        "near",
+        285.75,
+        463
+      ]
+    ],
+    [
+      [
+        "near",
+        279.5,
+        463
+      ]
+    ],
+    [
+      [
+        "near",
+        273.25,
+        463
+      ]
+    ],
+    [
+      [
+        "near",
+        267.0,
+        463
+      ]
+    ],
+    [
+      [
+        "near",
+        260.75,
+        463
+      ]
+    ],
+    [
+      [
+        "near",
+        254.5,
+        463
+      ]
+    ],
+    [
+      [
+        "far",
+        272.25,
+        461
+      ],
+      [
+        "near",
+        248.25,
+        463
+      ]
+    ],
+    [
+      [
+        "far",
+        266.0,
+        461
+      ],
+      [
+        "near",
+        242.0,
+        463
+      ]
+    ],
+    [
+      [
+        "far",
+        259.75,
+        461
+      ]
+    ],
+    [
+      [
+        "far",
+        253.5,
+        461
+      ]
+    ],
+    [
+      [
+        "far",
+        247.25,
+        461
+      ]
+    ],
+    [
+      [
+        "far",
+        241.0,
+        461
+      ]
+    ],
+    [
+      [
+        "far",
+        234.75,
+        461
+      ]
+    ],
+    [
+      [
+        "far",
+        228.5,
+        461
+      ]
+    ]
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "name": "envy-jump-standing",
+  "spriteSheet": "envy-jump-standing-sheet.png",
+  "facing": "right, three-quarter",
+  "originPx": [
+    253.25,
+    463
+  ],
+  "frameSize": [
+    512,
+    512
+  ],
+  "columns": 5,
+  "rows": 4,
+  "frameCount": 20,
+  "frameDurationMs": 44,
+  "durationMs": 880,
+  "loop": false,
+  "events": {
+    "takeoff": 6,
+    "apex": 10,
+    "land": 14
+  },
+  "footContactsByFrame": [
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ]
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ],
+    [
+      [
+        "left",
+        268.0,
+        461
+      ],
+      [
+        "right",
+        231.0,
+        463
+      ]
+    ]
+  ],
+  "previewRootOffsetsPx": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      -14
+    ],
+    [
+      0,
+      -30
+    ],
+    [
+      0,
+      -45
+    ],
+    [
+      0,
+      -52
+    ],
+    [
+      0,
+      -58
+    ],
+    [
+      0,
+      -48
+    ],
+    [
+      0,
+      -39
+    ],
+    [
+      0,
+      -18
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "poseReference": "../references/envy-jump-key-poses.png",
+  "orientationReference": "../references/envy-turnaround-hood-fit.png",
+  "footEvents": {
+    "right": {
+      "lift": 5,
+      "land": 15
+    },
+    "left": {
+      "lift": 6,
+      "land": 14
+    }
+  }
+}

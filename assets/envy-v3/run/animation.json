@@ -1,0 +1,680 @@
+{
+  "name": "envy-run",
+  "facing": "right, three-quarter",
+  "originPx": [
+    253.25,
+    463
+  ],
+  "frameSize": [
+    512,
+    512
+  ],
+  "spriteSheet": "envy-run-sheet.png",
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "frameDurationMs": 50,
+  "durationMs": 800,
+  "loop": true,
+  "artSource": "Walk leg textures and ImageGen upper-body parts, posed with the locomotion rig",
+  "suggestedTravelPerCyclePx": 190,
+  "footContactsByFrame": [
+    [
+      [
+        "right",
+        287.2,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        275.325,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        263.45,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        251.575,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        239.7,
+        463
+      ]
+    ],
+    [
+      [
+        "right",
+        227.825,
+        463
+      ]
+    ],
+    [],
+    [],
+    [
+      [
+        "left",
+        288.2,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        276.325,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        264.45,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        252.575,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        240.7,
+        461
+      ]
+    ],
+    [
+      [
+        "left",
+        228.825,
+        461
+      ]
+    ],
+    [],
+    []
+  ],
+  "rig": {
+    "orientationReference": "../references/envy-turnaround.png",
+    "orientationView": "RIGHT 3/4",
+    "poseReference": "../references/envy-run-key-poses.png",
+    "cameraNearLeg": "right",
+    "cameraFarLeg": "left",
+    "leadContacts": [
+      {
+        "frame": 0,
+        "leg": "right"
+      },
+      {
+        "frame": 8,
+        "leg": "left"
+      }
+    ],
+    "flightFrames": [
+      6,
+      7,
+      14,
+      15
+    ],
+    "jointCoordinatesByFrame": [
+      {
+        "left": {
+          "hip": [
+            258.0,
+            302.0
+          ],
+          "knee": [
+            282.67,
+            365.37
+          ],
+          "ankle": [
+            216.28,
+            374.4
+          ],
+          "shoePitchDeg": -30.18,
+          "soleY": 414
+        },
+        "right": {
+          "hip": [
+            241.0,
+            302.0
+          ],
+          "knee": [
+            264.86,
+            365.68
+          ],
+          "ankle": [
+            287.6,
+            431.12
+          ],
+          "shoePitchDeg": 7.0,
+          "soleY": 463
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            306.0
+          ],
+          "knee": [
+            293.24,
+            364.15
+          ],
+          "ankle": [
+            226.28,
+            366.4
+          ],
+          "shoePitchDeg": -29.46,
+          "soleY": 406
+        },
+        "right": {
+          "hip": [
+            241.0,
+            306.0
+          ],
+          "knee": [
+            274.58,
+            365.13
+          ],
+          "ankle": [
+            275.6,
+            432.12
+          ],
+          "shoePitchDeg": 2.39,
+          "soleY": 463
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            307.0
+          ],
+          "knee": [
+            306.56,
+            354.6
+          ],
+          "ankle": [
+            240.28,
+            364.4
+          ],
+          "shoePitchDeg": -25.7,
+          "soleY": 403
+        },
+        "right": {
+          "hip": [
+            241.0,
+            307.0
+          ],
+          "knee": [
+            271.8,
+            367.62
+          ],
+          "ankle": [
+            263.6,
+            434.12
+          ],
+          "shoePitchDeg": 0.0,
+          "soleY": 463
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            305.0
+          ],
+          "knee": [
+            316.4,
+            339.83
+          ],
+          "ankle": [
+            256.28,
+            369.4
+          ],
+          "shoePitchDeg": -19.69,
+          "soleY": 406
+        },
+        "right": {
+          "hip": [
+            241.0,
+            305.0
+          ],
+          "knee": [
+            265.26,
+            368.53
+          ],
+          "ankle": [
+            251.6,
+            434.12
+          ],
+          "shoePitchDeg": 0.0,
+          "soleY": 463
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            300.0
+          ],
+          "knee": [
+            318.22,
+            331.59
+          ],
+          "ankle": [
+            271.28,
+            379.4
+          ],
+          "shoePitchDeg": -12.47,
+          "soleY": 413
+        },
+        "right": {
+          "hip": [
+            241.0,
+            300.0
+          ],
+          "knee": [
+            258.26,
+            365.77
+          ],
+          "ankle": [
+            239.6,
+            430.12
+          ],
+          "shoePitchDeg": -5.94,
+          "soleY": 463
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            296.0
+          ],
+          "knee": [
+            314.62,
+            333.66
+          ],
+          "ankle": [
+            284.28,
+            393.4
+          ],
+          "shoePitchDeg": -5.15,
+          "soleY": 423
+        },
+        "right": {
+          "hip": [
+            241.0,
+            296.0
+          ],
+          "knee": [
+            250.85,
+            363.28
+          ],
+          "ankle": [
+            227.6,
+            426.12
+          ],
+          "shoePitchDeg": -13.36,
+          "soleY": 463
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            295.0
+          ],
+          "knee": [
+            307.26,
+            341.88
+          ],
+          "ankle": [
+            293.28,
+            407.4
+          ],
+          "shoePitchDeg": 1.15,
+          "soleY": 435
+        },
+        "right": {
+          "hip": [
+            241.0,
+            295.0
+          ],
+          "knee": [
+            257.42,
+            360.99
+          ],
+          "ankle": [
+            216.6,
+            414.12
+          ],
+          "shoePitchDeg": -21.04,
+          "soleY": 454
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            297.0
+          ],
+          "knee": [
+            298.68,
+            351.49
+          ],
+          "ankle": [
+            295.28,
+            418.4
+          ],
+          "shoePitchDeg": 5.45,
+          "soleY": 447
+        },
+        "right": {
+          "hip": [
+            241.0,
+            297.0
+          ],
+          "knee": [
+            270.96,
+            358.05
+          ],
+          "ankle": [
+            211.6,
+            389.12
+          ],
+          "shoePitchDeg": -27.41,
+          "soleY": 431
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            302.0
+          ],
+          "knee": [
+            284.81,
+            364.49
+          ],
+          "ankle": [
+            288.28,
+            431.4
+          ],
+          "shoePitchDeg": 7.0,
+          "soleY": 461
+        },
+        "right": {
+          "hip": [
+            241.0,
+            302.0
+          ],
+          "knee": [
+            280.69,
+            357.22
+          ],
+          "ankle": [
+            215.6,
+            373.12
+          ],
+          "shoePitchDeg": -30.18,
+          "soleY": 416
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            306.0
+          ],
+          "knee": [
+            287.38,
+            367.33
+          ],
+          "ankle": [
+            276.28,
+            433.4
+          ],
+          "shoePitchDeg": 2.39,
+          "soleY": 461
+        },
+        "right": {
+          "hip": [
+            241.0,
+            306.0
+          ],
+          "knee": [
+            291.26,
+            351.8
+          ],
+          "ankle": [
+            225.6,
+            365.12
+          ],
+          "shoePitchDeg": -29.46,
+          "soleY": 408
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            307.0
+          ],
+          "knee": [
+            283.25,
+            370.14
+          ],
+          "ankle": [
+            264.28,
+            434.4
+          ],
+          "shoePitchDeg": 0.0,
+          "soleY": 461
+        },
+        "right": {
+          "hip": [
+            241.0,
+            307.0
+          ],
+          "knee": [
+            301.17,
+            338.69
+          ],
+          "ankle": [
+            239.6,
+            365.12
+          ],
+          "shoePitchDeg": -25.7,
+          "soleY": 405
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            305.0
+          ],
+          "knee": [
+            274.12,
+            371.06
+          ],
+          "ankle": [
+            252.28,
+            434.4
+          ],
+          "shoePitchDeg": 0.0,
+          "soleY": 461
+        },
+        "right": {
+          "hip": [
+            241.0,
+            305.0
+          ],
+          "knee": [
+            305.73,
+            325.83
+          ],
+          "ankle": [
+            254.6,
+            369.12
+          ],
+          "shoePitchDeg": -19.69,
+          "soleY": 408
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            300.0
+          ],
+          "knee": [
+            263.99,
+            367.74
+          ],
+          "ankle": [
+            240.28,
+            430.4
+          ],
+          "shoePitchDeg": -5.94,
+          "soleY": 461
+        },
+        "right": {
+          "hip": [
+            241.0,
+            300.0
+          ],
+          "knee": [
+            305.39,
+            321.86
+          ],
+          "ankle": [
+            270.6,
+            379.12
+          ],
+          "shoePitchDeg": -12.47,
+          "soleY": 415
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            296.0
+          ],
+          "knee": [
+            249.19,
+            363.43
+          ],
+          "ankle": [
+            229.28,
+            427.4
+          ],
+          "shoePitchDeg": -13.36,
+          "soleY": 461
+        },
+        "right": {
+          "hip": [
+            241.0,
+            296.0
+          ],
+          "knee": [
+            300.8,
+            328.37
+          ],
+          "ankle": [
+            283.6,
+            393.12
+          ],
+          "shoePitchDeg": -5.15,
+          "soleY": 425
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            295.0
+          ],
+          "knee": [
+            259.02,
+            362.99
+          ],
+          "ankle": [
+            217.28,
+            415.4
+          ],
+          "shoePitchDeg": -21.04,
+          "soleY": 452
+        },
+        "right": {
+          "hip": [
+            241.0,
+            295.0
+          ],
+          "knee": [
+            291.87,
+            340.12
+          ],
+          "ankle": [
+            291.6,
+            407.12
+          ],
+          "shoePitchDeg": 1.15,
+          "soleY": 437
+        }
+      },
+      {
+        "left": {
+          "hip": [
+            258.0,
+            297.0
+          ],
+          "knee": [
+            273.91,
+            363.11
+          ],
+          "ankle": [
+            212.28,
+            389.4
+          ],
+          "shoePitchDeg": -27.41,
+          "soleY": 429
+        },
+        "right": {
+          "hip": [
+            241.0,
+            297.0
+          ],
+          "knee": [
+            280.38,
+            352.44
+          ],
+          "ankle": [
+            293.6,
+            418.12
+          ],
+          "shoePitchDeg": 5.45,
+          "soleY": 449
+        }
+      }
+    ]
+  }
+}
