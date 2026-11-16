@@ -1,0 +1,39 @@
+{
+  "portraits": [
+    {
+      "value": {
+        "identityId": 10716,
+        "profile": "calendarSample"
+      },
+      "signature": "fzYtOEI3YmZnwMDCvcC1zFU9LxoVKCgojXFtqI+SqLeyRCYMKBkcFCUdNCElmZmXiIiSTFJQaXR2OjAvYU5QjndxUEtIX2pkUFVbNzsqXEdOWEdPT01Opaao"
+    },
+    {
+      "value": {
+        "identityId": 10204,
+        "profile": "uptie1Or2"
+      },
+      "signature": "WUI8uePxZnaNSlBgEhUeEgwM5Pny5PDuk628WV93MzZFBAIF8v/22fHXi6OvYWR3OThIGRgd6f/0p97Hlba/XFlsW1pqFxYetMbQvuPctdvkhJGaeHqGEgwO"
+    },
+    {
+      "value": {
+        "identityId": 10115,
+        "profile": "calendarSample"
+      },
+      "signature": "MAYAMDNCfn2FmKSiTT8y70osNTk6VFJXOklCvbvAxNrYlkUwUUBTa2NwLTE8oJuxk5KYcHBmgX6PkYaWIRcYaHd0vcnHSktPgYOSjIebKCw4R0dRf32CEBYS"
+    }
+  ],
+  "sanity": [
+    {
+      "value": 30,
+      "signature": "AAAAAA4DAAAACQwAAAAAAABfcnFMAFhyf0kAAAAAG0cAM0sAaxw1VQAAAAQAAABWWgBzDB9ZAAkADQAAGnRKAGkbLksAAAALAAAARE8Adg0yVgAAAAAAAAAuWABuFDZVAAIAAABCDjZPAG8oOWoAAgAAAGJvbjsAZXeEXQAAAAAAAAkCAAAAFhYCAAA="
+    },
+    {
+      "value": 34,
+      "signature": "AAAAEQkAAAAAABAAAAAAAGZ2fCYAYwAAAAAAACQOUgBkMgBxAAAAAAAAHgAABnY2AHUBPj0AAAAEAABNjCYAbyZmRAADAAAAAABgMAB9eZA0AAoAEwAAAFU0AAAAWTwAAAAAAE8AWDIAAAA9OhIAAAAAenN8HwAAADU4AAAAAAAIBgsAAAAACAAAAAA="
+    },
+    {
+      "value": 45,
+      "signature": "AAAGAAAAAAEOGgAAAAAAC3wAAAAAe4iIKQAAABAfiAAAAACQBAAAAAAAABV1AG8lAIgPAAAAAAAAAY4dhzcAiYmLIQAAAAAAjZaeNAAAAHQjAAAAAAAAB38gBAAAZSgAAAAAAAAAdSEAGgBoJQgAAAAAAABnEwB+docuAAAAAAAAAAAAAAAdHwAAAAA="
+    }
+  ]
+}
