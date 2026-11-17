@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>2D 주사위 굴리기</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(ellipse at center, #1e2530, #0e1116);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+  }
+
+  .scene {
+    position: relative;
+    width: 400px;
+    text-align: center;
+  }
+
+  .lane {
+    position: relative;
+    height: 340px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    --wall-offset: 130px; /* fallback; JS widens this to fit however many dice are set */
+  }
+
+  /* one shared boundary style for all 4 surfaces (floor/ceiling/2 walls) — same
+     idle brightness, same hit flash, same everything. Only the orientation
+     modifier (-h vs -v) differs, because a horizontal bar and a vertical bar
+     necessarily need their long axis in different CSS properties. Keeping this
+     as one source of truth instead of four hand-tuned copies is what stops the
+     "floor looks dimmer than the wall" drift. */
+  .boundary {
+    position: absolute;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(255,255,255,0.12);
+    transition: box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .boundary.hit {
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 0 26px 6px rgba(255,255,255,0.7);
+  }
+  .boundary-h {
+    left: calc(50% - var(--wall-offset));
+    right: calc(50% - var(--wall-offset));
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.28), rgba(255,255,255,0.06));
+  }
+  .boundary-v {
+    top: 16px;
+    bottom: 22px;
+    width: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06));
+  }
+  .wall-left  { left: calc(50% - var(--wall-offset)); }
+  .wall-right { right: calc(50% - var(--wall-offset)); }
+
+  .shadow {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    width: 60px;
+    height: 14px;
+    margin-left: -30px;
+    background: #000;
+    border-radius: 50%;
+    opacity: 0.45;
+    filter: blur(2px);
+    transform: scale(1, 1);
+  }
+
+  .wall-ripple-wrap {
+    position: absolute;
+    top: 16px;
+    bottom: 22px;
+    width: 0;
+    pointer-events: none;
+  }
+  .wall-ripple {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    left: -4px;
+    border-radius: 4px;
+    background: #ff2d55;
+    box-shadow: 0 0 14px #ff2d55;
+    opacity: 0;
+    animation: wallFlash 0.4s ease-out forwards;
+  }
+
+  /* same surge effect as the wall, just rotated to a horizontal bar for floor/ceiling —
+     spans exactly between the two walls, matching their own left/right offset, so the
+     four surfaces form one continuous rectangle instead of the floor/ceiling overhanging
+     past the walls */
+  .surface-ripple {
+    position: absolute;
+    left: calc(50% - var(--wall-offset));
+    right: calc(50% - var(--wall-offset));
+    height: 8px;
+    border-radius: 4px;
+    background: #ff2d55;
+    box-shadow: 0 0 14px #ff2d55;
+    opacity: 0;
+    animation: wallFlashY 0.4s ease-out forwards;
+  }
+
+  @keyframes wallFlash {
+    0%   { transform: scaleX(1); opacity: 0.95; filter: hue-rotate(0deg); }
+    50%  { transform: scaleX(2.4); filter: hue-rotate(150deg); }
+    100% { transform: scaleX(4.5); opacity: 0; filter: hue-rotate(300deg); }
+  }
+
+  @keyframes wallFlashY {
+    0%   { transform: scaleY(1); opacity: 0.95; filter: hue-rotate(0deg); }
+    50%  { transform: scaleY(2.4); filter: hue-rotate(150deg); }
+    100% { transform: scaleY(4.5); opacity: 0; filter: hue-rotate(300deg); }
+  }
+
+  .die {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    width: 64px;
+    height: 64px;
+    margin-left: -32px;
+    background: linear-gradient(155deg, #fbfbf9, #e2e2de);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 0 2px rgba(0,0,0,0.06),
+      inset 0 5px 8px rgba(255,255,255,0.6),
+      inset 0 -6px 10px rgba(0,0,0,0.12),
+      0 10px 18px rgba(0,0,0,0.35);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 10px;
+    box-sizing: border-box;
+    transform: translate(0px, 0px) rotate(0deg) scale(1, 1);
+    will-change: transform;
+  }
+
+  .pip {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #666, #1a1a1a 70%);
+    justify-self: center;
+    align-self: center;
+    opacity: 0;
+  }
+  .pip.on { opacity: 1; }
+
+  .p1 { grid-area: 2 / 2; }
+  .p2 { grid-area: 1 / 1; }
+  .p3 { grid-area: 3 / 3; }
+  .p4 { grid-area: 1 / 3; }
+  .p5 { grid-area: 3 / 1; }
+  .p6 { grid-area: 2 / 1; }
+  .p7 { grid-area: 2 / 3; }
+  .p8 { grid-area: 1 / 2; }
+  .p9 { grid-area: 3 / 2; }
+
+  .btn {
+    margin-top: 18px;
+    padding: 10px 28px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(155deg, #ff8a65, #e64a19);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(230,74,25,0.4);
+    letter-spacing: 0.02em;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+
+  .result {
+    margin-top: 14px;
+    color: #eee;
+    font-size: 15px;
+    min-height: 44px;
+    opacity: 0;
+    transition: opacity 0.3s ease, font-size 0.2s ease;
+  }
+  .result.show { opacity: 1; }
+  .result.big {
+    font-size: 38px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 3px 14px rgba(255, 138, 101, 0.55);
+    animation: resultPop 0.4s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  @keyframes resultPop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .controls-panel {
+    margin-top: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 260px;
+  }
+  .param-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+  .param-row label {
+    color: #aab;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+  }
+  .param-row .val {
+    color: #fff;
+    font-weight: 700;
+  }
+  .param-row input[type="range"] {
+    width: 100%;
+    accent-color: #e64a19;
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="lane">
+    <div class="boundary boundary-h" id="floorBar" style="bottom: 24px;"></div>
+    <div class="boundary boundary-h" id="ceilingBar" style="top: 16px;"></div>
+    <div class="boundary boundary-v wall-left" id="wallLeft"></div>
+    <div class="boundary boundary-v wall-right" id="wallRight"></div>
+  </div>
+  <button class="btn" id="rollBtn">주사위 굴리기</button>
+  <div class="result" id="result">주사위를 굴려보세요</div>
+
+  <div class="controls-panel">
+    <div class="param-row">
+      <label>시작 강도: <span class="val" id="vIntensity">2.5x</span></label>
+      <input type="range" id="sIntensity" min="0.3" max="3" step="0.1" value="2.5">
+    </div>
+    <div class="param-row">
+      <label>반발력 (바닥/천장): <span class="val" id="vRestitution">0.90</span></label>
+      <input type="range" id="sRestitution" min="0.3" max="0.9" step="0.01" value="0.90">
+    </div>
+    <div class="param-row">
+      <label>반발력 (벽): <span class="val" id="vWallRestitution">0.90</span></label>
+      <input type="range" id="sWallRestitution" min="0.3" max="0.9" step="0.01" value="0.90">
+    </div>
+    <div class="param-row">
+      <label>급감소 시작 (N번째 바운스): <span class="val" id="vSuddenN">15</span></label>
+      <input type="range" id="sSuddenN" min="2" max="20" step="1" value="15">
+    </div>
+    <div class="param-row">
+      <label>급감소력: <span class="val" id="vSuddenDecay">0.70</span></label>
+      <input type="range" id="sSuddenDecay" min="0.05" max="0.9" step="0.01" value="0.70">
+    </div>
+    <div class="param-row">
+      <label>주사위 개수: <span class="val" id="vDiceCount">1</span></label>
+      <input type="range" id="sDiceCount" min="1" max="6" step="1" value="1">
+    </div>
+  </div>
+</div>
+
+<script>
+  // grid layout:  p2 p8 p4 / p6 p1 p7 / p5 p9 p3
+  const pipPatterns = {
+    1: ['p1'],
+    2: ['p2', 'p3'],
+    3: ['p2', 'p1', 'p3'],
+    4: ['p2', 'p4', 'p5', 'p3'],
+    5: ['p2', 'p4', 'p5', 'p3', 'p1'],
+    6: ['p2', 'p4', 'p5', 'p3', 'p6', 'p7'],
+  };
+
+  const lane = document.querySelector('.lane');
+  const btn = document.getElementById('rollBtn');
+  const result = document.getElementById('result');
+  const wallLeft = document.getElementById('wallLeft');
+  const wallRight = document.getElementById('wallRight');
+  const floorBar = document.getElementById('floorBar');
+  const ceilingBar = document.getElementById('ceilingBar');
+
+  function flashSurface(el) {
+    el.classList.add('hit');
+    setTimeout(() => el.classList.remove('hit'), 160);
+  }
+
+  // --- dice pool: dice are created/destroyed to match the count slider -----
+
+  function createDieDOM() {
+    const shadowEl = document.createElement('div');
+    shadowEl.className = 'shadow';
+    const dieEl = document.createElement('div');
+    dieEl.className = 'die';
+    const pipEls = {};
+    ['p1','p2','p3','p4','p5','p6','p7','p8','p9'].forEach(cls => {
+      const p = document.createElement('div');
+      p.className = 'pip ' + cls;
+      dieEl.appendChild(p);
+      pipEls[cls] = p;
+    });
+    lane.appendChild(shadowEl);
+    lane.appendChild(dieEl);
+    return { dieEl, shadowEl, pipEls };
+  }
+
+  function setFaceFor(pipEls, n) {
+    Object.values(pipEls).forEach(p => p.classList.remove('on'));
+    pipPatterns[n].forEach(cls => pipEls[cls].classList.add('on'));
+  }
+
+  function renderDie(d, x, y, rot, sx, sy, shadowScale, shadowOpacity) {
+    d.dieEl.style.transform = `translate(${x}px, ${-y}px) rotate(${rot}deg) scale(${sx}, ${sy})`;
+    d.shadowEl.style.transform = `scale(${shadowScale}, ${shadowScale * 0.6})`;
+    d.shadowEl.style.opacity = shadowOpacity;
+  }
+
+  let dicePool = [];
+
+  // spread starting positions across the play width instead of stacking dice
+  // exactly on top of each other — collision resolution still separates them
+  // the instant physics starts, but this avoids one big initial pile-up
+  function initialXFor(i, count) {
+    if (count === 1) return 0;
+    const span = WALL_LIMIT * 1.1;
+    return -span / 2 + (span / (count - 1)) * i + rand(-8, 8);
+  }
+
+  // idle preview: rebuild the resting dice whenever the count slider changes
+  // or on page load, so you can see how many you're about to roll
+  function setupIdleDice(count) {
+    updateLayout(count);
+    dicePool.forEach(d => { d.dieEl.remove(); d.shadowEl.remove(); });
+    dicePool = [];
+    for (let i = 0; i < count; i++) {
+      const d = createDieDOM();
+      renderDie(d, initialXFor(i, count), 0, 0, 1, 1, 1, 0.45);
+      setFaceFor(d.pipEls, 1 + Math.floor(Math.random() * 6));
+      dicePool.push(d);
+    }
+  }
+
+  // lazily created on the first roll — browsers block audio until a user gesture
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  // short synthesized percussive blip: quick pitch drop + exponential fade
+  function playImpactSound(freq, duration, type, volume) {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.6, ctx.currentTime + duration);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  }
+
+  // pitch/volume scale a little with impact strength so hard hits sound harder
+  const playFloorSound = (speed) => playImpactSound(120 + Math.min(speed, 900) * 0.06, 0.14, 'sine', Math.min(0.5, 0.2 + speed / 3000));
+  const playCeilingSound = (speed) => playImpactSound(260 + Math.min(speed, 900) * 0.05, 0.11, 'sine', Math.min(0.45, 0.18 + speed / 3200));
+  const playWallSound = (speed) => playImpactSound(420 + Math.min(speed, 700) * 0.15, 0.07, 'triangle', Math.min(0.4, 0.15 + speed / 2200));
+  const playSettleSound = () => playImpactSound(85, 0.28, 'sine', 0.3);
+  const playDieClackSound = (speed) => playImpactSound(650 + Math.min(speed, 600) * 0.2, 0.05, 'triangle', Math.min(0.35, 0.12 + speed / 2000));
+
+  // each tunable param: {slider element, value-readout element, decimal places, suffix}
+  const params = {
+    intensity:    { el: document.getElementById('sIntensity'),    out: document.getElementById('vIntensity'),    digits: 1, suffix: 'x' },
+    restitution:  { el: document.getElementById('sRestitution'),  out: document.getElementById('vRestitution'),  digits: 2, suffix: '' },
+    wallRestitution: { el: document.getElementById('sWallRestitution'), out: document.getElementById('vWallRestitution'), digits: 2, suffix: '' },
+    suddenN:      { el: document.getElementById('sSuddenN'),      out: document.getElementById('vSuddenN'),      digits: 0, suffix: '' },
+    suddenDecay:  { el: document.getElementById('sSuddenDecay'),  out: document.getElementById('vSuddenDecay'),  digits: 2, suffix: '' },
+    diceCount:    { el: document.getElementById('sDiceCount'),    out: document.getElementById('vDiceCount'),    digits: 0, suffix: '' },
+  };
+  Object.values(params).forEach(p => {
+    const refresh = () => { p.out.textContent = parseFloat(p.el.value).toFixed(p.digits) + p.suffix; };
+    p.el.addEventListener('input', refresh);
+    refresh();
+  });
+  const getParam = (name) => parseFloat(params[name].el.value);
+  params.diceCount.el.addEventListener('input', () => {
+    if (!rolling) setupIdleDice(getParam('diceCount'));
+  });
+
+  let WALL_LIMIT = 90;     // die center travel range, px from lane center — widened per dice count below
+  const CEILING = 210;     // max die "height" (translateY amount) before it hits the ceiling
+  const FLOOR_BOTTOM = 24; // px from lane bottom where the die's bottom edge rests
+  const BASE_WALL_LIMIT = 90;
+  const BASE_SCENE_WIDTH = 400; // never shrink narrower than this, even for 1 die
+
+  const sceneEl = document.querySelector('.scene');
+
+  // With enough dice, the cup can be physically too narrow for them to ever stop
+  // touching each other, so pairwise separation + collision response keeps
+  // re-triggering forever (confirmed headlessly: a too-narrow cup with 4+ dice
+  // never settled, 1000+ die-die collisions before the safety cutoff). Widening
+  // the cup with the dice count gives everyone enough room to actually come to
+  // rest. WALL_LIMIT is the die-center travel range; the visual wall sits
+  // WALL_MARGIN further out to leave room for the die's own half-width.
+  const WALL_MARGIN = 40;
+  function updateLayout(count) {
+    WALL_LIMIT = Math.max(BASE_WALL_LIMIT, (count - 1) * 38);
+    const wallOffset = WALL_LIMIT + WALL_MARGIN;
+    lane.style.setProperty('--wall-offset', wallOffset + 'px');
+    sceneEl.style.width = Math.max(BASE_SCENE_WIDTH, wallOffset * 2 + 20) + 'px';
+  }
+
+  function flashWall(side) {
+    flashSurface(side === 'left' ? wallLeft : wallRight);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'wall-ripple-wrap';
+    wrap.style[side] = 'calc(50% - var(--wall-offset))';
+    const flash = document.createElement('div');
+    flash.className = 'wall-ripple';
+    wrap.appendChild(flash);
+    lane.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 420);
+  }
+
+  // distance from the lane's bottom edge up to an element's own top edge —
+  // reading this straight from layout instead of hand-computing it from physics
+  // constants (FLOOR_BOTTOM/CEILING/die height) is what keeps the ripple glued
+  // to the actual floor/ceiling bar no matter how the play area is resized.
+  function surfaceBottomOffset(el) {
+    return lane.getBoundingClientRect().bottom - el.getBoundingClientRect().top;
+  }
+
+  // same surge effect as flashWall, just spanning the floor/ceiling bar's
+  // orientation (full width, growing vertically) instead of the wall's
+  function flashSurfaceRipple(bottomPx) {
+    const ripple = document.createElement('div');
+    ripple.className = 'surface-ripple';
+    ripple.style.bottom = (bottomPx - 4) + 'px'; // center the 8px-tall bar on the line
+    lane.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 420);
+  }
+
+  function runPhase(durationMs, onFrame) {
+    return new Promise(resolve => {
+      const start = performance.now();
+      function step(now) {
+        const elapsed = now - start;
+        const p = Math.min(elapsed / durationMs, 1);
+        onFrame(p, elapsed);
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          resolve();
+        }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+  let rolling = false;
+
+  // real velocity/gravity/collision physics — bounces off all 4 walls of the "cup"
+  // AND off each other, with a random strength+direction kick on every real impact
+  // (not a scripted path or a timer). Each die's face only changes on an actual
+  // bounce event it was personally involved in.
+  //
+  // Three things matter for a clean stop instead of endless bouncing:
+  //  - the floor/ceiling collision block only runs on the (!landed) transition frame.
+  //    Once resting, y is held at exactly 0 without re-entering the block every
+  //    frame — otherwise ripple/squash/etc replay 60x/sec forever at rest.
+  //  - a wall hit only "bounces" (reflect vx + effects) when the incoming speed
+  //    clears WALL_EPSILON. Below that it's resting contact against the wall:
+  //    clamp position, zero vx, no reflection. The wall only reflects vx
+  //    (energy-scaled) and leaves vy untouched — a vertical wall has no business
+  //    changing vertical speed.
+  //  - a die-die collision only applies an impulse (and wakes both dice up) when
+  //    they're actually closing the distance faster than DIE_EPSILON. Two dice
+  //    resting against each other still get pushed apart to resolve the overlap,
+  //    but without an impulse — otherwise they'd shake each other awake forever.
+  //
+  // cfg: { intensity, restitution, wallRestitution, suddenN, suddenDecay }
+  //  - intensity: scales every raw velocity/kick magnitude (launch strength) —
+  //    not the fixed settle thresholds — so a stronger setting means bigger
+  //    launches that take longer to decay below those thresholds (more bounces).
+  //  - restitution / wallRestitution: energy retained on a floor-or-ceiling vs.
+  //    wall bounce (0-1, higher = bouncier). Same meaning, one knob per surface.
+  //  - suddenN / suddenDecay: once a die's own bounce count reaches suddenN, its
+  //    velocity is cut by suddenDecay once — a dramatic "running out of steam" moment.
+  function runPhysics(cfg, count) {
+    const GRAVITY = 2600; // px/s^2
+    const LAND_THRESHOLD = 220; // impact speed below which a die stops bouncing and settles
+    const WALL_EPSILON = 24;    // incoming speed below which a wall touch is resting contact, not a bounce
+    const DIE_MIN_DIST = 58;    // center-to-center distance dice are pushed apart at
+    const DIE_EPSILON = 20;     // closing speed below which two touching dice are resting contact, not a hit
+
+    updateLayout(count);
+
+    const intensity = cfg.intensity;
+    const wallRestitution = clamp(cfg.wallRestitution, 0.1, 0.95);
+    const restLo = clamp(cfg.restitution - 0.09, 0.1, 0.95);
+    const restHi = clamp(cfg.restitution + 0.09, 0.1, 0.95);
+    const wallLo = clamp(wallRestitution - 0.09, 0.1, 0.95);
+    const wallHi = clamp(wallRestitution + 0.09, 0.1, 0.95);
+
+    dicePool.forEach(d => { d.dieEl.remove(); d.shadowEl.remove(); });
+    const dice = [];
+    for (let i = 0; i < count; i++) {
+      const dom = createDieDOM();
+      const currentFace = 1 + Math.floor(Math.random() * 6);
+      setFaceFor(dom.pipEls, currentFace);
+      dice.push({
+        dieEl: dom.dieEl, shadowEl: dom.shadowEl, pipEls: dom.pipEls,
+        x: initialXFor(i, count), y: 0,
+        vx: rand(-1, 1) * rand(400, 800) * intensity,
+        vy: rand(1400, 2000) * intensity,
+        rot: 0,
+        angVel: (Math.random() < 0.5 ? -1 : 1) * rand(500, 950) * intensity,
+        landed: false,
+        bounceCount: 0,
+        suddenDecayFired: false,
+        squashAxis: 0, // 0 = floor/ceiling/die hit (vertical-ish squash), 1 = wall hit (horizontal squash)
+        squashT: 1,    // 1 = relaxed, 0 = fully squashed, eases back to 1
+        currentFace,
+      });
+    }
+    dicePool = dice;
+
+    let elapsedTotal = 0;
+    let lastTime = null;
+    const MAX_TIME = Math.min(9000, 5000 * Math.max(1, intensity));
+
+    // the displayed face IS the result — there's no separate pre-decided target to
+    // snap to at the end, which is what previously caused a visible "tick" right as
+    // a die settled (whatever was mid-flicker got force-overwritten by a value
+    // chosen before the roll even started).
+    const flicker = (d) => { d.currentFace = 1 + Math.floor(Math.random() * 6); setFaceFor(d.pipEls, d.currentFace); };
+
+    function maybeTriggerSuddenDecay(d) {
+      if (!d.suddenDecayFired && d.bounceCount >= cfg.suddenN) {
+        d.suddenDecayFired = true;
+        const keep = 1 - cfg.suddenDecay;
+        d.vx *= keep;
+        d.vy *= keep;
+        d.angVel *= keep;
+      }
+    }
+
+    return new Promise(resolve => {
+      function step(now) {
+        if (lastTime === null) lastTime = now;
+        const dt = Math.min((now - lastTime) / 1000, 0.032);
+        lastTime = now;
+        elapsedTotal += dt * 1000;
+
+        for (const d of dice) {
+          if (!d.landed) d.vy -= GRAVITY * dt;
+          d.x += d.vx * dt;
+          if (!d.landed) d.y += d.vy * dt;
+          d.rot += d.angVel * dt;
+
+          if (!d.landed && d.y <= 0) {
+            const impactSpeed = Math.abs(d.vy);
+            d.y = 0;
+            d.squashAxis = 0; d.squashT = 0;
+            flashSurface(floorBar);
+            flashSurfaceRipple(surfaceBottomOffset(floorBar));
+            playFloorSound(impactSpeed);
+            if (impactSpeed < LAND_THRESHOLD) {
+              d.vy = 0;
+              d.landed = true;
+            } else {
+              d.vy = -d.vy * rand(restLo, restHi);
+              const kick = Math.min(impactSpeed * 0.3, 240 * intensity);
+              d.vx += rand(-1, 1) * kick;
+              d.angVel = d.angVel * 0.7 + rand(-1, 1) * Math.min(impactSpeed * 0.25, 200 * intensity);
+              d.bounceCount++;
+              maybeTriggerSuddenDecay(d);
+              flicker(d);
+            }
+          } else if (!d.landed && d.y >= CEILING) {
+            const impactSpeed = Math.abs(d.vy);
+            d.y = CEILING;
+            d.vy = -d.vy * rand(restLo, restHi);
+            d.vx += rand(-1, 1) * rand(150, 500) * intensity;
+            d.angVel = d.angVel * 0.75 + rand(-1, 1) * rand(100, 300) * intensity;
+            d.squashAxis = 0; d.squashT = 0;
+            flashSurface(ceilingBar);
+            flashSurfaceRipple(surfaceBottomOffset(ceilingBar));
+            playCeilingSound(impactSpeed);
+            d.bounceCount++;
+            maybeTriggerSuddenDecay(d);
+            flicker(d);
+          }
+
+          if (d.x <= -WALL_LIMIT || d.x >= WALL_LIMIT) {
+            const side = d.x <= -WALL_LIMIT ? 'left' : 'right';
+            const approachSpeed = Math.abs(d.vx);
+            d.x = side === 'left' ? -WALL_LIMIT : WALL_LIMIT;
+
+            if (approachSpeed < WALL_EPSILON) {
+              d.vx = 0; // resting against the wall — not a bounce
+            } else {
+              // a vertical wall only reflects the perpendicular component (vx),
+              // scaled down by the energy loss — vy (parallel to the wall) is
+              // untouched.
+              d.vx = -d.vx * rand(wallLo, wallHi);
+              d.angVel = d.angVel * 0.75 + rand(-1, 1) * rand(80, 220) * intensity;
+              d.squashAxis = 1; d.squashT = 0;
+              flashWall(side);
+              playWallSound(approachSpeed);
+              d.bounceCount++;
+              maybeTriggerSuddenDecay(d);
+              flicker(d);
+            }
+          }
+
+          if (d.landed) {
+            const friction = Math.pow(0.02, dt);
+            d.vx *= friction;
+            d.angVel *= friction;
+          }
+        }
+
+        // dice-vs-dice: simple equal-mass circle collision. Always resolves the
+        // overlap (positional push-apart); only applies an impulse (and wakes
+        // both dice) when they're actually closing in faster than DIE_EPSILON.
+        for (let i = 0; i < dice.length; i++) {
+          for (let j = i + 1; j < dice.length; j++) {
+            const a = dice[i], b = dice[j];
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0 && dist < DIE_MIN_DIST) {
+              const nx = dx / dist, ny = dy / dist;
+              const overlap = DIE_MIN_DIST - dist;
+              a.x -= nx * overlap / 2; a.y -= ny * overlap / 2;
+              b.x += nx * overlap / 2; b.y += ny * overlap / 2;
+              a.x = clamp(a.x, -WALL_LIMIT, WALL_LIMIT); b.x = clamp(b.x, -WALL_LIMIT, WALL_LIMIT);
+              a.y = clamp(a.y, 0, CEILING); b.y = clamp(b.y, 0, CEILING);
+
+              const relVel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+              if (relVel < -DIE_EPSILON) {
+                const dieRestitution = 0.7;
+                const impulse = -(1 + dieRestitution) * relVel / 2;
+                a.vx -= impulse * nx; a.vy -= impulse * ny;
+                b.vx += impulse * nx; b.vy += impulse * ny;
+                a.angVel += rand(-1, 1) * 180; b.angVel += rand(-1, 1) * 180;
+                a.landed = false; b.landed = false;
+                a.squashAxis = Math.abs(nx) > Math.abs(ny) ? 1 : 0; a.squashT = 0;
+                b.squashAxis = a.squashAxis; b.squashT = 0;
+                playDieClackSound(Math.abs(relVel));
+              }
+            }
+          }
+        }
+
+        let allSettled = true;
+        for (const d of dice) {
+          d.squashT = Math.min(1, d.squashT + dt / 0.12);
+          if (!(d.landed && Math.abs(d.vx) < 12 && Math.abs(d.angVel) < 15)) allSettled = false;
+
+          const squashAmt = (1 - d.squashT) * 0.4;
+          let sx = 1, sy = 1;
+          if (d.squashAxis === 0) { sx = 1 + squashAmt; sy = 1 - squashAmt * 0.85; }
+          else { sy = 1 + squashAmt; sx = 1 - squashAmt * 0.85; }
+
+          const shadowScale = Math.max(0.35, 1 - (d.y / CEILING) * 0.65);
+          const shadowOpacity = Math.max(0.15, 0.45 - (d.y / CEILING) * 0.3);
+
+          renderDie(d, d.x, d.y, d.rot, sx, sy, shadowScale, shadowOpacity);
+        }
+
+        if (allSettled || elapsedTotal > MAX_TIME) {
+          resolve(dice);
+        } else {
+          requestAnimationFrame(step);
+        }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  async function rollDice() {
+    if (rolling) return;
+    rolling = true;
+    btn.disabled = true;
+    result.classList.remove('show', 'big');
+    getAudioCtx(); // create/resume within the click gesture so later sounds aren't blocked
+
+    const cfg = {
+      intensity: getParam('intensity'),
+      restitution: getParam('restitution'),
+      wallRestitution: getParam('wallRestitution'),
+      suddenN: getParam('suddenN'),
+      suddenDecay: getParam('suddenDecay'),
+    };
+    const dice = await runPhysics(cfg, getParam('diceCount'));
+
+    const restRots = dice.map(d => Math.round(d.rot / 90) * 90);
+    dice.forEach((d, i) => renderDie(d, d.x, 0, restRots[i], 1, 1, 1, 0.45));
+    playSettleSound();
+
+    // tiny thud squash settle
+    await runPhase(140, (p) => {
+      const t = Math.sin(p * Math.PI);
+      dice.forEach((d, i) => renderDie(d, d.x, 0, restRots[i], 1 + 0.05 * t, 1 - 0.05 * t, 1, 0.45));
+    });
+    dice.forEach((d, i) => renderDie(d, d.x, 0, restRots[i], 1, 1, 1, 0.45));
+
+    const faces = dice.map(d => d.currentFace);
+    const sum = faces.reduce((a, b) => a + b, 0);
+    result.textContent = faces.length > 1 ? `결과: ${faces.join(', ')} (합계 ${sum})` : `결과: ${faces[0]}`;
+    result.classList.add('show', 'big');
+    rolling = false;
+    btn.disabled = false;
+  }
+
+  btn.addEventListener('click', rollDice);
+  setupIdleDice(getParam('diceCount'));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hex-war-party
+    runtime: node
+    plan: free
+    rootDir: prototypes/hex-war-lobby
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22

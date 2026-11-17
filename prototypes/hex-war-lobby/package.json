@@ -1,0 +1,11 @@
+{
+  "name": "hex-war-lobby",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}

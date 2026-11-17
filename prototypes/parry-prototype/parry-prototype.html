@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>패링 프로토타입 v0.7</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    background: #0b0c10; color: #d8dce3;
+    font-family: "Pretendard", "Malgun Gothic", system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  h1 { font-size: 15px; font-weight: 600; letter-spacing: .04em; color: #8b94a3; margin: 0; }
+  #wrap { position: relative; }
+  canvas { display: block; border-radius: 6px; background: #05060a; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+  #patterns { width: 900px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .pat {
+    background: #101219; border: 1px solid #1c2029; border-radius: 6px; padding: 10px 11px;
+    font-size: 10.5px; line-height: 1.65; color: #6d7484;
+  }
+  .pat .nm { font-size: 11.5px; font-weight: 700; color: #cfd5df; display: block; margin-bottom: 3px; }
+  .pat .ans { display: block; margin-top: 3px; }
+  .pat.real { border-left: 3px solid #7fd4e8; }
+  .pat.fake { border-left: 3px solid #e5484d; }
+  .pat.real .ans { color: #7fd4e8; }
+  .pat.fake .ans { color: #e5484d; }
+  .pairA { color: #e8a33d; font-weight: 600; }
+  .pairB { color: #b38ce0; font-weight: 600; }
+  #presets {
+    width: 900px; display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #7f8797;
+  }
+  #presets button {
+    background: #151922; border: 1px solid #232a38; color: #9aa3b2;
+    border-radius: 5px; padding: 7px 18px; font-family: inherit; font-size: 12px;
+    font-weight: 600; cursor: pointer;
+  }
+  #presets button:hover { background: #1c2230; color: #d8dce3; }
+  #presets button.on { background: #d94f4f; border-color: #d94f4f; color: #fff; }
+  #presets .hint { margin-left: auto; color: #4d5563; font-size: 11px; }
+  #panel {
+    width: 900px; display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 15px 28px; padding: 18px 20px;
+    background: #101219; border: 1px solid #1c2029; border-radius: 6px;
+  }
+  .ctrl { display: flex; flex-direction: column; gap: 5px; }
+  .desc { font-size: 11px; color: #5b6373; line-height: 1.6; padding-left: 102px; }
+  .desc b { color: #97a0b0; font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .row label { flex: 0 0 92px; color: #aab2c0; font-weight: 600; }
+  .row input[type=range] { flex: 1; accent-color: #d94f4f; height: 3px; }
+  .row .val { flex: 0 0 54px; text-align: right; font-variant-numeric: tabular-nums; color: #cfd5df; }
+  .row input[type=checkbox] { accent-color: #d94f4f; }
+  #keys { width: 900px; font-size: 12px; color: #6d7484; line-height: 1.9; display: flex; gap: 22px; flex-wrap: wrap; }
+  kbd {
+    background: #1a1e28; border: 1px solid #272d3a; border-bottom-width: 2px;
+    border-radius: 4px; padding: 1px 7px; font-family: inherit; font-size: 11px; color: #b9c1cf;
+  }
+  .note { width: 900px; font-size: 12px; color: #565d6c; line-height: 1.8; }
+
+  /* 버전 기록 — 화면이 넓을 때 본문 옆에 붙는다 */
+  #versions {
+    position: fixed; top: 24px; right: 24px; width: 240px;
+    background: #101219; border: 1px solid #1c2029; border-radius: 6px;
+    padding: 14px 16px; font-size: 11px; line-height: 1.6; color: #6d7484;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+  }
+  #versions h2 {
+    margin: 0 0 10px; font-size: 10px; font-weight: 700; letter-spacing: .12em;
+    color: #4d5563; text-transform: uppercase;
+  }
+  #versions .v { padding: 8px 0; border-top: 1px solid #191d26; }
+  #versions .v:first-of-type { border-top: 0; }
+  #versions .v .tag {
+    display: inline-block; font-weight: 700; color: #8b94a3; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  #versions .v.cur { color: #aab2c0; }
+  #versions .v.cur .tag { color: #d94f4f; }
+  #versions .v.cur .tag::after { content: ' ● 현재'; font-size: 9px; letter-spacing: .04em; }
+  #versions ul { margin: 4px 0 0; padding-left: 14px; }
+  #versions li { margin: 2px 0; }
+  @media (max-width: 1450px) { #versions { display: none; } }
+</style>
+</head>
+<body>
+
+<aside id="versions">
+  <h2>Version</h2>
+
+  <div class="v cur"><span class="tag">v0.7</span> 구분 강화 · 완화
+    <ul>
+      <li><b>몸 전체가 자세를 잡습니다</b> — 웅크림·곧추섬·기울기. 칼선 하나가 아니라 실루엣으로 구분</li>
+      <li>칼 잔상 3단 — 어디서 어디로 가는 중인지 보임</li>
+      <li><b>분기 슬로우</b> — 갈라진 뒤에만 시간이 늘어짐 (타이밍은 그대로 고정)</li>
+      <li><b>3패턴 모드</b> — 이지선다를 한 쌍만 남김</li>
+    </ul>
+  </div>
+
+  <div class="v"><span class="tag">v0.6</span> 레퍼런스 반영
+    <ul>
+      <li>분기 <b>이후에만</b> 칼날 VFX — 진짜는 흰 잔광, 페이크는 붉게 흩어짐</li>
+      <li>연타 처벌을 락아웃 → <b>판정 창 축소</b>(Sekiro 방식)로 교체</li>
+      <li>난이도 5단계로 재조정 (어려움 ≈ Sekiro, 극한 ≈ Lies of P)</li>
+    </ul>
+  </div>
+
+  <div class="v"><span class="tag">v0.5</span> 난이도 조정
+    <ul>
+      <li>분기 창이 콤보·후반부에서 118ms까지 줄던 문제 수정 — 이제 배율에서 제외</li>
+      <li>난이도 프리셋 4종 + 연습 모드</li>
+      <li>내 체력 슬라이더</li>
+    </ul>
+  </div>
+
+  <div class="v"><span class="tag">v0.4</span> 이지선다 두 쌍
+    <ul>
+      <li>상단 쌍 추가 → 5패턴 (내려침 / 페이크)</li>
+      <li>체간·忍殺 제거 → 보스 체력 100</li>
+      <li>체력 66·33에서 무너짐 + 가속</li>
+    </ul>
+  </div>
+
+  <div class="v"><span class="tag">v0.3</span> 실루엣 읽기
+    <ul>
+      <li>패턴마다 고유한 시작 자세 (4패턴)</li>
+      <li>중단 쌍만 460ms 공유 후 분기</li>
+      <li>페이크 = 타격 없음, 처벌은 헛침 경직</li>
+      <li>색 구분 폐기 — 자세로만 읽음</li>
+    </ul>
+  </div>
+
+  <div class="v"><span class="tag">v0.2</span> 패링 단일 입력
+    <ul>
+      <li>회피·공격 제거 → Space 하나</li>
+      <li>공통 시작 모션 실험 (v0.3에서 폐기)</li>
+      <li>危 → 지연 공격</li>
+    </ul>
+  </div>
+
+  <div class="v"><span class="tag">v0.1</span> 최초 프로토타입
+    <ul>
+      <li>패링 / 퍼펙트 / 헛침 경직 / 히트스톱</li>
+      <li>늦은 구제(코요테 타임)</li>
+      <li>판정 타임라인</li>
+    </ul>
+  </div>
+</aside>
+
+<h1>PARRY PROTOTYPE v0.7 — 구분 강화 · 완화</h1>
+
+<div id="wrap"><canvas id="cv" width="900" height="520"></canvas></div>
+
+<div id="patterns">
+  <div class="pat real"><span class="nm">1. 빠른 공격</span>아래 겨눔 → 찌르기<span class="ans">시작 보고 바로 패링</span></div>
+  <div class="pat real"><span class="nm">2. 느린 공격</span><span class="pairA">중단</span> → 중반 <b>위로</b><span class="ans">참았다가 패링</span></div>
+  <div class="pat fake"><span class="nm">3. 느린 페이크</span><span class="pairA">중단</span> → 중반 <b>아래로</b><span class="ans">누르지 않기</span></div>
+  <div class="pat real"><span class="nm">4. 내려침</span><span class="pairB">상단</span> → 중반 <b>앞으로</b><span class="ans">참았다가 패링 · 2피해</span></div>
+  <div class="pat fake"><span class="nm">5. 페이크</span><span class="pairB">상단</span> → 중반 <b>뒤로</b><span class="ans">누르지 않기</span></div>
+</div>
+
+<div id="presets">
+  <span>난이도</span>
+  <button data-p="practice">연습</button>
+  <button data-p="easy" class="on">쉬움</button>
+  <button data-p="normal">보통</button>
+  <button data-p="hard">어려움</button>
+  <button data-p="extreme">극한</button>
+  <span style="margin-left:12px">패턴</span>
+  <button data-n="3" class="on">3개</button>
+  <button data-n="5">5개</button>
+  <span class="hint">어려움 ≈ Sekiro(200ms) · 극한 ≈ Lies of P(80ms)</span>
+</div>
+
+<div id="panel">
+  <div class="ctrl">
+    <div class="row"><label>분기 길이</label><input type="range" id="s_branch" min="120" max="600" step="10" value="440"><span class="val" id="v_branch">440ms</span></div>
+    <div class="desc">두 이지선다 쌍이 <b>갈라진 뒤</b> 주어지는 시간. <b>가장 중요한 값</b> — 2지선다 판단은 사람이 300~400ms 걸립니다. 콤보·후반부에서도 줄어들지 않습니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>패링 윈도우</label><input type="range" id="s_parry" min="40" max="300" step="5" value="180"><span class="val" id="v_parry">180ms</span></div>
+    <div class="desc">키를 누른 뒤 판정이 살아있는 시간. <b>이르게 누른 것</b>을 봐주는 폭입니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>늦은 구제</label><input type="range" id="s_late" min="0" max="300" step="5" value="200"><span class="val" id="v_late">200ms</span></div>
+    <div class="desc">공격이 <b>닿은 뒤에도</b> 이 시간 안에 누르면 되살립니다(코요테 타임). 피해량은 절반.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>내 체력</label><input type="range" id="s_hp" min="1" max="10" step="1" value="7"><span class="val" id="v_hp">7</span></div>
+    <div class="desc">몇 대까지 버티는지. 바꾸면 <b>R로 다시 시작</b>해야 적용됩니다. 내려침(4번)은 2대씩 깎습니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>퍼펙트 판정</label><input type="range" id="s_perfect" min="20" max="160" step="5" value="65"><span class="val" id="v_perfect">65ms</span></div>
+    <div class="desc">패링 윈도우 중 <b>타격 직전</b> 이 구간에 맞추면 퍼펙트. 피해 1.75배.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>패링 피해</label><input type="range" id="s_dmg" min="1" max="15" step="1" value="6"><span class="val" id="v_dmg">6</span></div>
+    <div class="desc">패링 1회가 보스 체력(100)을 깎는 양. <b>전투 길이를 정하는 값</b>. 퍼펙트 ×1.75 / 늦은구제 ×0.5 / 내려침 ×1.5.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>분기 슬로우</label><input type="range" id="s_slow" min="30" max="100" step="5" value="60"><span class="val" id="v_slow">60%</span></div>
+    <div class="desc">이지선다가 <b>갈라진 뒤에만</b> 시간이 이 배율로 느려집니다. 판단할 실제 시간이 늘어납니다. 항상 똑같이 걸리므로 타이밍은 여전히 외울 수 있습니다. 100% = 꺼짐.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>연타 축소</label><input type="range" id="s_spam" min="0" max="80" step="5" value="40"><span class="val" id="v_spam">40%</span></div>
+    <div class="desc">Sekiro 방식. 0.6초 안에 다시 누르면 <b>다음 판정 창이 이만큼 좁아집니다.</b> 락아웃과 달리 조작을 끊지 않으면서 연타를 무의미하게 만듭니다. 0이면 꺼집니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>헛침 경직</label><input type="range" id="s_lock" min="0" max="600" step="20" value="100"><span class="val" id="v_lock">100ms</span></div>
+    <div class="desc">헛쳤을 때 굳는 시간. <b>보조 처벌</b> — 주된 연타 억제는 위의 연타 축소가 맡습니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>히트스톱</label><input type="range" id="s_stop" min="0" max="220" step="10" value="90"><span class="val" id="v_stop">90ms</span></div>
+    <div class="desc">패링 성공 순간 화면이 멎는 시간. 타격감 대부분이 여기서 나옵니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>입력 버퍼</label><input type="range" id="s_buf" min="0" max="200" step="10" value="100"><span class="val" id="v_buf">100ms</span></div>
+    <div class="desc">경직·피격 중 누른 키를 기억했다가 풀리는 순간 자동 발동.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>예비동작 속도</label><input type="range" id="s_tel" min="60" max="180" step="5" value="115"><span class="val" id="v_tel">1.15x</span></div>
+    <div class="desc">접근·버팀 구간의 배율(분기는 제외). 콤보 후속타는 여기에 0.72배가 더 걸립니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>공격 간격</label><input type="range" id="s_gap" min="200" max="2000" step="50" value="1000"><span class="val" id="v_gap">1000ms</span></div>
+    <div class="desc">콤보와 콤보 사이 쉬는 시간. 길수록 숨 돌릴 틈이 생깁니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>화면 흔들림</label><input type="range" id="s_shake" min="0" max="200" step="10" value="100"><span class="val" id="v_shake">1.00x</span></div>
+    <div class="desc">연출 강도. 0으로 두면 판정만 남아서 순수 타이밍 확인용이 됩니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>패턴 이름</label><input type="checkbox" id="s_assist"><span class="val" style="flex:1;text-align:left;color:#565d6c">머리 위 표시 (H)</span></div>
+    <div class="desc">쌍을 이룬 패턴은 갈라지기 전까지 <b>「중단 ?」「상단 ?」</b>으로만 나옵니다.</div>
+  </div>
+  <div class="ctrl">
+    <div class="row"><label>페이크 연속</label><input type="checkbox" id="s_double"><span class="val" style="flex:1;text-align:left;color:#565d6c">SLOWF → FEINT → HEAVY</span></div>
+    <div class="desc">페이크가 <b>연달아 두 번</b> 나오는 콤보를 허용합니다. 5패턴·체력 33 이하에서만 등장하며 이 게임에서 가장 어려운 구간입니다. 어려움 이상에서만 기본 켜짐.</div>
+  </div>
+</div>
+
+<div id="keys">
+  <span><kbd>Space</kbd> / <kbd>K</kbd> 패링 — 입력은 이것 하나뿐입니다</span>
+  <span><kbd>R</kbd> 재시작</span>
+  <span><kbd>H</kbd> 패턴 이름 토글</span>
+</div>
+
+<div class="note">
+  다섯 패턴은 <b>서로 다른 자세에서 출발</b>합니다. 같은 패턴은 언제나 똑같이 움직이므로, 외우면 시작만 보고 대응할 수 있습니다.<br>
+  이지선다는 두 쌍입니다 — <b class="pairA">중단 시작(2·3번)</b>은 460ms를, <b class="pairB">상단 시작(4·5번)</b>은 540ms를 똑같이 버티다 갈라집니다. <b>아래에서 시작하면 무조건 빠른 공격</b>이니 그것만은 즉답할 수 있습니다.<br>
+  패링에 성공하면 보스 <b>체력</b>이 깎입니다. 체력 66·33에서 보스가 잠시 무너지고, 그때마다 접근·버팀 구간이 빨라지고 콤보가 길어집니다. 페이크를 안 물면 見切로 체력 1이 깎입니다.<br>
+  <b style="color:#7f8797">v0.7 —</b> 이제 <b>몸 전체가 자세를 잡습니다</b>. 아래는 웅크리고, 상단은 곧추서고, 앞으로 나오는지 뒤로 빠지는지가 실루엣으로 보입니다. 칼 잔상도 방향을 알려줍니다.<br>
+  기본값은 <b>쉬움 · 3패턴</b>입니다 — 이지선다가 한 쌍(중단)뿐이고, 갈라진 뒤에는 <b>시간이 60%로 느려져</b> 판단할 여유가 생깁니다. 익숙해지면 위에서 <b>5개</b>를 눌러 상단 쌍을 추가하세요.
+</div>
+
+<script>
+"use strict";
+
+// ─────────────────────────────────────────────────────────────
+// 튜닝 값
+// ─────────────────────────────────────────────────────────────
+const S = {
+  parryWindow: 160,   // 누른 뒤 판정이 살아있는 시간 (= 이르게 누른 것 용서)
+  lateGrace: 170,     // 닿은 뒤에도 되살려주는 유예 (= 늦게 누른 것 용서, 코요테 타임)
+  perfectWindow: 60,
+  parryDmg: 5,        // 패링 1회가 깎는 보스 체력
+  playerHp: 6,
+  whiffLock: 120,     // 헛침 경직 (보조 처벌)
+  spamShrink: 0.5,    // 연타 축소 — Sekiro 방식. 급하게 다시 누를수록 다음 창이 이 배율로 좁아진다
+  branchDur: 380,     // 이지선다가 갈라진 뒤 주어지는 시간 (배율에서 제외됨)
+  hitstop: 90,
+  inputBuffer: 100,
+  telScale: 1.1,
+  comboGap: 900,
+  shake: 1.0,
+  assist: false,
+  practice: false,    // 연습 모드 — 콤보 없이 한 대씩만
+  branchSlow: 0.6,    // 갈라진 뒤 시간 배율. 항상 똑같이 걸리므로 타이밍은 여전히 외울 수 있다
+  patternCount: 3,    // 3 = 아래+중단 쌍만 (이지선다 1개) / 5 = 전부
+  doubleFeint: false, // 페이크가 연달아 나오는 콤보를 허용할지 (게임에서 가장 어려운 구간)
+};
+
+// 3패턴 모드에서 쓰는 것 — 이지선다를 한 쌍만 남긴다
+const EASY_SET = ['FAST', 'SLOW', 'SLOWF'];
+
+const VERSION = 'v0.7';
+const PRESET_KO = { practice: '연습', easy: '쉬움', normal: '보통', hard: '어려움' };
+let presetName = 'easy';
+
+// 난이도 프리셋. 분기 길이가 사실상의 난이도이고 나머지는 보조다.
+//
+//   실제 게임들의 패링 창 (리서치 기준):
+//     Sekiro 200ms(12f) · Nine Sols 133ms(8f) · Lies of P ~70ms
+//   "어려움"이 대략 Sekiro, "극한"이 Lies of P 영역이다.
+//   판단 시간(분기)은 인간 2지선다 반응 300~400ms가 기준선.
+const PRESETS = {
+  practice: { branchDur: 600, parryWindow: 200, lateGrace: 240, perfectWindow: 80, parryDmg: 7,
+              playerHp: 9, whiffLock: 60,  spamShrink: 0.75, telScale: 1.30, comboGap: 1300,
+              branchSlow: 0.45, patternCount: 3, doubleFeint: false, assist: true,  practice: true  },
+  easy:     { branchDur: 440, parryWindow: 180, lateGrace: 200, perfectWindow: 65, parryDmg: 6,
+              playerHp: 7, whiffLock: 100, spamShrink: 0.60, telScale: 1.15, comboGap: 1000,
+              branchSlow: 0.60, patternCount: 3, doubleFeint: false, assist: false, practice: false },
+  normal:   { branchDur: 340, parryWindow: 150, lateGrace: 150, perfectWindow: 60, parryDmg: 5,
+              playerHp: 6, whiffLock: 140, spamShrink: 0.55, telScale: 1.05, comboGap: 850,
+              branchSlow: 0.80, patternCount: 5, doubleFeint: false, assist: false, practice: false },
+  hard:     { branchDur: 260, parryWindow: 120, lateGrace: 90,  perfectWindow: 50, parryDmg: 4,
+              playerHp: 5, whiffLock: 200, spamShrink: 0.45, telScale: 0.95, comboGap: 700,
+              branchSlow: 1.00, patternCount: 5, doubleFeint: true,  assist: false, practice: false },
+  extreme:  { branchDur: 190, parryWindow: 80,  lateGrace: 0,   perfectWindow: 30, parryDmg: 3,
+              playerHp: 3, whiffLock: 300, spamShrink: 0.30, telScale: 0.85, comboGap: 500,
+              branchSlow: 1.00, patternCount: 5, doubleFeint: true,  assist: false, practice: false },
+};
+
+const SPAM_RESET = 600;   // 이 시간 안에 다시 누르면 "연타"로 취급한다
+
+const PERFECT_MUL = 1.75, LATE_MUL = 0.5, READ_DMG = 1;
+
+// ─────────────────────────────────────────────────────────────
+// 자세 — 칼끝 위치 (보스 중심 x, 중단선 cy0 기준 상대좌표)
+// ─────────────────────────────────────────────────────────────
+const POSE = {
+  REST:   [ 12,  26],   // 칼을 내린 평상시
+  LOWG:   [ 60,  42],   // 아래 겨눔
+  MIDG:   [ 54,  -6],   // 중단 겨눔
+  HIGHG:  [ 40, -62],   // 상단 치켜듦
+  THRUST: [ 80,   6],   // 찌르기      (1번 타격)
+  OVER:   [ 72, -74],   // 위로 들어올림 (2번 타격 준비)
+  DROP:   [ 74,  46],   // 아래로 흘림  (3번 회수)
+  SLAM:   [ 78,  34],   // 앞으로 내려침 (4번 타격)
+  PULL:   [  2, -78],   // 뒤로 거둠    (5번 회수)
+};
+
+// 몸 자세 — 칼선 하나로는 구분이 안 된다. 실루엣 자체가 달라야 한다.
+//   dy = 위아래 / sy = 세로로 늘고 줆(웅크림·곧추섬) / lean = 기울기(+면 플레이어 쪽)
+const BODY = {
+  REST:   { dy:   0, sy: 1.00, lean:  0.00 },
+  LOWG:   { dy:  12, sy: 0.86, lean:  0.10 },   // 웅크려 아래를 겨눔
+  MIDG:   { dy:   0, sy: 1.00, lean:  0.02 },   // 중립
+  HIGHG:  { dy: -10, sy: 1.12, lean: -0.14 },   // 곧추서서 치켜듦
+  THRUST: { dy:   6, sy: 0.92, lean:  0.24 },   // 앞으로 찌름
+  OVER:   { dy: -16, sy: 1.18, lean: -0.20 },   // 더 높이 (진짜)
+  DROP:   { dy:  16, sy: 0.82, lean:  0.06 },   // 주저앉음 (페이크)
+  SLAM:   { dy:  10, sy: 0.86, lean:  0.28 },   // 앞으로 내리꽂음 (진짜)
+  PULL:   { dy: -14, sy: 1.16, lean: -0.30 },   // 뒤로 크게 젖힘 (페이크)
+};
+
+// ─────────────────────────────────────────────────────────────
+// 패턴 정의
+//
+//   규칙 1 — 같은 패턴은 언제나 똑같이 움직인다. 그래야 외울 수 있다.
+//   규칙 2 — 쌍을 이룬 패턴은 갈라지기 전까지 자세·소리·길이가 완전히 같아야 한다.
+//            하나라도 어긋나면 그게 정답을 흘린다.
+//
+//   쌍 A(중단): SLOW / SLOWF — 240 + 220 공유 후 위/아래로 분기
+//   쌍 B(상단): HEAVY / FEINT — 240 + 300 공유 후 앞/뒤로 분기
+//   FAST(아래)만 시작 즉시 확정 — 즉답할 수 있는 패턴이 하나는 있어야 한다.
+// ─────────────────────────────────────────────────────────────
+const APPROACH = 240, HOLD_A = 220, HOLD_B = 300;
+
+const ATK = {
+  FAST:  { label: '빠른 공격',   startLabel: '빠름',    feint: false, h:   6, dmg: 1, mul: 1,   branchAt: 0,
+           segs: [['LOWG', APPROACH], ['THRUST', 180]],
+           sfxStart: 'telFast',  sfxBranch: null },
+
+  SLOW:  { label: '느린 공격',   startLabel: '중단 ?',  feint: false, h: -40, dmg: 1, mul: 1,   branchAt: 2,
+           segs: [['MIDG', APPROACH], ['MIDG', HOLD_A], ['OVER', 'BRANCH']],
+           sfxStart: 'telMid',   sfxBranch: 'branchUp' },
+
+  SLOWF: { label: '느린 페이크', startLabel: '중단 ?',  feint: true,  h:   0, dmg: 0, mul: 0,   branchAt: 2,
+           segs: [['MIDG', APPROACH], ['MIDG', HOLD_A], ['DROP', 'BRANCH']],
+           sfxStart: 'telMid',   sfxBranch: 'branchDown' },
+
+  HEAVY: { label: '내려침',      startLabel: '상단 ?',  feint: false, h:  30, dmg: 2, mul: 1.5, branchAt: 2,
+           segs: [['HIGHG', APPROACH], ['HIGHG', HOLD_B], ['SLAM', 'BRANCH']],
+           sfxStart: 'telHigh',  sfxBranch: 'branchFwd' },
+
+  FEINT: { label: '페이크',      startLabel: '상단 ?',  feint: true,  h:   0, dmg: 0, mul: 0,   branchAt: 2,
+           segs: [['HIGHG', APPROACH], ['HIGHG', HOLD_B], ['PULL', 'BRANCH']],
+           sfxStart: 'telHigh',  sfxBranch: 'branchBack' },
+};
+
+const COMBOS = [
+  { seq: ['FAST'],                    minPhase: 0 },
+  { seq: ['SLOW'],                    minPhase: 0 },
+  { seq: ['HEAVY'],                   minPhase: 0 },
+  { seq: ['SLOWF','FAST'],            minPhase: 0 },
+  { seq: ['FEINT','FAST'],            minPhase: 0 },
+  { seq: ['FAST','FAST'],             minPhase: 0 },
+  { seq: ['FAST','SLOW'],             minPhase: 1 },
+  { seq: ['SLOW','FAST'],             minPhase: 1 },
+  { seq: ['HEAVY','FAST'],            minPhase: 1 },
+  { seq: ['SLOWF','HEAVY'],           minPhase: 1 },
+  { seq: ['FEINT','SLOW'],            minPhase: 1 },
+  { seq: ['FAST','FEINT','FAST'],     minPhase: 2 },
+  { seq: ['SLOW','SLOWF','FAST'],     minPhase: 2 },
+  { seq: ['SLOWF','FEINT','HEAVY'],   minPhase: 2 },
+  { seq: ['HEAVY','SLOWF','FAST'],    minPhase: 2 },
+];
+
+const PHASE_SPEED  = [1.0, 0.90, 0.82];   // 체력이 깎일수록 빨라진다
+const FOLLOW_SCALE = 0.72;                // 콤보 후속타는 짧다
+const FEINT_RECOIL = 160;                 // 페이크 회수 시간
+const PHASE_HP     = [66, 33];            // 이 체력을 지나면 보스가 한 번 무너진다
+
+// ─────────────────────────────────────────────────────────────
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+const GROUND = 400;
+const PX = 300, BX = 620;
+
+let G, effects, shake, flash, hitstop, timeScale, slowmo;
+
+function reset() {
+  G = {
+    over: null, started: false, time: 0,
+    pending: null,                    // 닿았지만 아직 확정 안 된 타격 {real, dmg}
+    timing: [],                       // 판정 기록 [{off, res}]
+    player: {
+      hp: S.playerHp, maxHp: S.playerHp,
+      state: 'idle',                  // idle | parry | lock | hurt
+      t: 0, dur: 0, buffer: null, pressAt: null, lean: 0,
+      spam: 0, lastPress: -9999, effWindow: S.parryWindow,   // 연타 축소용
+    },
+    boss: {
+      hp: 100, maxHp: 100,
+      state: 'idle',                  // idle | tel | strike | feintEnd | recover | stagger
+      t: 0, dur: 0,
+      combo: [], step: 0, cur: null,
+      segs: [], ends: [], seg: 0, branched: false,
+      lunge: 0, readMark: 0,
+    },
+    stat: { parry: 0, perfect: 0, late: 0, read: 0, baited: 0, hit: 0, streak: 0, best: 0 },
+  };
+  effects = []; shake = 0; flash = 0; hitstop = 0; timeScale = 1; slowmo = 0;
+}
+reset();
+
+// ─────────────────────────────────────────────────────────────
+// 사운드
+// ─────────────────────────────────────────────────────────────
+let AC = null;
+function audio() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); return AC; }
+
+function tone(freq, dur, type, gain, sweepTo) {
+  const a = audio(), t = a.currentTime;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(freq, t);
+  if (sweepTo) o.frequency.exponentialRampToValueAtTime(sweepTo, t + dur);
+  g.gain.setValueAtTime(gain, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + dur + .02);
+}
+
+function noise(dur, gain, hz, q) {
+  const a = audio(), t = a.currentTime;
+  const n = Math.floor(a.sampleRate * dur);
+  const buf = a.createBuffer(1, n, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const src = a.createBufferSource(); src.buffer = buf;
+  const f = a.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = hz; f.Q.value = q || 1;
+  const g = a.createGain(); g.gain.setValueAtTime(gain, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(f); f.connect(g); g.connect(a.destination);
+  src.start(t);
+}
+
+const SFX = {
+  // 예비동작 시작 — 쌍끼리는 반드시 같은 소리를 쓴다
+  telFast: () => { tone(430, .09, 'triangle', .05); },
+  telMid:  () => { tone(240, .26, 'triangle', .06); },   // 2·3번 공용
+  telHigh: () => { tone(180, .30, 'sawtooth', .05); },   // 4·5번 공용
+  // 분기 — 소리의 방향이 칼의 방향과 일치한다
+  branchUp:   () => { tone(300, .18, 'triangle', .07, 620); },
+  branchDown: () => { tone(300, .18, 'triangle', .07, 150); },
+  branchFwd:  () => { tone(200, .22, 'sawtooth', .08, 460); noise(.12, .07, 700, .8); },
+  branchBack: () => { tone(200, .22, 'sawtooth', .06, 90); },
+
+  parry:   () => { tone(2100, .16, 'square', .10, 900); tone(3300, .10, 'triangle', .06); noise(.12, .18, 4200, 2); },
+  perfect: () => { tone(2600, .26, 'square', .13, 700); tone(4200, .14, 'triangle', .09); noise(.18, .24, 5200, 1.6); },
+  late:    () => { tone(1500, .18, 'square', .08, 800); noise(.14, .12, 3000, 1.6); },
+  read:    () => { tone(880, .18, 'sine', .06, 1320); },      // 見切 — 페이크를 안 물었다
+  hurt:    () => { tone(90, .28, 'sawtooth', .16, 42); noise(.20, .16, 240, .8); },
+  swing:   () => { noise(.13, .07, 900, .7); },
+  shrink:  () => { tone(140, .10, 'sine', .05, 90); },       // 연타로 창이 좁아졌다
+  brink:   () => { tone(700, .10, 'sine', .05); },
+  stagger: () => { tone(520, .6, 'sawtooth', .17, 60); noise(.5, .2, 700, .5); },
+  win:     () => { [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.3,'triangle',.10),i*110)); },
+  lose:    () => { [400,320,240,160].forEach((f,i)=>setTimeout(()=>tone(f,.4,'sawtooth',.10),i*140)); },
+};
+
+// ─────────────────────────────────────────────────────────────
+// 입력 — 패링 하나뿐
+// ─────────────────────────────────────────────────────────────
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ([' ','arrowup','arrowdown','tab'].includes(k)) e.preventDefault();
+  if (e.repeat) return;
+  if (!G.started) { G.started = true; audio(); }
+  if (k === 'r') { reset(); G.started = true; return; }
+  if (k === 'h') { S.assist = !S.assist; document.getElementById('s_assist').checked = S.assist; return; }
+  if (G.over) return;
+  if (k === ' ' || k === 'k') input();
+});
+
+function input() {
+  const p = G.player;
+  // 늦은 구제 — 이미 닿았어도 유예 안에 누르면 살아난다.
+  // 단 이미 한 번 휘둘렀다면(경직 중이거나 연타 누적) 구제 없음.
+  // → 늦은 반응은 봐주되 성급하게 미리 누른 것은 그대로 처벌.
+  if (G.pending) { if (p.state !== 'lock' && p.spam === 0) lateRescue(); return; }
+  if (p.state === 'idle') { doParry(); return; }
+  p.buffer = { at: G.time };
+}
+
+// Sekiro 방식 — 급하게 다시 누를수록 판정 창이 스스로 좁아진다.
+// 락아웃은 "네 입력을 무시한다"는 벌이라 억울하지만, 창 축소는 조작을 끊지 않으면서
+// 연타를 무의미하게 만든다.
+function doParry() {
+  const p = G.player;
+  if (G.time - p.lastPress > SPAM_RESET) p.spam = 0;
+  p.effWindow = Math.max(20, S.parryWindow * Math.pow(S.spamShrink, p.spam));
+  p.spam++; p.lastPress = G.time;
+
+  p.state = 'parry'; p.t = 0; p.dur = p.effWindow; p.parried = false;
+  p.pressAt = G.time;
+  SFX.swing();
+  if (p.spam > 1) SFX.shrink();
+}
+
+// ─────────────────────────────────────────────────────────────
+// 이펙트
+// ─────────────────────────────────────────────────────────────
+function burst(x, y, n, color, spd) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = (Math.random() * .6 + .4) * (spd || 3);
+    effects.push({ x, y, vx: Math.cos(a) * s * 3, vy: Math.sin(a) * s * 3 - 1, life: 1, color, size: Math.random() * 2.5 + 1 });
+  }
+}
+function ring(x, y, color) { effects.push({ ring: true, x, y, r: 6, life: 1, color }); }
+
+// ─────────────────────────────────────────────────────────────
+// 보스
+// ─────────────────────────────────────────────────────────────
+function phaseOf(hp) { return hp > PHASE_HP[0] ? 0 : hp > PHASE_HP[1] ? 1 : 2; }
+function phase() { return phaseOf(G.boss.hp); }
+
+function pickCombo() {
+  const p = phase();
+  const allowed = S.patternCount <= 3 ? EASY_SET : Object.keys(ATK);
+  // 연습 모드 — 콤보 없이 한 대씩. 패턴을 따로따로 익히는 용도.
+  if (S.practice) return [allowed[Math.floor(Math.random() * allowed.length)]];
+
+  // 페이크 연속(안 누르기를 두 번 버텨야 하는 구간)은 꺼둘 수 있게 한다
+  const dbl = c => c.seq.some((k, i) => i > 0 && ATK[k].feint && ATK[c.seq[i - 1]].feint);
+  const pool = COMBOS.filter(c => c.minPhase <= p && c.seq.every(k => allowed.includes(k))
+                                  && (S.doubleFeint || !dbl(c)));
+  if (!pool.length) return [allowed[Math.floor(Math.random() * allowed.length)]];
+  const weighted = [];
+  pool.forEach(c => { const w = 1 + (c.seq.length - 1) * p * 0.6; for (let i = 0; i < Math.ceil(w); i++) weighted.push(c); });
+  return weighted[Math.floor(Math.random() * weighted.length)].seq.slice();
+}
+
+function startTelegraph(first) {
+  const b = G.boss;
+  const a = ATK[b.combo[b.step]];
+  b.cur = a;
+  b.state = 'tel'; b.t = 0;
+
+  const sc = S.telScale * PHASE_SPEED[phase()] * (first ? 1 : FOLLOW_SCALE);
+  // 접근·버팀은 빨라져도 되지만 분기(판단 시간)는 절대 줄이지 않는다.
+  // 여기에 배율을 곱하면 후속타·후반부에서 인간 반응 한계 아래로 내려가 "불가능"이 된다.
+  b.segs = a.segs.map(([pose, d]) => ({ pose, d: d === 'BRANCH' ? S.branchDur : d * sc }));
+  b.ends = []; let acc = 0;
+  b.segs.forEach(s => { acc += s.d; b.ends.push(acc); });
+  b.dur = acc;
+  b.seg = 0; b.branched = (a.branchAt === 0);
+
+  SFX[a.sfxStart]();
+}
+
+function updateBoss(dt) {
+  const b = G.boss;
+  b.t += dt;
+  b.lunge *= 0.86;
+
+  switch (b.state) {
+    case 'idle':
+      if (b.t >= b.dur) { b.combo = pickCombo(); b.step = 0; startTelegraph(true); }
+      break;
+
+    case 'tel': {
+      let idx = b.segs.length - 1;
+      for (let i = 0; i < b.segs.length; i++) if (b.t < b.ends[i]) { idx = i; break; }
+      b.seg = idx;
+      // 분기 순간 — 쌍을 이룬 패턴은 여기서 처음으로 정체가 드러난다
+      if (!b.branched && idx >= b.cur.branchAt) {
+        b.branched = true; b.vfxT = 0;
+        if (b.cur.sfxBranch) SFX[b.cur.sfxBranch]();
+        const w = bladeWorld(b);
+        burst(w[0], w[1], b.cur.feint ? 14 : 10, b.cur.feint ? '#e5484d' : '#ffffff', b.cur.feint ? 2.6 : 2);
+        if (b.cur.branchAt > 0) ring(w[0], w[1], b.cur.feint ? '#e5484d' : '#ffffff');
+      }
+      // 분기 이후에만 칼날에 이펙트를 흘린다.
+      // 진짜 = 흰 잔광(궤도에 실림) / 페이크 = 붉게 흩어짐(힘이 빠짐).
+      // 갈라지기 전에는 아무것도 없어야 정답이 새지 않는다.
+      if (b.branched) {
+        b.vfxT = (b.vfxT || 0) + dt;
+        if (b.vfxT >= 45) {
+          b.vfxT = 0;
+          const w = bladeWorld(b);
+          if (b.cur.feint) {
+            for (let i = 0; i < 2; i++)
+              effects.push({ x: w[0] + (Math.random() - .5) * 12, y: w[1] + (Math.random() - .5) * 12,
+                vx: (Math.random() - .5) * 2.4 - 1, vy: (Math.random() - .5) * 2 + .7,
+                life: 1, color: '#e5484d', size: Math.random() * 2 + 1 });
+          } else {
+            effects.push({ x: w[0], y: w[1], vx: (Math.random() - .5) * 1.2,
+              vy: (Math.random() - .5) * 1.2 - .5,
+              life: 1, color: '#eef3fb', size: Math.random() * 2 + 1.4 });
+          }
+        }
+      }
+      if (b.t >= b.dur) b.cur.feint ? resolveFeint() : resolveStrike();
+      break;
+    }
+
+    case 'strike':
+    case 'feintEnd':
+      if (b.t >= b.dur) {
+        b.step++;
+        if (b.step < b.combo.length) startTelegraph(false);
+        else { b.state = 'recover'; b.t = 0; b.dur = 380; }
+      }
+      break;
+
+    case 'recover':
+      if (b.t >= b.dur) { b.state = 'idle'; b.t = 0; b.dur = S.comboGap; }
+      break;
+
+    case 'stagger':
+      if (b.t >= b.dur) { b.state = 'idle'; b.t = 0; b.dur = 900; }
+      break;
+  }
+}
+
+// 공격이 실제로 닿는 순간 — 모든 판정이 여기 한 프레임에서 결정된다
+function resolveStrike() {
+  const b = G.boss, p = G.player;
+  const atk = b.cur;
+  b.state = 'strike'; b.t = 0; b.dur = 130; b.lunge = 1; b.readMark = 0;
+  SFX.swing();
+
+  const parryActive = p.state === 'parry' && p.t <= p.effWindow;
+  const perfect = parryActive && p.t <= Math.min(S.perfectWindow, p.effWindow);
+
+  if (parryActive) {
+    record(-p.t, perfect ? 'perfect' : 'parry');
+    p.parried = true;
+    p.state = 'idle'; p.t = 0; p.pressAt = null;   // 성공하면 경직 없음 → 연속 패링 가능
+    p.spam = 0; p.effWindow = S.parryWindow;       // 맞춰냈으면 축소도 풀린다
+    G.stat.parry++; if (perfect) G.stat.perfect++;
+    G.stat.streak++; G.stat.best = Math.max(G.stat.best, G.stat.streak);
+    hitstop = perfect ? S.hitstop * 1.5 : S.hitstop;
+    shake += (perfect ? 9 : 5.5) * S.shake;
+    flash = perfect ? .5 : .3;
+    const cy = GROUND - 60 + atk.h;
+    burst((PX + BX) / 2 - 40, cy, perfect ? 24 : 14, perfect ? '#ffd76b' : '#e8eef7', perfect ? 4.5 : 3);
+    ring((PX + BX) / 2 - 40, cy, perfect ? '#ffd76b' : '#e8eef7');
+    perfect ? SFX.perfect() : SFX.parry();
+    damageBoss(S.parryDmg * atk.mul * (perfect ? PERFECT_MUL : 1));
+  } else {
+    if (p.pressAt != null && G.time - p.pressAt < 700) {
+      record(-(G.time - p.pressAt), 'miss');
+      p.pressAt = null;
+    }
+    beginPending(atk);
+  }
+}
+
+// 페이크가 끝나는 순간 — 타격 판정 자체가 없다.
+// 물었으면 이미 경직에 걸려 있고, 그 경직을 다음 공격이 때린다. 그게 처벌의 전부.
+function resolveFeint() {
+  const b = G.boss, p = G.player;
+  b.state = 'feintEnd'; b.t = 0; b.dur = FEINT_RECOIL;
+
+  const bit = p.state === 'parry' || p.state === 'lock' ||
+              (p.pressAt != null && G.time - p.pressAt < 600);
+  if (bit) {
+    G.stat.baited++; G.stat.streak = 0; b.readMark = -1;
+    p.pressAt = null;
+  } else {
+    G.stat.read++; b.readMark = 1;
+    flash = .16; burst(BX - 10, GROUND - 70, 9, '#7fd4e8', 2.2);
+    SFX.read();
+    damageBoss(READ_DMG);                          // 참은 것에도 아주 작은 보상
+  }
+}
+
+// ── 닿은 타격을 곧바로 확정하지 않고 유예에 걸어둔다 ──
+function beginPending(atk) {
+  if (S.lateGrace <= 0) { hurtPlayer(atk.dmg); return; }
+  G.pending = { real: 0, atk };
+  flash = .2;
+  SFX.brink();
+}
+
+function commitPending() { const a = G.pending.atk; G.pending = null; hurtPlayer(a.dmg); }
+
+function lateRescue() {
+  const pend = G.pending;
+  G.pending = null;
+  const p = G.player;
+
+  record(pend.real, 'late');
+  p.state = 'idle'; p.t = 0; p.buffer = null; p.pressAt = null;
+  p.spam = 0; p.effWindow = S.parryWindow;
+  G.stat.parry++; G.stat.late++;
+  G.stat.streak++; G.stat.best = Math.max(G.stat.best, G.stat.streak);
+
+  const cy = GROUND - 60;
+  hitstop = S.hitstop * .8; shake += 5 * S.shake; flash = .3;
+  burst((PX + BX) / 2 - 40, cy, 12, '#7fd4e8', 2.8);
+  ring((PX + BX) / 2 - 40, cy, '#7fd4e8');
+  SFX.late();
+  damageBoss(S.parryDmg * pend.atk.mul * LATE_MUL);
+}
+
+function record(off, res) {
+  G.timing.push({ off, res });
+  if (G.timing.length > 40) G.timing.shift();
+}
+
+// 패링이 곧 공격이다. 체력이 단계선을 지날 때마다 보스가 한 번 무너진다.
+function damageBoss(v) {
+  const b = G.boss;
+  if (G.over) return;
+  const before = phaseOf(b.hp);
+  b.hp = Math.max(0, b.hp - v);
+  burst(BX - 8, GROUND - 56, 10, '#ff8b5e', 2.6);
+
+  if (b.hp <= 0) {
+    G.over = 'win';
+    slowmo = 1200; flash = .8; shake += 18 * S.shake;
+    burst(BX, GROUND - 50, 46, '#ffd76b', 5.5);
+    ring(BX, GROUND - 50, '#ffd76b');
+    SFX.win();
+    return;
+  }
+  if (phaseOf(b.hp) > before) {
+    b.state = 'stagger'; b.t = 0; b.dur = 1400;
+    b.combo = []; b.step = 0; b.cur = null; b.readMark = 0;
+    G.pending = null;
+    slowmo = 900; flash = .6; shake += 14 * S.shake;
+    burst(BX, GROUND - 50, 34, '#ffd76b', 4.6);
+    ring(BX, GROUND - 50, '#ffd76b');
+    SFX.stagger();
+  }
+}
+
+function hurtPlayer(dmg) {
+  const p = G.player;
+  p.hp -= (dmg || 1);
+  p.state = 'hurt'; p.t = 0; p.dur = 520; p.buffer = null; p.pressAt = null;
+  G.stat.hit++; G.stat.streak = 0;
+  shake += (8 + 4 * (dmg || 1)) * S.shake; flash = .35;
+  burst(PX, GROUND - 45, 12 + 8 * (dmg || 1), '#e5484d', 3.5);
+  SFX.hurt();
+  if (p.hp <= 0) { p.hp = 0; G.over = 'lose'; SFX.lose(); }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 플레이어
+// ─────────────────────────────────────────────────────────────
+function updatePlayer(dt) {
+  const p = G.player;
+  p.t += dt;
+  // 손을 쉬면 축소가 풀린다
+  if (p.spam > 0 && G.time - p.lastPress > SPAM_RESET) { p.spam = 0; p.effWindow = S.parryWindow; }
+  p.lean += ((p.state === 'parry' ? 6 : p.state === 'hurt' ? -14 : 0) - p.lean) * .2;
+
+  if (p.state !== 'idle' && p.t >= p.dur) {
+    if (p.state === 'parry' && !p.parried) {
+      p.state = 'lock'; p.t = 0; p.dur = S.whiffLock;   // 헛침 경직
+      return;
+    }
+    p.state = 'idle'; p.t = 0;
+  }
+
+  if (p.state === 'idle' && p.buffer) {
+    if (G.time - p.buffer.at <= S.inputBuffer) { p.buffer = null; doParry(); }
+    else p.buffer = null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 루프
+// ─────────────────────────────────────────────────────────────
+let last = performance.now();
+function frame(now) {
+  let real = Math.min(now - last, 50); last = now;
+
+  if (hitstop > 0) { hitstop -= real; }
+  else {
+    if (G.pending) {
+      G.pending.real += real;            // 유예는 실시간으로 흐른다
+      timeScale = 0.16;
+      if (G.pending.real >= S.lateGrace) commitPending();
+    }
+    else if (slowmo > 0) { slowmo -= real; timeScale = 0.32; }
+    else {
+      // 분기 슬로우 — 이지선다가 갈라진 뒤에만 시간이 늘어진다.
+      // 항상 똑같이 걸리므로 "타이밍은 패턴마다 고정"이라는 원칙은 그대로다.
+      const b = G.boss;
+      const inBranch = b.state === 'tel' && b.branched && b.cur && b.cur.branchAt > 0;
+      timeScale = inBranch ? S.branchSlow : 1;
+    }
+    const dt = real * timeScale;
+    if (!G.over && G.started) { G.time += dt; updatePlayer(dt); updateBoss(dt); }
+    else if (!G.started) G.time += dt;
+    else G.time += dt;
+  }
+
+  shake *= 0.88; flash *= 0.86;
+  for (let i = effects.length - 1; i >= 0; i--) {
+    const e = effects[i];
+    e.life -= real / (e.ring ? 380 : 520);
+    if (e.ring) e.r += real * 0.55;
+    else { e.x += e.vx * real / 16; e.y += e.vy * real / 16; e.vy += real / 60; }
+    if (e.life <= 0) effects.splice(i, 1);
+  }
+
+  draw();
+  requestAnimationFrame(frame);
+}
+
+// ─────────────────────────────────────────────────────────────
+// 렌더
+// ─────────────────────────────────────────────────────────────
+const ease = t => 1 - Math.pow(1 - t, 2);
+
+// 임의 시각 t의 자세 — 칼끝 + 몸. 세그먼트를 따라 보간한다.
+// 같은 자세가 연속되면(버티는 구간) 저절로 멈춰 있게 된다.
+// t를 인자로 받으므로 과거 시각을 넣어 잔상(트레일)을 그릴 수 있다.
+function poseAt(b, t) {
+  if (!b.segs || !b.segs.length) return { tip: POSE.REST, body: BODY.REST };
+  let idx = b.segs.length - 1;
+  for (let i = 0; i < b.segs.length; i++) if (t < b.ends[i]) { idx = i; break; }
+  const segStart = idx === 0 ? 0 : b.ends[idx - 1];
+  const k = ease(Math.max(0, Math.min(1, (t - segStart) / b.segs[idx].d)));
+  const fn = idx === 0 ? 'REST' : b.segs[idx - 1].pose, tn = b.segs[idx].pose;
+  const f = POSE[fn], to = POSE[tn], bf = BODY[fn], bt = BODY[tn];
+  const j = (fn === tn) ? Math.sin(G.time / 28) * 1.5 : 0;   // 버티는 동안의 떨림
+  const L = (a, b2) => a + (b2 - a) * k;
+  return {
+    tip:  [L(f[0], to[0]), L(f[1], to[1]) + j],
+    body: { dy: L(bf.dy, bt.dy), sy: L(bf.sy, bt.sy), lean: L(bf.lean, bt.lean) },
+  };
+}
+function bladeTip(b) { return poseAt(b, b.t).tip; }
+
+// 칼끝의 화면 좌표 (이펙트를 칼날에서 뿌리기 위해)
+function bladeWorld(b) {
+  const t = bladeTip(b);
+  return [BX - b.lunge * 34 + t[0], GROUND - 60 + t[1]];
+}
+
+function draw() {
+  ctx.save();
+  ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
+
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0a0d14'); g.addColorStop(.6, '#0d1119'); g.addColorStop(1, '#060809');
+  ctx.fillStyle = g; ctx.fillRect(-20, -20, W + 40, H + 40);
+
+  ctx.globalAlpha = .16; ctx.fillStyle = '#1a2130';
+  for (let i = 0; i < 7; i++) { const x = 60 + i * 130; ctx.fillRect(x, 150, 8, GROUND - 150); ctx.fillRect(x - 22, 150, 52, 9); }
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = '#232a38'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, GROUND); ctx.lineTo(W, GROUND); ctx.stroke();
+  ctx.fillStyle = '#0a0d13'; ctx.fillRect(0, GROUND, W, H - GROUND);
+
+  drawBoss();
+  drawPlayer();
+  drawEffects();
+  drawPending();
+  drawHUD();
+  drawTimingMeter();
+
+  if (flash > .01) { ctx.fillStyle = `rgba(255,255,255,${flash * .55})`; ctx.fillRect(-20, -20, W + 40, H + 40); }
+  ctx.restore();
+
+  // 버전 · 현재 난이도 — 옆 패널이 접히는 좁은 화면에서도 항상 보이게
+  ctx.save();
+  ctx.textAlign = 'right'; ctx.font = '10px sans-serif';
+  ctx.fillStyle = '#333a47';
+  ctx.fillText(`${VERSION}  ·  ${PRESET_KO[presetName]}${S.practice ? ' (단발)' : ''}`, W - 14, H - 12);
+  ctx.restore();
+
+  drawOverlay();
+}
+
+function drawPlayer() {
+  const p = G.player;
+  const x = PX + p.lean, y = GROUND;
+
+  ctx.save();
+  if (p.state === 'hurt' && Math.floor(p.t / 60) % 2 === 0) ctx.globalAlpha = .4;
+
+  ctx.fillStyle = 'rgba(0,0,0,.45)';
+  ctx.beginPath(); ctx.ellipse(x, y + 3, 24, 6, 0, 0, 7); ctx.fill();
+
+  ctx.fillStyle = p.state === 'lock' ? '#4a5568' : '#7fd4e8';
+  ctx.fillRect(x - 12, y - 62, 24, 62);
+  ctx.fillStyle = '#0b0e14'; ctx.fillRect(x - 8, y - 56, 16, 12);
+
+  ctx.strokeStyle = p.state === 'parry' ? '#fff' : '#9fb0c4';
+  ctx.lineWidth = p.state === 'parry' ? 4 : 3;
+  ctx.beginPath();
+  if (p.state === 'parry') { ctx.moveTo(x + 12, y - 22); ctx.lineTo(x + 30, y - 66); }
+  else { ctx.moveTo(x + 10, y - 30); ctx.lineTo(x + 34, y - 58); }
+  ctx.stroke();
+  ctx.restore();
+
+  if (p.state === 'parry') {
+    const k = 1 - p.t / p.effWindow;
+    const perfectPart = p.t <= Math.min(S.perfectWindow, p.effWindow);
+    // 가드 호의 크기 = 지금 살아있는 판정 창. 연타로 좁아지면 눈에 보이게 작아진다.
+    const scale = Math.max(.25, p.effWindow / S.parryWindow);
+    ctx.save();
+    ctx.strokeStyle = perfectPart ? '#ffd76b' : '#e8eef7';
+    ctx.lineWidth = (perfectPart ? 5 : 3) * (.5 + scale * .5);
+    ctx.globalAlpha = Math.max(0, k) * .95 * (.45 + scale * .55);
+    ctx.beginPath(); ctx.arc(x + 6, y - 34, 18 + 22 * scale, -1.15 * scale - .2, 1.15 * scale + .2); ctx.stroke();
+    ctx.restore();
+  }
+  if (p.state === 'lock') {
+    ctx.save(); ctx.globalAlpha = .5 + Math.sin(G.time / 50) * .2; ctx.fillStyle = '#e5484d';
+    ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('경직', x, y - 78); ctx.restore();
+  }
+  // 연타 축소 경고 — 왜 갑자기 안 맞는지 알려줘야 한다
+  if (p.spam > 1 && p.state !== 'lock') {
+    ctx.save(); ctx.textAlign = 'center';
+    ctx.fillStyle = '#e8a33d'; ctx.globalAlpha = .55 + Math.sin(G.time / 60) * .25;
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(`창 축소 ${Math.round(p.effWindow)}ms`, x, y - 92);
+    ctx.restore();
+  }
+}
+
+function drawBoss() {
+  const b = G.boss;
+  if (G.over === 'win') return;
+  const x = BX - b.lunge * 34, y = GROUND;
+  const cy0 = y - 60;
+
+  ctx.fillStyle = 'rgba(0,0,0,.45)';
+  ctx.beginPath(); ctx.ellipse(BX, y + 3, 34, 8, 0, 0, 7); ctx.fill();
+
+  const staggered = b.state === 'stagger';
+  // 자세에 따라 몸이 웅크리고·곧추서고·기운다. 실루엣만으로 패턴이 갈려야 한다.
+  const bp = (b.state === 'tel' && b.cur) ? poseAt(b, b.t).body : BODY.REST;
+  ctx.save();
+  ctx.translate(x, y + bp.dy);
+  if (staggered) ctx.transform(1, 0, Math.sin(G.time / 90) * .12, 1, 0, 0);
+  else ctx.transform(1, 0, bp.lean, bp.sy, 0, 0);
+  ctx.fillStyle = staggered ? '#6b4a52' : '#c0454b';
+  ctx.beginPath();
+  ctx.moveTo(-22, 0); ctx.lineTo(-26, -70); ctx.lineTo(-6, -92);
+  ctx.lineTo(18, -92); ctx.lineTo(26, -66); ctx.lineTo(22, 0);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#0b0e14'; ctx.fillRect(-10, -84, 22, 12);
+  if (!staggered) { ctx.fillStyle = '#ffe6a0'; ctx.fillRect(-6, -80, 5, 4); ctx.fillRect(4, -80, 5, 4); }
+  ctx.restore();
+
+  // 예비동작 — 자세만으로 읽는다. 색으로 정답을 알려주지 않는다.
+  if (b.state === 'tel' && b.cur) {
+    const tip = bladeTip(b);
+    const prog = Math.min(1, b.t / b.dur);
+    // 분기 전 = 중립. 분기 후 = 진짜는 흰빛이 강해지고, 페이크는 붉게 죽는다.
+    const col  = !b.branched ? '#eef3fb' : (b.cur.feint ? '#e07a72' : '#ffffff');
+    const glow = !b.branched ? '#dce6ff' : (b.cur.feint ? '#e5484d' : '#ffffff');
+
+    // 칼 잔상 — 어디서 어디로 가는 중인지가 한눈에 보여야 방향을 읽는다
+    ctx.save();
+    ctx.strokeStyle = col; ctx.lineCap = 'round';
+    [90, 60, 30].forEach((back, i) => {
+      const pt = b.t - back;
+      if (pt <= 0) return;
+      const g = poseAt(b, pt);
+      ctx.globalAlpha = (.06 + i * .07) * (.5 + prog * .5);
+      ctx.lineWidth = 3 + i;
+      ctx.beginPath();
+      ctx.moveTo(x + 8, cy0 + 26);
+      ctx.lineTo(x + g.tip[0], cy0 + g.tip[1]);
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 4 + prog * 3;
+    ctx.globalAlpha = (b.branched && b.cur.feint) ? .45 + prog * .25 : .5 + prog * .5;
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = 10 + prog * 22 + (b.branched && !b.cur.feint ? 16 : 0);
+    ctx.beginPath();
+    ctx.moveTo(x + 8, cy0 + 26);
+    ctx.lineTo(x + tip[0], cy0 + tip[1]);
+    ctx.stroke();
+    ctx.restore();
+
+    if (S.assist) {
+      // 갈라지기 전에는 "중단 ?" / "상단 ?" 까지만 — 보조가 정답을 먼저 말하면 안 된다
+      const txt = b.branched ? b.cur.label : b.cur.startLabel;
+      ctx.save();
+      ctx.fillStyle = b.branched ? (b.cur.feint ? '#e5484d' : '#7fd4e8') : '#8fa0b8';
+      ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(txt, x, y - 112);
+      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, y - 46, 6 + (1 - prog) * 70, 0, 7); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // 페이크 회수 — 칼이 도로 내려간다
+  if (b.state === 'feintEnd' && b.cur) {
+    const k = ease(Math.min(1, b.t / b.dur));
+    const from = POSE[b.segs[b.segs.length - 1].pose], to = POSE.REST;
+    ctx.save();
+    ctx.strokeStyle = '#8fa0b8'; ctx.lineWidth = 4 * (1 - k) + 1.5;
+    ctx.globalAlpha = .7 * (1 - k) + .2;
+    ctx.beginPath();
+    ctx.moveTo(x + 8, cy0 + 26);
+    ctx.lineTo(x + from[0] + (to[0] - from[0]) * k, cy0 + from[1] + (to[1] - from[1]) * k);
+    ctx.stroke();
+    if (b.readMark === 1) {
+      ctx.globalAlpha = 1 - k; ctx.fillStyle = '#7fd4e8';
+      ctx.font = 'bold 22px serif'; ctx.textAlign = 'center';
+      ctx.fillText('見切', x, y - 112);
+    }
+    ctx.restore();
+  }
+
+  if (b.state === 'strike' && b.cur) {
+    const k = 1 - b.t / b.dur;
+    const cy = cy0 + b.cur.h;
+    ctx.save();
+    ctx.globalAlpha = k * .9;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = (b.cur.dmg > 1 ? 11 : 7) * k + 1;
+    ctx.beginPath(); ctx.moveTo(x + 20, cy); ctx.lineTo(PX + 20, cy + (b.cur.h < 0 ? 16 : -16)); ctx.stroke();
+    ctx.restore();
+  }
+
+  if (staggered) {
+    ctx.save();
+    ctx.fillStyle = '#ffd76b'; ctx.font = 'bold 26px serif'; ctx.textAlign = 'center';
+    ctx.globalAlpha = .5 + Math.sin(G.time / 70) * .5;
+    ctx.fillText('崩', BX, y - 118);
+    ctx.restore();
+  }
+}
+
+function drawEffects() {
+  effects.forEach(e => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, e.life);
+    if (e.ring) {
+      ctx.strokeStyle = e.color; ctx.lineWidth = 3 * e.life + .5;
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, 7); ctx.stroke();
+    } else {
+      ctx.fillStyle = e.color; ctx.fillRect(e.x, e.y, e.size, e.size);
+    }
+    ctx.restore();
+  });
+}
+
+function drawPending() {
+  if (!G.pending) return;
+  const k = 1 - G.pending.real / S.lateGrace;
+  ctx.save();
+  const vg = ctx.createRadialGradient(PX, GROUND - 40, 40, PX, GROUND - 40, 520);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, `rgba(127,212,232,${.28 + (1 - k) * .3})`);
+  ctx.fillStyle = vg; ctx.fillRect(-20, -20, W + 40, H + 40);
+
+  const bw = 150;
+  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(PX - bw / 2, GROUND - 108, bw, 7);
+  ctx.fillStyle = 'rgba(127,212,232,.95)'; ctx.fillRect(PX - bw / 2, GROUND - 108, bw * Math.max(0, k), 7);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = `rgba(127,212,232,${.75 + Math.sin(G.time / 20) * .25})`;
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText('지금!', PX, GROUND - 118);
+  ctx.restore();
+}
+
+// 판정 타임라인 — 내 입력이 타격 순간 대비 몇 ms 빗나갔는지
+function drawTimingMeter() {
+  const cx = W / 2, y = 452, sc = 0.42, half = 190;
+  const clamp = v => Math.max(-half, Math.min(half, v * sc));
+  const seg = (a, b, c) => { const x0 = cx + clamp(a), x1 = cx + clamp(b); ctx.fillStyle = c; ctx.fillRect(x0, y, x1 - x0, 12); };
+
+  seg(-9999, 9999, '#1c1418');
+  seg(-S.parryWindow, -S.perfectWindow, '#5a6576');
+  seg(-S.perfectWindow, 0, '#ffd76b');
+  seg(0, S.lateGrace, '#3d7ea6');
+  ctx.fillStyle = '#e8eef7'; ctx.fillRect(cx - 1, y - 5, 2, 22);
+
+  const recent = G.timing.slice(-10);
+  recent.forEach((r, i) => {
+    const age = (i + 1) / recent.length;
+    ctx.save(); ctx.globalAlpha = .25 + age * .75;
+    ctx.fillStyle = r.res === 'perfect' ? '#ffd76b' : r.res === 'parry' ? '#e8eef7'
+                  : r.res === 'late' ? '#7fd4e8' : '#e5484d';
+    ctx.fillRect(cx + clamp(r.off) - 1, y - 9 - age * 4, 2, 9 + age * 4);
+    ctx.restore();
+  });
+
+  ctx.font = '10px sans-serif'; ctx.fillStyle = '#4d5563';
+  ctx.textAlign = 'left';  ctx.fillText('← 이르게', cx - half, y + 26);
+  ctx.textAlign = 'right'; ctx.fillText('늦게 →', cx + half, y + 26);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#7d8695'; ctx.fillText('타격 순간', cx, y + 26);
+
+  const n = G.timing.length;
+  if (n >= 4) {
+    const avg = G.timing.reduce((s, r) => s + r.off, 0) / n;
+    ctx.font = '11px sans-serif'; ctx.fillStyle = '#9aa3b2';
+    ctx.fillText(`평균 ${avg > 0 ? '+' : ''}${avg.toFixed(0)}ms  (n=${n})`, cx, y + 44);
+    let hint = '';
+    if (avg > 45) hint = '전반적으로 늦습니다 → 늦은 구제를 늘려보세요';
+    else if (avg < -75) hint = '전반적으로 이릅니다 → 패링 윈도우를 늘리거나 분기 길이를 늘리세요';
+    if (hint) { ctx.fillStyle = '#5b6373'; ctx.fillText(hint, cx, y + 60); }
+  } else {
+    ctx.font = '11px sans-serif'; ctx.fillStyle = '#3f4653';
+    ctx.fillText('판정 타임라인 — 패링할수록 내 입력 습관이 쌓입니다', cx, y + 44);
+  }
+}
+
+function drawHUD() {
+  const b = G.boss, p = G.player, st = G.stat;
+  ctx.font = '10px sans-serif';
+
+  ctx.textAlign = 'left'; ctx.fillStyle = '#5b6373';
+  ctx.fillText('내 체력', 24, 19);
+  for (let i = 0; i < p.maxHp; i++) {
+    ctx.fillStyle = i < p.hp ? '#7fd4e8' : '#232a38';
+    ctx.fillRect(24 + i * 26, 24, 20, 8);
+  }
+
+  // 보스 체력 — 패링으로 깎는다
+  const bw = 320, bx = W - 344, by = 26;
+  ctx.textAlign = 'right'; ctx.fillStyle = '#5b6373';
+  ctx.fillText('보스 체력 (패링으로 깎음)', W - 24, 19);
+  ctx.fillStyle = '#1a1f2b'; ctx.fillRect(bx, by, bw, 11);
+  ctx.fillStyle = phase() === 2 ? '#e5484d' : '#c0454b';
+  ctx.fillRect(bx, by, bw * (b.hp / b.maxHp), 11);
+  // 단계선 — 여기를 지나면 보스가 무너지고 빨라진다
+  ctx.fillStyle = '#0b0e14';
+  PHASE_HP.forEach(hp => ctx.fillRect(bx + bw * hp / 100 - 1, by, 2, 11));
+  ctx.fillStyle = '#7d8695'; ctx.textAlign = 'right';
+  ctx.fillText(`${Math.ceil(b.hp)} / ${b.maxHp}`, W - 24, 51);
+
+  ctx.textAlign = 'left'; ctx.font = '11px sans-serif'; ctx.fillStyle = '#5b6373';
+  ctx.fillText(`패링 ${st.parry}   퍼펙트 ${st.perfect}   늦은구제 ${st.late}   見切 ${st.read}   낚임 ${st.baited}   피격 ${st.hit}   연속 ${st.streak}`, 24, 52);
+
+  if (st.streak >= 3) {
+    ctx.save(); ctx.textAlign = 'center';
+    ctx.font = 'bold 26px sans-serif';
+    ctx.fillStyle = st.streak >= 10 ? '#ffd76b' : '#e8eef7';
+    ctx.globalAlpha = .8;
+    ctx.fillText(`${st.streak}`, W / 2, 96);
+    ctx.font = '10px sans-serif'; ctx.fillStyle = '#5b6373';
+    ctx.fillText('CHAIN', W / 2, 110);
+    ctx.restore();
+  }
+}
+
+function drawOverlay() {
+  if (!G.started) {
+    ctx.fillStyle = 'rgba(5,6,10,.82)'; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e8eef7'; ctx.font = '600 22px sans-serif';
+    ctx.fillText('아무 키나 눌러 시작', W / 2, H / 2 - 34);
+    ctx.fillStyle = '#6d7484'; ctx.font = '13px sans-serif';
+    ctx.fillText('입력은 Space 하나뿐입니다', W / 2, H / 2 - 4);
+    ctx.fillStyle = '#565d6c'; ctx.font = '12px sans-serif';
+    ctx.fillText('아래에서 시작 = 빠른 공격, 즉답', W / 2, H / 2 + 24);
+    ctx.fillStyle = '#e8a33d';
+    ctx.fillText('중단에서 시작 = 위로 올리면 진짜 / 아래로 흘리면 페이크', W / 2, H / 2 + 46);
+    ctx.fillStyle = '#b38ce0';
+    ctx.fillText('상단에서 시작 = 앞으로 내려치면 진짜 / 뒤로 거두면 페이크', W / 2, H / 2 + 68);
+    return;
+  }
+  if (!G.over) return;
+  ctx.fillStyle = 'rgba(5,6,10,.86)'; ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = G.over === 'win' ? '#ffd76b' : '#e5484d';
+  ctx.font = '600 34px serif';
+  ctx.fillText(G.over === 'win' ? '討取' : '死', W / 2, H / 2 - 24);
+  const st = G.stat;
+  ctx.fillStyle = '#9aa3b2'; ctx.font = '13px sans-serif';
+  ctx.fillText(`패링 ${st.parry} · 퍼펙트 ${st.perfect} · 늦은구제 ${st.late} · 피격 ${st.hit}`, W / 2, H / 2 + 14);
+  const readRate = (st.read + st.baited) ? Math.round(st.read / (st.read + st.baited) * 100) : 0;
+  ctx.fillText(`페이크 간파 ${st.read}/${st.read + st.baited} (${readRate}%) · 최고 연속 ${st.best}`, W / 2, H / 2 + 36);
+  ctx.fillStyle = '#5b6373'; ctx.font = '12px sans-serif';
+  ctx.fillText('R — 다시', W / 2, H / 2 + 68);
+}
+
+// ─────────────────────────────────────────────────────────────
+// 슬라이더 바인딩
+// ─────────────────────────────────────────────────────────────
+function bind(id, key, fmt, xf) {
+  const el = document.getElementById(id), out = document.getElementById(id.replace('s_', 'v_'));
+  const apply = () => { const raw = +el.value; S[key] = xf ? xf(raw) : raw; out.textContent = fmt(raw); };
+  el.addEventListener('input', apply); apply();
+}
+bind('s_branch', 'branchDur',     v => v + 'ms');
+bind('s_parry',  'parryWindow',   v => v + 'ms');
+bind('s_late',   'lateGrace',     v => v + 'ms');
+bind('s_hp',     'playerHp',      v => String(v));
+bind('s_perfect','perfectWindow', v => v + 'ms');
+bind('s_dmg',    'parryDmg',      v => String(v));
+bind('s_lock',   'whiffLock',     v => v + 'ms');
+bind('s_spam',   'spamShrink',    v => v + '%', v => 1 - v / 100);
+bind('s_slow',   'branchSlow',    v => v + '%', v => v / 100);
+bind('s_stop',   'hitstop',       v => v + 'ms');
+bind('s_buf',    'inputBuffer',   v => v + 'ms');
+bind('s_tel',    'telScale',      v => (v / 100).toFixed(2) + 'x', v => v / 100);
+bind('s_gap',    'comboGap',      v => v + 'ms');
+bind('s_shake',  'shake',         v => (v / 100).toFixed(2) + 'x', v => v / 100);
+document.getElementById('s_assist').addEventListener('change', e => S.assist = e.target.checked);
+document.getElementById('s_double').addEventListener('change', e => S.doubleFeint = e.target.checked);
+
+// ── 난이도 프리셋 ── 슬라이더를 한꺼번에 옮기고 즉시 재시작한다
+const SLIDER_OF = {
+  branchDur:'s_branch', parryWindow:'s_parry', lateGrace:'s_late', playerHp:'s_hp',
+  perfectWindow:'s_perfect', parryDmg:'s_dmg', whiffLock:'s_lock', spamShrink:'s_spam',
+  telScale:'s_tel', comboGap:'s_gap', branchSlow:'s_slow',
+};
+function applyPreset(name) {
+  const p = PRESETS[name];
+  Object.entries(p).forEach(([k, v]) => {
+    const id = SLIDER_OF[k];
+    if (id) {
+      const el = document.getElementById(id);
+      el.value = k === 'telScale' ? Math.round(v * 100)
+               : k === 'branchSlow' ? Math.round(v * 100)
+               : k === 'spamShrink' ? Math.round((1 - v) * 100)   // 슬라이더는 "줄어드는 %"
+               : v;
+      el.dispatchEvent(new Event('input'));
+    } else S[k] = v;                       // assist / practice 처럼 슬라이더가 없는 값
+  });
+  document.getElementById('s_assist').checked = p.assist;
+  document.getElementById('s_double').checked = p.doubleFeint;
+  presetName = name;
+  document.querySelectorAll('#presets button[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === name));
+  syncPatternButtons();
+  reset(); G.started = true;               // 체력 등은 재시작해야 적용되므로 바로 새 판
+}
+function syncPatternButtons() {
+  document.querySelectorAll('#presets button[data-n]').forEach(b =>
+    b.classList.toggle('on', +b.dataset.n === S.patternCount));
+}
+document.querySelectorAll('#presets button[data-p]').forEach(b =>
+  b.addEventListener('click', () => { applyPreset(b.dataset.p); b.blur(); }));
+document.querySelectorAll('#presets button[data-n]').forEach(b =>
+  b.addEventListener('click', () => {
+    S.patternCount = +b.dataset.n; syncPatternButtons(); b.blur();
+    reset(); G.started = true;
+  }));
+syncPatternButtons();
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Fantasy, AGING } from '../dist/world.js';
+import { Dungeon } from '../dist/engine.js';
+const adult=seed=>Fantasy.restore(new Dungeon(seed).s);
+const next=g=>{let n=0;while(g.s.status==='running'&&n++<200)g.step();assert.equal(g.s.status,'choice');};
+const work=()=>{const g=adult(11);g.start();next(g);g.choose('work');next(g);g.choose('inn');while(g.s.queue.length)g.step();return g;};
+
+test('one routine life record advances a whole year',()=>{const g=work(),age=g.age().years;g.step();assert.equal(g.s.timeline.elapsedDays,360);assert.equal(g.s.log.at(-1).ageMonths,0);assert.match(g.s.log.at(-1).location,/1년/);assert.deepEqual(g.age(),{years:age+1,months:0});});
+test('after preparation, only a new dungeon segment advances time',()=>{const g=adult(11);g.start();next(g);g.enterDungeon('mine');while(g.s.queue.length)g.step();const prepared=g.s.timeline.elapsedDays;assert.ok(prepared>=360&&prepared<=720);g.step();assert.equal(g.s.timeline.elapsedDays,prepared);g.step();assert.equal(g.s.timeline.elapsedDays,prepared+1);if(g.s.queue.length)g.step();assert.equal(g.s.timeline.elapsedDays,prepared+1);});
+test('age survives retirement, switching jobs and saved state',()=>{const g=work();g.advanceTime(410);g.requestChange();g.choose('leave');while(g.s.queue.length)g.step();next(g);g.choose('work');next(g);g.choose('smith');const restored=Fantasy.restore(JSON.parse(JSON.stringify(g.s)));assert.deepEqual(restored.s.timeline,g.s.timeline);assert.deepEqual(restored.age(),g.age());});
+test('fatal encounters record age, time, location and cause',()=>{const g=work();g.character.traits=['sharp','brave'];g.advanceTime(450);g.s.hp=1;g.enqueue('낙석에 치명상을 입었습니다.','bad',{hp:-3});g.step();g.step();assert.equal(g.s.outcome.type,'death');assert.equal(g.s.outcome.ageYears,g.s.timeline.startAge+1);assert.equal(g.s.outcome.ageMonths,3);assert.match(g.s.outcome.location,/여관/);assert.match(g.s.outcome.cause,/낙석/);assert.match(g.s.log.at(-1).text,/세 3개월.*사망/);});
+test('a long life can end outside the dungeon with its death age recorded',()=>{const g=work();g.character.race='human';const age=AGING.human.from+20;g.s.timeline.elapsedDays=(age-g.s.timeline.startAge)*360-360;g.chance=()=>true;g.step();assert.equal(g.s.status,'ended');assert.equal(g.s.outcome.type,'death');assert.equal(g.s.outcome.ageYears,age);assert.match(g.s.outcome.cause,/노환/);assert.match(g.s.outcome.location,/여관/);});
+test('old saves migrate without changing identity or previous logs',()=>{const g=work();g.step();const raw=structuredClone(g.s);delete raw.timeline;const copy=Fantasy.restore(raw);assert.equal(copy.s.id,raw.id);assert.deepEqual(copy.s.log,raw.log);assert.equal(copy.s.timeline.startAge,18);assert.equal(copy.s.timeline.elapsedDays,raw.world.totalDays*30+raw.roomsExplored);});

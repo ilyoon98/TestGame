@@ -1,0 +1,22 @@
+# Dependencies and Python caches
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local settings and logs
+.env
+.env.*
+!.env.example
+!.env.*.example
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
+*.log
+
+# Prototype runtime data and local exports
+/prototypes/hex-war-lobby/rooms-state.json
+/prototypes/dungeon-chronicle/.openai/hosting.json
+/prototypes/dungeon-chronicle/artifacts/
+/prototypes/limbus-check-panel/runtime/
+/prototypes/seedring-gacha/archives/

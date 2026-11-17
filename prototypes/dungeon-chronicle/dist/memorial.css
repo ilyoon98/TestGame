@@ -1,0 +1,58 @@
+/* Slate stones, engraved symbols and quiet brass honors in the chronicle's palette. */
+.tribute-person{display:block;flex:0 0 32px;width:32px;height:48px}.tribute-person .pixel-character{width:32px;height:48px}.npc-remembrance-portrait{float:right;display:block;width:56px;height:84px;margin:0 0 12px 16px}.npc-remembrance-portrait .pixel-character{width:56px;height:84px}
+.grave-visits{margin:24px 0;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.grave-visits h3{font:22px var(--display);color:var(--gold);margin-bottom:9px}.grave-visits ol{list-style:none;padding:0}.grave-visits li{padding:20px 0;border-top:1px solid #43596366}.grave-visits li:first-child{border-top:0}.tribute-heading{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.tribute-heading strong{font-size:17px;color:#d7dfd5;font-weight:500}.tribute-heading small{font-size:13px;color:#b7c8c6}.tribute-symbol{display:inline-flex;color:#dfc2a8;width:24px;height:24px;flex:none}.tribute-symbol svg{width:100%;height:100%}.grave-visits li>p{font-size:16px;line-height:1.85;margin:10px 0;color:var(--ink)}.tribute-memory{padding:12px 16px;border-left:2px solid #9cad9480;background:#9cad9409}.tribute-memory small{font-size:12px;color:var(--gold);line-height:1.7}.tribute-memory p{font-size:15px;line-height:1.85;color:#bbcfc9;margin-top:5px;overflow-wrap:anywhere}.grave-visits details>summary{font-size:14px;color:var(--gold);cursor:pointer;padding:10px 0}
+.shared-memories{margin-top:24px;border-top:1px solid var(--line);padding-top:20px}.shared-memories h3{font:21px var(--display);color:var(--gold);margin-bottom:20px}.shared-memories ol{list-style:none;padding-left:16px;border-left:1px solid #879c8d66}.shared-memories li{position:relative;padding:0 0 20px 12px}.shared-memories li::before{content:'';position:absolute;left:-20px;top:7px;width:7px;height:7px;background:#a9b5a1;transform:rotate(45deg)}.shared-memories small{font-size:13px;color:var(--gold);line-height:1.7}.shared-memories p{font-size:16px;color:var(--ink);line-height:1.85;margin-top:6px;overflow-wrap:anywhere}.result-life h4{font-size:14px;color:var(--gold);font-weight:500;margin:18px 0 8px}
+.cemetery-dialog{width:min(1040px,calc(100% - 32px));max-width:1040px;max-height:calc(100dvh - 32px);padding:28px 32px}
+.cemetery-dialog .dialog-heading h2,.life-result-dialog .dialog-heading h2{font-size:29px;line-height:1.4}
+.cemetery-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.cemetery-toolbar p{font-size:15px;color:var(--gold)}
+.cemetery-toolbar label{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.cemetery-toolbar select{background:#14212e;border:1px solid var(--line);border-radius:4px;padding:8px 10px;color:var(--ink);font:inherit}
+.cemetery-intro{font-size:15px;line-height:1.8;color:var(--muted);margin:16px 0 24px}
+.grave-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px 12px}
+.grave-card{display:flex;align-items:center;flex-direction:column;padding:10px 12px 18px;border:1px solid transparent;border-bottom-color:#435566;border-radius:5px;background:#14212e;color:var(--ink);text-align:center;min-width:0;position:relative}
+.grave-card:hover,.grave-card:focus-visible{border-color:#7893a8;background:#1d2e3e;outline:2px solid transparent}
+.grave-card .tomb-art{width:110px;height:165px}
+.grave-card strong{font-family:var(--display);font-size:22px;font-weight:500;margin-top:2px}
+.grave-card>span{font-size:13px;color:var(--muted);margin:5px 0 8px}
+.grave-card>small{font-size:13px;line-height:1.7;color:#94a6b4;min-height:43px;overflow-wrap:anywhere}
+.grave-card.rare-grave{border-color:#d6b97766;background:#26313b}.rare-grave>small{color:var(--gold)}
+.tomb-art{display:block;overflow:visible;image-rendering:pixelated;flex-shrink:0}
+.honored{filter:drop-shadow(0 0 6px #d6b97720)}
+.honor-guide{padding:18px 0;margin:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:15px;color:var(--muted)}
+.honor-guide summary,.stone-meaning summary,.result-logs summary{cursor:pointer;color:var(--gold);font-size:15px;line-height:1.7}
+.honor-guide p{line-height:1.8;margin:12px 0}.honor-guide ul{padding-left:20px;line-height:1.9}.honor-guide li{margin:9px 0}.honor-guide strong{display:block;color:var(--ink);font-weight:500}
+.memorial-note{font-size:13px;color:var(--muted);line-height:1.8;margin:16px 0 0}
+.completed-story{width:100%;display:flex;justify-content:space-between;gap:12px;padding:14px 0;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:var(--ink);font-size:15px}.completed-story span{white-space:nowrap;color:var(--gold);font-size:13px}
+#completedStoriesSection{margin:24px 0}#completedStoriesSection h3{font:21px var(--display);color:var(--ink)}
+.life-result-dialog{width:min(830px,calc(100% - 32px));max-width:830px;max-height:calc(100dvh - 32px);padding:28px}
+.life-result-dialog[open]{display:flex;flex-direction:column;height:min(900px,calc(100dvh - 32px));overflow:hidden}
+.life-result-dialog>.dialog-heading,.life-result-actions{flex-shrink:0}
+#resultContent{flex:1;min-height:60px;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain;padding-right:8px}
+.memorial-result{display:grid;grid-template-columns:220px minmax(0,1fr);gap:30px;margin:10px 0 24px}
+.result-monument{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0;padding:20px 8px 18px;background:#14212e;border:1px solid #435566;border-radius:5px}
+.result-monument .tomb-art{width:144px;height:216px}.result-monument .pixel-character{width:96px;height:144px;margin:28px 0}
+.result-monument p{font-family:var(--display);font-size:17px;color:var(--ink);line-height:1.8;margin:12px 0 6px;word-break:keep-all}
+.result-monument>span{font-size:12px;color:var(--muted);letter-spacing:2px}
+.rare-monument{border-color:#d6b97780}.rare-monument>span{color:var(--gold)}
+.result-life{min-width:0;padding:10px 0}.memorial-race{font-size:14px;color:var(--muted)}
+.result-life h3{font:34px var(--display);margin:8px 0 14px;color:var(--ink);line-height:1.5}.result-life h3 small{font:18px var(--body);color:var(--gold);white-space:nowrap;margin-left:8px}
+.memorial-traits{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.memorial-traits>span{display:flex;align-items:center;gap:6px;background:#14212e;border:1px solid var(--line);padding:5px 8px;font-size:13px}.memorial-traits .pixel-icon{width:16px;height:16px}
+.memorial-cause{font-size:16px;line-height:1.85;color:#d4dee5}.memorial-location{color:var(--muted);font-size:13px;line-height:1.7;margin:7px 0 18px}
+.memorial-first-job{font-size:13px;color:var(--muted);margin:0 0 10px}
+.life-numbers{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}.life-numbers div{border-top:1px solid var(--line);padding-top:8px}.life-numbers dt{font-size:12px;color:var(--muted);margin-bottom:4px}.life-numbers dd{font-size:17px;font-family:var(--mono);color:var(--ink)}
+.result-honors{margin:18px 0;padding:18px;border:1px solid #d6b97755;background:#d6b97709}.result-honors h3{font:19px var(--display);color:var(--gold);margin-bottom:12px}.honor-item{display:flex;flex-direction:column;gap:4px;margin:12px 0}.honor-item strong{font-size:15px;color:var(--gold);font-weight:500}.honor-item span{font-size:13px;color:var(--muted);line-height:1.7}
+.stone-meaning,.result-logs{margin:16px 0}.stone-meaning p{font-size:14px;line-height:1.85;color:var(--muted);margin-top:8px}
+.life-result-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding-top:20px;margin-top:20px;border-top:1px solid var(--line)}
+#reviewResultButton{margin-top:14px}
+.engraving-icons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.stone-meaning>summary.stone-info-toggle{list-style:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:8px;border:1px solid var(--line);border-radius:50%;color:var(--muted);background:#14212e;cursor:pointer}
+.stone-info-toggle::-webkit-details-marker{display:none}.stone-info-toggle::marker{content:''}.stone-info-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+.stone-meaning:not([open])>:not(summary){display:none!important}
+.stone-meaning[open]>.stone-info-toggle,.stone-meaning>.stone-info-toggle:hover,.stone-meaning>.stone-info-toggle:focus-visible{color:var(--gold);border-color:var(--gold);outline:2px solid transparent}
+.engraving-icon{display:flex;align-items:center;gap:12px;min-width:0;min-height:70px;padding:12px;background:#14212e;border:1px solid #405466;border-radius:4px;color:var(--ink);text-align:left;cursor:help}
+.engraving-icon:hover,.engraving-icon:focus-visible{border-color:var(--gold);background:#203341;outline:2px solid transparent}
+.engraving-symbol{display:grid;place-items:center;width:32px;height:32px;flex-shrink:0;color:#dcc389}.engraving-symbol svg,.engraving-symbol .pixel-icon{width:30px;height:30px;image-rendering:pixelated}
+.engraving-icon>span:last-child{min-width:0}.engraving-icon small{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}.engraving-icon strong{font-size:15px;line-height:1.6;font-weight:500;overflow-wrap:anywhere}
+@media(max-width:500px){.engraving-icons{gap:8px}.engraving-icon{padding:10px 8px;gap:8px}.engraving-symbol{width:26px;height:26px}.engraving-symbol svg,.engraving-symbol .pixel-icon{width:25px;height:25px}.engraving-icon strong{font-size:14px}.engraving-icon small{font-size:11px}}
+@media(max-width:700px){.cemetery-dialog,.life-result-dialog{padding:20px}.cemetery-dialog .dialog-heading h2,.life-result-dialog .dialog-heading h2{font-size:25px}.grave-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grave-card{padding:8px 8px 14px}.grave-card .tomb-art{width:90px;height:135px}.grave-card strong{font-size:20px}.grave-card>span,.grave-card>small{font-size:12px}.memorial-result{grid-template-columns:1fr;gap:18px}.result-monument{padding:12px}.result-monument .tomb-art{width:100px;height:150px}.result-monument p{margin-top:6px;font-size:16px}.result-life h3{font-size:29px}.life-result-actions{justify-content:stretch}.life-result-actions button{flex:1;padding:10px 12px}.life-result-actions .primary-button{flex-basis:100%}.completed-story{flex-direction:column}.cemetery-toolbar label{width:100%;justify-content:space-between}}

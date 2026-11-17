@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>태양계 장거리 포격 시뮬레이션</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="hud">
+    <div id="leftPanel" class="panel">
+      <div class="panel-title">MISSION</div>
+      <div id="currentDateDisplay" class="big-readout">2026-08-10</div>
+      <ul id="missionLog" class="scroll-list"></ul>
+
+      <div class="panel-title panel-title-spaced">TARGET</div>
+      <label class="row-label">
+        목표 행성
+        <select id="targetSelect"></select>
+      </label>
+      <div id="targetInfoPanel" class="info-block"></div>
+    </div>
+
+    <div id="rightPanel" class="panel">
+      <div class="panel-title">LAUNCH CONTROL</div>
+
+      <label class="row-label">
+        발사각
+        <input type="range" id="launchAngleRange" min="0" max="359" step="1" value="90">
+      </label>
+      <div class="readout"><span id="angleReadout">90°</span></div>
+      <div class="hint">0°=오른쪽 · 90°=아래 · 180°=왼쪽 · 270°=위 (시계 방향)</div>
+
+      <label class="row-label">
+        탄속 (world px/일)
+        <input type="range" id="launchSpeedRange" min="5" max="300" step="1" value="60">
+      </label>
+      <div class="readout"><span id="speedReadout">60</span></div>
+
+      <div class="info-block">
+        <div class="info-row"><span>예상 비행시간(참고)</span><b id="estFlightTime">-</b></div>
+        <div class="info-row"><span>예상 도착일(참고)</span><b id="estArrivalDate">-</b></div>
+        <div class="info-row"><span>충돌 위험</span><b>미확인</b></div>
+      </div>
+
+      <button id="fireBtn">🔥 FIRE</button>
+    </div>
+
+    <div id="bottomPanel" class="panel">
+      <div id="timeSpeedGroup">
+        <button data-speed="0" class="speedBtn active">정지</button>
+        <button data-speed="1" class="speedBtn">x1</button>
+        <button data-speed="10" class="speedBtn">x10</button>
+        <button data-speed="100" class="speedBtn">x100</button>
+        <button data-speed="1000" class="speedBtn">x1000</button>
+      </div>
+      <div id="projectileCount">비행 중인 탄환: 0</div>
+    </div>
+
+    <details id="debugPanel" class="panel">
+      <summary>🛠 샌드박스 / 디버그</summary>
+      <div class="debug-body">
+        <label class="row-label">
+          이동 간격
+          <select id="stepSelect"></select>
+        </label>
+        <div class="btn-row">
+          <button id="prevDateBtn">◀</button>
+          <button id="nextDateBtn">▶</button>
+        </div>
+        <label class="row-label">
+          날짜 이동
+          <input type="date" id="dateInput">
+        </label>
+        <div class="btn-row">
+          <button id="todayBtn">오늘</button>
+          <button id="resetViewBtn">화면 초기화</button>
+        </div>
+        <div class="btn-row">
+          <button id="plutoToggleBtn">명왕성 제거</button>
+        </div>
+        <div class="btn-row">
+          <button id="zoomIn">+</button>
+          <button id="zoomOut">−</button>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div id="missionBanner" class="hidden"></div>
+  <div id="tooltip" class="hidden"></div>
+
+  <script src="planets.js"></script>
+  <script src="projectiles.js"></script>
+  <script src="collisions.js"></script>
+  <script src="render.js"></script>
+  <script src="game.js"></script>
+  <script src="ui.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

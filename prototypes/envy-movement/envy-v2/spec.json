@@ -1,0 +1,22 @@
+{
+  "schema": "generate2dsprite.master_spec.v1",
+  "name": "envy",
+  "subject": "Envy from 7 Sins Heist Crew",
+  "identity": "Compact figure with a round icy-blue face, worried cyan eyes, angular navy hood with pale trim, oversized sleeves, simple navy jacket with a short icy-blue-edged hem, vivid blue neck ribbon, loose navy pants, chunky blue-and-white sneakers, and a cobalt handheld game-console keyring with a :3 screen.",
+  "pose": "relaxed standing idle, feet planted and hands empty",
+  "recap": "Envy from 7 Sins Heist Crew (Compact figure with a round icy-blue face, worried cyan eyes, angular navy hood with pale trim, oversized sleeves, simple navy jacket with a short icy-blue-edged hem, vivid blue neck ribbon, loose navy pants, chunky blue-and-white sneakers, and a cobalt handheld game-console keyring with a :3 screen)",
+  "facing": "right",
+  "facing_parts": null,
+  "view": "three-quarter facing right",
+  "class": "hero",
+  "finish": "hd",
+  "key": "#FF00FF",
+  "genre": null,
+  "pronoun": "they",
+  "identity_ref": null,
+  "style_ref": null,
+  "allowed_text": null,
+  "extra_bans": [],
+  "opaque_parts": null,
+  "extra": null
+}

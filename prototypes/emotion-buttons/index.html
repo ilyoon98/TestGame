@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>마음의 표정</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="emotions.js" defer></script>
+</head>
+<body>
+  <main class="studio">
+    <header class="intro">
+      <p class="index-mark"><span aria-hidden="true">✳</span> 마음 관찰실</p>
+      <h1>마음의 표정</h1>
+      <p class="intro-note">감정을 하나 고르고, 표정이 어떻게 움직이는지 살펴보세요.</p>
+    </header>
+
+    <div class="layout">
+      <section class="stage" id="stage" aria-label="감정 미리보기" data-effect="flowers">
+        <div class="stage-bar">
+          <span class="current-tag"><span aria-hidden="true"></span> 지금 표정</span>
+          <button class="motion-toggle" id="motion-toggle" type="button">
+            <span class="motion-icon" aria-hidden="true"></span>
+            <span id="motion-label">반복 효과 일시정지</span>
+          </button>
+        </div>
+        <div class="portrait">
+          <svg class="orbit" viewBox="0 0 440 340" aria-hidden="true">
+            <ellipse cx="220" cy="170" rx="183" ry="133" />
+            <path d="M37 164v12m-6-6h12m354-6v12m-6-6h12" />
+          </svg>
+          <canvas id="face" width="512" height="512" role="img" aria-label="기쁜 표정"></canvas>
+          <svg class="effects" viewBox="0 0 440 340" aria-hidden="true">
+            <defs>
+              <g id="flower">
+                <path fill="currentColor" d="M0-5C-9-17-17-3-7 2c-10 4-3 17 5 9 5 10 17 4 12-4 11-2 8-15-2-13C6-17-3-16 0-5Z"/>
+                <circle r="3.3" fill="#fff1b7"/>
+              </g>
+              <path id="drop" fill="currentColor" d="M0-12C3-7 8-1 8 4a8 8 0 0 1-16 0c0-5 5-11 8-16Z"/>
+              <path id="spark" d="M0-8V8M-8 0H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </defs>
+            <g class="effect flowers">
+              <g transform="translate(118 147)"><use href="#flower" class="petal" style="--dx:-72px;--dy:-55px;--flower:#dc7d8d"/></g>
+              <g transform="translate(306 144)"><use href="#flower" class="petal" style="--dx:67px;--dy:-67px;--flower:#b882c3;--delay:.7s"/></g>
+              <g transform="translate(297 218)"><use href="#flower" class="petal" style="--dx:94px;--dy:-39px;--flower:#e5a048;--delay:1.4s"/></g>
+              <g transform="translate(138 204)"><use href="#flower" class="petal" style="--dx:-91px;--dy:-49px;--flower:#d596b8;--delay:2.1s"/></g>
+              <g transform="translate(265 109)"><use href="#flower" class="petal" style="--dx:40px;--dy:-63px;--flower:#dc7d8d;--delay:2.8s"/></g>
+            </g>
+            <g class="effect tears">
+              <g transform="translate(272 154)"><use href="#drop" class="tear"/></g>
+              <g transform="translate(274 159)"><use href="#drop" class="tear" style="--delay:1.25s"/></g>
+            </g>
+            <g class="effect sweat">
+              <g transform="translate(321 95)"><use href="#drop" class="sweat-drop"/></g>
+              <g transform="translate(343 114)"><use href="#drop" class="sweat-drop" style="--delay:.24s;--size:.7"/></g>
+              <g transform="translate(105 135)"><use href="#spark" class="flicker" style="--delay:.25s"/></g>
+            </g>
+            <g class="effect air" fill="none" stroke="currentColor" stroke-linecap="round">
+              <path class="flicker" d="M70 157q13-8 26-3m-19 15q11-7 23-4" stroke-width="2.5"/>
+              <path class="flicker" d="M343 181q13-8 26-3m-22 14q11-7 23-4" stroke-width="2.5" style="--delay:1s"/>
+            </g>
+            <g class="effect signs">
+              <g transform="translate(341 108)"><text class="sign" id="sign" text-anchor="middle" y="10">?</text></g>
+              <g transform="translate(92 201)"><use href="#spark" class="flicker" style="--delay:1.1s"/></g>
+            </g>
+          </svg>
+        </div>
+        <div class="caption" aria-live="polite">
+          <p class="mood-name" id="mood-name">기쁨</p>
+          <p class="mood-note" id="mood-note">좋은 기분이 꽃잎처럼 퍼져요.</p>
+        </div>
+      </section>
+
+      <section class="picker" aria-labelledby="picker-title">
+        <div class="picker-title">
+          <h2 id="picker-title">감정 고르기</h2>
+          <span>11가지</span>
+        </div>
+        <div class="buttons" id="buttons" role="group" aria-label="감정 목록"></div>
+        <p class="message" id="message" role="status" hidden></p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

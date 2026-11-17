@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>주사위 땅따먹기</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(ellipse at center, #1e2530, #0e1116);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    color: #eee;
+  }
+
+  .layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .arena-wrap {
+    position: relative;
+    width: 640px;
+    height: 640px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+
+  .arena-wrap canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 640px;
+    height: 640px;
+  }
+  #bgLayer { background: #12161d; }
+  #defenseLayer.hidden { display: none; }
+  #confettiCanvas { pointer-events: none; z-index: 5; }
+  #topLayer { touch-action: none; cursor: grab; }
+  #topLayer.aiming { cursor: grabbing; }
+
+  .turn-hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .player-card {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    color: #9aa4b2;
+    background: rgba(0,0,0,0.4);
+    padding: 8px 10px;
+    border-radius: 8px;
+    line-height: 1.5;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    opacity: 0.55;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .player-card.active {
+    opacity: 1;
+    border-color: var(--pcolor);
+    box-shadow: 0 0 14px -2px var(--pcolor);
+    animation: cardPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes cardPulse {
+    0%, 100% { box-shadow: 0 0 14px -2px var(--pcolor); }
+    50% { box-shadow: 0 0 22px 2px var(--pcolor); }
+  }
+  .player-card b { color: #fff; font-size: 14px; }
+  .player-card .swatch {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--pcolor);
+    margin-right: 6px;
+  }
+  .occupancy-split-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+    margin-top: 6px;
+    display: flex;
+  }
+
+  .turn-toast {
+    position: absolute;
+    top: 108px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 7px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    background: var(--pcolor, #29b6f6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    z-index: 4;
+  }
+  .turn-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .throw-hud {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    font-size: 13px;
+    color: #9aa4b2;
+    background: rgba(0,0,0,0.35);
+    padding: 6px 10px;
+    border-radius: 8px;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+  .throw-hud b { color: #fff; font-size: 15px; }
+  .tumble-bar-track {
+    width: 120px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .tumble-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4fc3f7, #29b6f6);
+    width: 0%;
+    transition: width 0.05s linear;
+  }
+
+  .defense-toggle {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-size: 12.5px;
+    color: #9aa4b2;
+    background: rgba(0,0,0,0.35);
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .defense-toggle input { accent-color: #e64a19; }
+
+  .win-banner {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(10,12,16,0.72);
+    backdrop-filter: blur(2px);
+    z-index: 6;
+  }
+  .win-banner.show { display: flex; }
+  .win-banner .title {
+    font-size: 34px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 4px 18px rgba(0,0,0,0.6);
+    animation: titlePop 0.5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes titlePop {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.12); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .win-banner .subtitle { font-size: 14px; color: #b7c0cc; }
+  .win-banner .final-tally {
+    display: flex;
+    gap: 18px;
+    font-size: 13px;
+    color: #ddd;
+    margin-top: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .win-banner .final-tally b { font-size: 16px; }
+  .win-banner .btn { margin-top: 10px; }
+
+  .panel {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 18px;
+    max-height: 640px;
+    overflow-y: auto;
+  }
+  .panel h2 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .group-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6e7887;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 10px 0 -2px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .group-title:first-of-type { border-top: none; padding-top: 0; margin-top: 2px; }
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .row label {
+    font-size: 12.5px;
+    color: #aab;
+    display: flex;
+    justify-content: space-between;
+  }
+  .row label .val { color: #ff8a65; font-weight: 700; }
+  .row input[type="range"] {
+    width: 100%;
+    accent-color: #e64a19;
+  }
+  .btn {
+    margin-top: 4px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(155deg, #ff8a65, #e64a19);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(230,74,25,0.4);
+  }
+  .btn:active { transform: scale(0.96); }
+  .hint {
+    font-size: 12px;
+    color: #778;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="arena-wrap">
+    <canvas id="bgLayer" width="640" height="640"></canvas>
+    <canvas id="territoryLayer" width="640" height="640"></canvas>
+    <canvas id="defenseLayer" width="640" height="640"></canvas>
+    <canvas id="topLayer" width="640" height="640"></canvas>
+    <canvas id="confettiCanvas" width="640" height="640"></canvas>
+
+    <div class="turn-hud" id="turnHud"></div>
+    <div class="occupancy-split-track" id="occupancyTrack" style="position:absolute; top:64px; left:12px; right:12px; width:auto;"></div>
+    <div class="turn-toast" id="turnToast"></div>
+
+    <div class="throw-hud">
+      눈: <b id="hudFace">–</b> &nbsp;|&nbsp; 속도: <b id="hudSpeed">0</b><br>
+      다음 재추첨까지<br>
+      <div class="tumble-bar-track"><div class="tumble-bar-fill" id="hudTumbleBar"></div></div>
+    </div>
+
+    <label class="defense-toggle">
+      <input type="checkbox" id="defenseToggle" checked>
+      방어 영역 표시
+    </label>
+
+    <div class="win-banner" id="winBanner">
+      <div class="title" id="winTitle">P1 승리!</div>
+      <div class="subtitle" id="winSubtitle"></div>
+      <div class="final-tally" id="finalTally"></div>
+      <button class="btn" id="newGameBtn2">새 게임</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>주사위 땅따먹기</h2>
+    <div class="hint">
+      <b>자기 첫 턴에는</b> 주사위 아무거나 하나를 잡고 드래그하면 그 방향·세기로 내 주사위 전부가 한꺼번에
+      발사됩니다 (오프닝 물량 사격). <b>두 번째 턴부터는</b> 원래대로 자기 주사위 하나만 골라서 던집니다.
+      정산은 모두 멈춘 뒤 항상 같은 순서로 처리되고, 같은 셀을 동시에 노리면 아무도 못 먹습니다. 방어된
+      상대 땅은 내 눈이 더 낮아야 뺏고(동점은 수비 승), 정면으로 졌으면 실제로 굴러서 반동하며 눈도 다시
+      뽑힙니다. 낮은 눈은 무겁고 단단해서 잘 안 밀리고, 정지한 주사위는 스치는 정도로는 꿈쩍하지 않습니다.
+      60% 선점 시 즉시 승리, 아니면 턴 소진 후 더 많이 차지한 쪽(들)이 승리합니다. 플레이어는 2~4명까지
+      지원하며 사각형 보드의 꼭짓점에서 시작합니다.
+    </div>
+
+    <div class="group-title">게임 설정 (다음 새 게임부터 적용)</div>
+    <div class="row">
+      <label>NUM_PLAYERS (플레이어 수) <span class="val" id="vNumPlayers">2</span></label>
+      <input type="range" id="sNumPlayers" min="2" max="4" step="1" value="2">
+    </div>
+    <div class="row">
+      <label>DICE_PER_PLAYER (플레이어당 주사위) <span class="val" id="vDiceCount">5</span></label>
+      <input type="range" id="sDiceCount" min="3" max="8" step="1" value="5">
+    </div>
+    <div class="row">
+      <label>TURNS (플레이어당 턴 수) <span class="val" id="vTurns">12</span></label>
+      <input type="range" id="sTurns" min="6" max="20" step="1" value="12">
+    </div>
+
+    <div class="group-title">점령 / 방어</div>
+    <div class="row">
+      <label>RADIUS_PER_PIP (점령 반경 = 눈 × 이 값) <span class="val" id="vRadius">22</span></label>
+      <input type="range" id="sRadius" min="8" max="40" step="1" value="22">
+    </div>
+    <div class="row">
+      <label>DEFENSE_REACH (방어 전파 = 눈 × 이 값 칸) <span class="val" id="vReach">8</span></label>
+      <input type="range" id="sReach" min="2" max="16" step="1" value="8">
+    </div>
+    <div class="row">
+      <label>KNOCKBACK (반동 거리, px) <span class="val" id="vKnockback">80</span></label>
+      <input type="range" id="sKnockback" min="20" max="160" step="5" value="80">
+    </div>
+
+    <div class="group-title">충돌 상호작용</div>
+    <div class="row">
+      <label>MASS_BASE (질량 = 이 값 − 눈, 1이 제일 무거움) <span class="val" id="vMassBase">7</span></label>
+      <input type="range" id="sMassBase" min="7" max="14" step="1" value="7">
+    </div>
+    <div class="row">
+      <label>KNOCK_THRESHOLD (이 속도 미만은 정지 주사위를 못 밈) <span class="val" id="vKnockThreshold">220</span></label>
+      <input type="range" id="sKnockThreshold" min="50" max="600" step="10" value="220">
+    </div>
+    <div class="row">
+      <label>RESTING_FRICTION (밀려난 주사위 감속) <span class="val" id="vRestingFriction">0.850</span></label>
+      <input type="range" id="sRestingFriction" min="0.50" max="0.95" step="0.01" value="0.85">
+    </div>
+    <div class="row">
+      <label>MAX_RESOLVE_PASSES (정산 재진입 상한) <span class="val" id="vMaxPasses">5</span></label>
+      <input type="range" id="sMaxPasses" min="1" max="10" step="1" value="5">
+    </div>
+
+    <div class="group-title">물리 (던지는 감각)</div>
+    <div class="row">
+      <label>TUMBLE_DIST (눈 재추첨 거리) <span class="val" id="vTumble">40</span></label>
+      <input type="range" id="sTumble" min="10" max="150" step="5" value="40">
+    </div>
+    <div class="row">
+      <label>FRICTION (마찰, 낮을수록 빨리 멈춤) <span class="val" id="vFriction">0.97</span></label>
+      <input type="range" id="sFriction" min="0.85" max="0.99" step="0.005" value="0.97">
+    </div>
+    <div class="row">
+      <label>WALL_RESTITUTION (벽 반발력) <span class="val" id="vWall">0.50</span></label>
+      <input type="range" id="sWall" min="0.10" max="0.90" step="0.01" value="0.50">
+    </div>
+    <div class="row">
+      <label>MAX_POWER (최대 발사 속도) <span class="val" id="vPower">1600</span></label>
+      <input type="range" id="sPower" min="400" max="3000" step="50" value="1600">
+    </div>
+
+    <button class="btn" id="newGameBtn">새 게임</button>
+  </div>
+</div>
+
+<script>
+  const bgCanvas = document.getElementById('bgLayer');
+  const bgCtx = bgCanvas.getContext('2d');
+  const territoryCanvas = document.getElementById('territoryLayer');
+  const territoryCtx = territoryCanvas.getContext('2d');
+  const defenseCanvas = document.getElementById('defenseLayer');
+  const defenseCtx = defenseCanvas.getContext('2d');
+  const confettiCanvas = document.getElementById('confettiCanvas');
+  const confettiCtx = confettiCanvas.getContext('2d');
+  const canvas = document.getElementById('topLayer'); // interactive + per-frame layer
+  const ctx = canvas.getContext('2d');
+
+  const ARENA = canvas.width; // square, logical px
+  const DIE_SIZE = 56;
+  const HALF = DIE_SIZE / 2;
+  const MAX_DRAG = 170;       // px of drag that maps to full MAX_POWER
+  const REST_EPSILON = 10;    // px/s below which a die is considered stopped
+  const WALL_EPSILON = 24;    // incoming speed below which a wall touch is resting contact
+  const BOUNCE_COOLDOWN = 0.09; // seconds a die stays "just bounced" — see dice_land_phase1.html
+                                 // for why this exists (prevents a low-restitution bounce from
+                                 // snapping straight back to resting in the same frame).
+  const MIN_BOUNCE_SPEED = 150; // floor on any real bounce so it's always visible; see phase1.
+  const DIE_MIN_DIST = 60;      // center-to-center distance dice are pushed apart at
+  const DIE_EPSILON = 20;       // closing speed below which two touching dice are resting contact
+
+  const WIN_OCCUPANCY_PCT = 60;
+  const MAX_PLAYERS = 4;
+  const PLAYER_HUE = ['#29b6f6', '#ff7043', '#66bb6a', '#ba68c8'];
+  const PLAYER_TERRITORY_RGBA = [
+    'rgba(41, 182, 246, 0.38)', 'rgba(255, 112, 67, 0.38)',
+    'rgba(102, 187, 106, 0.38)', 'rgba(186, 104, 200, 0.38)',
+  ];
+  const PLAYER_NAME = ['P1', 'P2', 'P3', 'P4'];
+  const CONFETTI_COLORS = ['#29b6f6', '#ff7043', '#ffd54f', '#66bb6a', '#ba68c8'];
+
+  // square board's 4 corners, in player-index order. P0/P1 sit on the
+  // diagonal (top-left / bottom-right) — same placement the 2-player game
+  // always used — so 2-player games are unaffected. P2/P3 fill the other two
+  // corners as NUM_PLAYERS grows. sx/sy point each corner's dice cluster
+  // inward, toward the board center.
+  const CORNER_MARGIN = 90;
+  function corners(arena) {
+    return [
+      { x: CORNER_MARGIN, y: CORNER_MARGIN, sx: 1, sy: 1 },
+      { x: arena - CORNER_MARGIN, y: arena - CORNER_MARGIN, sx: -1, sy: -1 },
+      { x: arena - CORNER_MARGIN, y: CORNER_MARGIN, sx: -1, sy: 1 },
+      { x: CORNER_MARGIN, y: arena - CORNER_MARGIN, sx: 1, sy: -1 },
+    ];
+  }
+  const CORNERS = corners(ARENA);
+
+  // --- territory + defense grids (spec 2.1) -----------------------------
+  const GRID = 200;
+  const CELL = ARENA / GRID;
+  const owner = new Int8Array(GRID * GRID).fill(-1);  // -1 = unclaimed, 0..NUM_PLAYERS-1 = player index
+  const defense = new Uint8Array(GRID * GRID);        // 0 = undefended, 1-6 = defense value (lower = stronger)
+
+  // --- CONFIG: every tunable, all live slider-backed --------
+  const CONFIG = {
+    NUM_PLAYERS: 2,
+    DICE_PER_PLAYER: 5,
+    TURNS: 12,
+    RADIUS_PER_PIP: 22,
+    DEFENSE_REACH: 8,
+    KNOCKBACK: 80,
+    MASS_BASE: 7, // mass = MASS_BASE - face -> 1 is heaviest (6), 6 is lightest (1)
+    KNOCK_THRESHOLD: 220,   // impact speed below which a resting die isn't moved at all
+    RESTING_FRICTION: 0.85, // retention factor for a die knocked out of rest — lower than
+                             // base FRICTION on purpose so it decays fast and doesn't travel far
+    MAX_RESOLVE_PASSES: 5,
+    TUMBLE_DIST: 40,
+    FRICTION: 0.97,
+    WALL_RESTITUTION: 0.50,
+    MAX_POWER: 1600,
+  };
+
+  const params = {
+    NUM_PLAYERS:      { el: document.getElementById('sNumPlayers'), out: document.getElementById('vNumPlayers'), digits: 0 },
+    DICE_PER_PLAYER:  { el: document.getElementById('sDiceCount'), out: document.getElementById('vDiceCount'), digits: 0 },
+    TURNS:            { el: document.getElementById('sTurns'),     out: document.getElementById('vTurns'),     digits: 0 },
+    RADIUS_PER_PIP:   { el: document.getElementById('sRadius'),    out: document.getElementById('vRadius'),    digits: 0 },
+    DEFENSE_REACH:    { el: document.getElementById('sReach'),     out: document.getElementById('vReach'),     digits: 0 },
+    KNOCKBACK:        { el: document.getElementById('sKnockback'), out: document.getElementById('vKnockback'), digits: 0 },
+    MASS_BASE:        { el: document.getElementById('sMassBase'),  out: document.getElementById('vMassBase'),  digits: 0 },
+    KNOCK_THRESHOLD:  { el: document.getElementById('sKnockThreshold'), out: document.getElementById('vKnockThreshold'), digits: 0 },
+    RESTING_FRICTION: { el: document.getElementById('sRestingFriction'), out: document.getElementById('vRestingFriction'), digits: 3 },
+    MAX_RESOLVE_PASSES: { el: document.getElementById('sMaxPasses'), out: document.getElementById('vMaxPasses'), digits: 0 },
+    TUMBLE_DIST:      { el: document.getElementById('sTumble'),    out: document.getElementById('vTumble'),    digits: 0 },
+    FRICTION:         { el: document.getElementById('sFriction'),  out: document.getElementById('vFriction'),  digits: 3 },
+    WALL_RESTITUTION: { el: document.getElementById('sWall'),      out: document.getElementById('vWall'),      digits: 2 },
+    MAX_POWER:        { el: document.getElementById('sPower'),     out: document.getElementById('vPower'),     digits: 0 },
+  };
+  Object.entries(params).forEach(([key, p]) => {
+    const refresh = () => {
+      CONFIG[key] = parseFloat(p.el.value);
+      p.out.textContent = CONFIG[key].toFixed(p.digits);
+    };
+    p.el.addEventListener('input', refresh);
+    refresh();
+  });
+  // DEFENSE_REACH changes the shape of every die's defense footprint, so the
+  // standing map (computed at the end of the last turn) is stale the instant
+  // this slider moves — recompute immediately. TURNS is read live by
+  // checkTurnsWin() too. NUM_PLAYERS / DICE_PER_PLAYER need a fresh board
+  // (setupDice() + HUD rebuild), so they only take effect on "새 게임".
+  params.DEFENSE_REACH.el.addEventListener('input', () => recomputeDefense());
+  params.TURNS.el.addEventListener('input', updateTurnHud);
+
+  let showDefenseOverlay = true;
+  document.getElementById('defenseToggle').addEventListener('change', (evt) => {
+    showDefenseOverlay = evt.target.checked;
+    defenseCanvas.classList.toggle('hidden', !showDefenseOverlay);
+  });
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+  // grid layout re-used from dice2d.html: p2 p8 p4 / p6 p1 p7 / p5 p9 p3
+  const pipPatterns = {
+    1: ['p1'],
+    2: ['p2', 'p3'],
+    3: ['p2', 'p1', 'p3'],
+    4: ['p2', 'p4', 'p5', 'p3'],
+    5: ['p2', 'p4', 'p5', 'p3', 'p1'],
+    6: ['p2', 'p4', 'p5', 'p3', 'p6', 'p7'],
+  };
+  const pipPos = {
+    p1: [0, 0], p2: [-1, -1], p3: [1, 1], p4: [1, -1],
+    p5: [-1, 1], p6: [-1, 0], p7: [1, 0], p8: [0, -1], p9: [0, 1],
+  };
+
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function playImpactSound(freq, duration, type, volume) {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.6, ctx.currentTime + duration);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  }
+  const playWallSound = (speed) => playImpactSound(420 + Math.min(speed, 1400) * 0.1, 0.08, 'triangle', Math.min(0.4, 0.15 + speed / 3000));
+  const playSettleSound = () => playImpactSound(85, 0.24, 'sine', 0.25);
+  const playLaunchSound = (power) => playImpactSound(200 + power * 0.15, 0.1, 'sawtooth', Math.min(0.35, 0.15 + power / 4000));
+  const playCaptureSound = (cellCount) => playImpactSound(500 + Math.min(cellCount, 400) * 0.8, 0.16, 'sine', Math.min(0.3, 0.1 + cellCount / 3000));
+  const playBlockedSound = () => playImpactSound(140, 0.16, 'square', 0.15);
+  const playDieClackSound = (speed) => playImpactSound(650 + Math.min(speed, 600) * 0.2, 0.05, 'triangle', Math.min(0.35, 0.12 + speed / 2000));
+  const playTurnSound = (playerIdx) => playImpactSound(560 + playerIdx * 90, 0.14, 'sine', 0.22);
+  const playWinSound = () => {
+    playImpactSound(523, 0.5, 'sine', 0.3);
+    setTimeout(() => playImpactSound(659, 0.5, 'sine', 0.28), 130);
+    setTimeout(() => playImpactSound(784, 0.7, 'sine', 0.3), 260);
+  };
+  const playKnockbackSound = () => playImpactSound(160, 0.22, 'sawtooth', 0.32);
+
+  // --- dice: CONFIG.DICE_PER_PLAYER per player, all live in one flat array ---
+  let dice = [];
+  function makeDie(owner, x, y) {
+    return {
+      owner, x, y, vx: 0, vy: 0, rot: 0, angVel: 0,
+      face: 1 + Math.floor(Math.random() * 6),
+      distSinceTumble: 0, resting: true,
+      squashAxis: 0, squashT: 1, bounceCooldown: 0,
+      pendingResolve: false, // set by the physics loop when this die crosses into
+                              // resting THIS pass; resolveTurn() consumes and clears it
+      frictionOverride: null, // spec 2.6: set to RESTING_FRICTION when a real hit
+                               // knocks a resting die awake; cleared once it settles again
+    };
+  }
+
+  const CLUSTER_SPACING = 74;
+  // arranges n dice in a roughly square grid near a corner — scales with
+  // CONFIG.DICE_PER_PLAYER instead of a fixed 5-point pattern
+  function clusterOffsets(n) {
+    const cols = Math.ceil(Math.sqrt(n));
+    const offsets = [];
+    for (let i = 0; i < n; i++) {
+      offsets.push([(i % cols) * CLUSTER_SPACING, Math.floor(i / cols) * CLUSTER_SPACING]);
+    }
+    return offsets;
+  }
+  function setupDice() {
+    dice = [];
+    const offsets = clusterOffsets(CONFIG.DICE_PER_PLAYER);
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      const c = CORNERS[p];
+      offsets.forEach(([dx, dy]) => dice.push(makeDie(p, c.x + c.sx * dx, c.y + c.sy * dy)));
+    }
+  }
+
+  function reroll(d) {
+    let f;
+    do { f = 1 + Math.floor(Math.random() * 6); } while (f === d.face);
+    d.face = f;
+  }
+
+  // --- turn / game state -------------------------------------------------
+  let currentPlayer = 0;
+  let turnsUsed = [0, 0];
+  let turnInProgress = false;
+  let gameOver = false;
+  let winner = null; // player index, or null (draw)
+  let resolvePassCount = 0; // spec 2.2 step 5 — re-entry counter for the current turn's resolveTurn() calls
+
+  function cellIndex(gx, gy) { return gy * GRID + gx; }
+  function gridXOf(px) { return clamp(Math.floor(px / CELL), 0, GRID - 1); }
+
+  // --- defense propagation (spec 1.4 / 2.2) ------------------------------
+  // BFS from each die's standing cell, only through cells owned by that same
+  // player, capped at face * DEFENSE_REACH steps. Recomputed from scratch —
+  // no incremental updates (see spec: "증분 갱신 하지 마라 — 버그의 온상").
+  // Walks every die from every player and skips BFS entirely for one not
+  // standing on its own territory — a die shoved onto empty or enemy land
+  // defends nothing until it wins that ground back with a proper throw.
+  function recomputeDefense() {
+    defense.fill(0);
+    for (const d of dice) {
+      const startGx = gridXOf(d.x), startGy = gridXOf(d.y);
+      const startIdx = cellIndex(startGx, startGy);
+      if (owner[startIdx] !== d.owner) continue; // die isn't standing on its own land — no defense to give
+      const maxDepth = d.face * CONFIG.DEFENSE_REACH;
+      const visited = new Uint8Array(GRID * GRID);
+      const qx = [startGx], qy = [startGy], qd = [0];
+      visited[startIdx] = 1;
+      let qi = 0;
+      while (qi < qx.length) {
+        const gx = qx[qi], gy = qy[qi], depth = qd[qi]; qi++;
+        const idx = cellIndex(gx, gy);
+        defense[idx] = defense[idx] === 0 ? d.face : Math.min(defense[idx], d.face);
+        if (depth >= maxDepth) continue;
+        const neigh = [[gx - 1, gy], [gx + 1, gy], [gx, gy - 1], [gx, gy + 1]];
+        for (const [nx, ny] of neigh) {
+          if (nx < 0 || nx >= GRID || ny < 0 || ny >= GRID) continue;
+          const nidx = cellIndex(nx, ny);
+          if (visited[nidx]) continue;
+          if (owner[nidx] !== d.owner) continue;
+          visited[nidx] = 1;
+          qx.push(nx); qy.push(ny); qd.push(depth + 1);
+        }
+      }
+    }
+    redrawDefenseOverlay();
+  }
+
+  function redrawDefenseOverlay() {
+    defenseCtx.clearRect(0, 0, ARENA, ARENA);
+    for (let gy = 0; gy < GRID; gy++) {
+      for (let gx = 0; gx < GRID; gx++) {
+        const idx = cellIndex(gx, gy);
+        const face = defense[idx];
+        if (face === 0) continue;
+        // lower face = stronger defense = darker shading
+        const opacity = 0.08 + (7 - face) / 6 * 0.42;
+        defenseCtx.fillStyle = `rgba(0,0,0,${opacity})`;
+        defenseCtx.fillRect(gx * CELL, gy * CELL, CELL + 0.6, CELL + 0.6);
+      }
+    }
+  }
+
+  // --- territory capture (spec 1.5) — pure computation, no mutation -------
+  // Returns what a single die WOULD claim against the current owner/defense
+  // snapshot, without touching `owner`. This is the building block both the
+  // initial board setup and resolveTurn()'s batch resolution use — keeping it
+  // side-effect-free is what lets resolveTurn() detect same-cell contests
+  // BEFORE committing anything (spec 2.2's "동시 경합 -> 중립").
+  function computeCircleClaims(d) {
+    const radius = d.face * CONFIG.RADIUS_PER_PIP;
+    const r2 = radius * radius;
+    const gx0 = clamp(Math.floor((d.x - radius) / CELL), 0, GRID - 1);
+    const gx1 = clamp(Math.ceil((d.x + radius) / CELL), 0, GRID - 1);
+    const gy0 = clamp(Math.floor((d.y - radius) / CELL), 0, GRID - 1);
+    const gy1 = clamp(Math.ceil((d.y + radius) / CELL), 0, GRID - 1);
+    const centerIdx = cellIndex(gridXOf(d.x), gridXOf(d.y));
+
+    const claims = [];
+    let centerBlockedByDefense = false;
+    for (let gy = gy0; gy <= gy1; gy++) {
+      for (let gx = gx0; gx <= gx1; gx++) {
+        const cx = (gx + 0.5) * CELL, cy = (gy + 0.5) * CELL;
+        const dx = cx - d.x, dy = cy - d.y;
+        if (dx * dx + dy * dy > r2) continue;
+        const idx = cellIndex(gx, gy);
+        const cellOwner = owner[idx];
+        if (cellOwner === d.owner) continue; // already mine
+        if (cellOwner === -1) { claims.push(idx); continue; }
+        // enemy-owned cell — contest it against the standing defense snapshot
+        const def = defense[idx];
+        if (def === 0 || d.face < def) claims.push(idx);
+        else if (idx === centerIdx) centerBlockedByDefense = true;
+      }
+    }
+    return { claims, centerBlockedByDefense };
+  }
+
+  // spec 6-0 / 2.2: batch-resolve every die that settled THIS pass, in fixed
+  // array order — never in whatever order they happened to physically stop
+  // in. Cells two different-owner dice both want this pass go to neither
+  // (spec: "동시 경합... 아무도 못 먹는다"). With everyone's whole army
+  // launching in one volley, this rule now matters constantly — several of
+  // your own dice AND an opponent's dice can easily settle in the same pass.
+  // Knockback only fires for a die that lost its own standing cell to actual
+  // defense, not to a same-pass rival's claim (a draw between attackers, not
+  // a defensive repulse).
+  function resolveCapturesForPass(toResolve) {
+    const claimOwnersByCell = new Map(); // cell idx -> Set of player indices that want it
+    const perDie = new Map();            // die -> { claims, centerBlockedByDefense }
+
+    for (const d of toResolve) {
+      const info = computeCircleClaims(d);
+      perDie.set(d, info);
+      for (const idx of info.claims) {
+        if (!claimOwnersByCell.has(idx)) claimOwnersByCell.set(idx, new Set());
+        claimOwnersByCell.get(idx).add(d.owner);
+      }
+    }
+
+    const nullified = new Set();
+    for (const [idx, owners] of claimOwnersByCell) {
+      if (owners.size > 1) nullified.add(idx); // contested by different owners this pass -> neutral
+    }
+
+    let totalNewlyClaimed = 0;
+    for (const [d, info] of perDie) {
+      for (const idx of info.claims) {
+        if (nullified.has(idx)) continue;
+        owner[idx] = d.owner;
+        totalNewlyClaimed++;
+      }
+    }
+
+    if (totalNewlyClaimed > 0) {
+      redrawTerritory();
+      updateOccupancyHud();
+      playCaptureSound(totalNewlyClaimed);
+      checkAreaWin();
+    } else {
+      playBlockedSound();
+    }
+
+    for (const [d, info] of perDie) {
+      if (info.centerBlockedByDefense) applyKnockback(d);
+    }
+  }
+
+  // spec 1.6: charged face-first into a defended enemy cell and lost right
+  // there -> bounced back toward home. A graze on the edge of the circle
+  // doesn't trigger this, only losing your own standing cell does.
+  // spec 2.4 / 2.2 step 5: knockback is a real roll, not a teleport — it goes
+  // through the normal stepDie() physics (friction, wall bounce, and
+  // crucially TUMBLE_DIST reroll), which is what lets resolveTurn()'s
+  // re-entry loop actually engage: this die's resting flips to false, so
+  // resolveTurn() defers turn-end and waits for it to settle again before
+  // resolving a fresh pass at wherever it ends up.
+  function applyKnockback(d) {
+    const home = CORNERS[d.owner];
+    const dx = home.x - d.x, dy = home.y - d.y;
+    const len = Math.hypot(dx, dy) || 1;
+    // calibrate an initial speed so that, under normal friction with nothing
+    // else in its way, it travels roughly CONFIG.KNOCKBACK px — same felt
+    // distance as a straight teleport would, but now genuinely physics-driven.
+    const decayRate = -60 * Math.log(CONFIG.FRICTION);
+    const speed = CONFIG.KNOCKBACK * decayRate;
+    d.vx = (dx / len) * speed;
+    d.vy = (dy / len) * speed;
+    d.angVel = (Math.random() < 0.5 ? -1 : 1) * speed * 0.3;
+    d.resting = false;
+    d.distSinceTumble = 0; // fresh roll, same as any other launch
+    d.squashAxis = Math.abs(dx) > Math.abs(dy) ? 1 : 0;
+    d.squashT = 0;
+    playKnockbackSound();
+  }
+
+  function redrawTerritory() {
+    territoryCtx.clearRect(0, 0, ARENA, ARENA);
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      territoryCtx.fillStyle = PLAYER_TERRITORY_RGBA[p];
+      for (let gy = 0; gy < GRID; gy++) {
+        for (let gx = 0; gx < GRID; gx++) {
+          if (owner[cellIndex(gx, gy)] === p) {
+            // +0.6px overlap so adjacent cell rects don't leave antialiasing seams
+            territoryCtx.fillRect(gx * CELL, gy * CELL, CELL + 0.6, CELL + 0.6);
+          }
+        }
+      }
+    }
+  }
+
+  function occupancyCounts() {
+    const counts = new Array(CONFIG.NUM_PLAYERS).fill(0);
+    for (let i = 0; i < owner.length; i++) {
+      const o = owner[i];
+      if (o >= 0 && o < CONFIG.NUM_PLAYERS) counts[o]++;
+    }
+    return counts;
+  }
+
+  function updateOccupancyHud() {
+    const counts = occupancyCounts();
+    const total = owner.length;
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      const seg = document.getElementById(`occP${p}`);
+      if (seg) seg.style.width = (counts[p] / total * 100) + '%';
+    }
+  }
+
+  // --- turn flow -----------------------------------------------------
+  let turnToastTimer = null;
+  function showTurnToast(playerIdx) {
+    const el = document.getElementById('turnToast');
+    el.textContent = `${PLAYER_NAME[playerIdx]} 차례`;
+    el.style.setProperty('--pcolor', PLAYER_HUE[playerIdx]);
+    el.classList.add('show');
+    clearTimeout(turnToastTimer);
+    turnToastTimer = setTimeout(() => el.classList.remove('show'), 1100);
+  }
+
+  // rebuilds the player-card row and occupancy-bar segments for the current
+  // NUM_PLAYERS — only needed on new game (player count is a "새 게임" setting)
+  function buildPlayerUI() {
+    const hud = document.getElementById('turnHud');
+    hud.innerHTML = '';
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      const card = document.createElement('div');
+      card.className = 'player-card';
+      card.id = `cardP${p}`;
+      card.style.setProperty('--pcolor', PLAYER_HUE[p]);
+      card.innerHTML = `<span class="swatch"></span>${PLAYER_NAME[p]} <b id="turnsP${p}">0/${CONFIG.TURNS}</b>`;
+      hud.appendChild(card);
+    }
+    const track = document.getElementById('occupancyTrack');
+    track.innerHTML = '';
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      const seg = document.createElement('div');
+      seg.id = `occP${p}`;
+      seg.style.height = '100%';
+      seg.style.width = '0%';
+      seg.style.background = PLAYER_HUE[p];
+      seg.style.transition = 'width 0.15s ease';
+      track.appendChild(seg);
+    }
+  }
+
+  function updateTurnHud() {
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      const label = document.getElementById(`turnsP${p}`);
+      const card = document.getElementById(`cardP${p}`);
+      if (!label || !card) continue;
+      label.textContent = `${turnsUsed[p]}/${CONFIG.TURNS}`;
+      card.classList.toggle('active', currentPlayer === p && !gameOver);
+    }
+  }
+
+  function checkAreaWin() {
+    if (gameOver) return;
+    const counts = occupancyCounts();
+    const total = owner.length;
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      if ((counts[p] / total) * 100 >= WIN_OCCUPANCY_PCT) { declareWinner(p, '영토 60% 선점'); return; }
+    }
+  }
+
+  function checkTurnsWin() {
+    if (gameOver) return;
+    if (turnsUsed.every(t => t >= CONFIG.TURNS)) {
+      const counts = occupancyCounts();
+      const maxCount = Math.max(...counts);
+      const leaders = counts.map((c, i) => i).filter(i => counts[i] === maxCount);
+      const tally = counts.join(' : ');
+      if (leaders.length > 1) declareWinner(null, `${CONFIG.TURNS}턴 소진 · 공동 1위 무승부 (${tally}칸)`);
+      else declareWinner(leaders[0], `${CONFIG.TURNS}턴 소진 · ${tally}칸`);
+    }
+  }
+
+  function declareWinner(winnerIdx, reason) {
+    gameOver = true;
+    winner = winnerIdx;
+    playWinSound();
+    spawnConfetti();
+    const counts = occupancyCounts();
+    const total = owner.length;
+    const banner = document.getElementById('winBanner');
+    document.getElementById('winTitle').textContent = winnerIdx === null ? '무승부' : `${PLAYER_NAME[winnerIdx]} 승리!`;
+    document.getElementById('winSubtitle').textContent = reason;
+    const tallyEl = document.getElementById('finalTally');
+    tallyEl.innerHTML = '';
+    for (let p = 0; p < CONFIG.NUM_PLAYERS; p++) {
+      const span = document.createElement('span');
+      span.style.color = PLAYER_HUE[p];
+      span.innerHTML = `● ${PLAYER_NAME[p]} <b>${((counts[p] / total) * 100).toFixed(1)}%</b>`;
+      tallyEl.appendChild(span);
+    }
+    banner.classList.add('show');
+    updateTurnHud();
+  }
+
+  // spec 2.2: the whole point of Phase 6-0. Physics only ever sets
+  // `resting`/`pendingResolve` — this is the ONE place captures, defense
+  // recompute, and turn bookkeeping happen, always in the same order,
+  // regardless of which die physically stopped moving first.
+  function resolveTurn() {
+    resolvePassCount++;
+
+    recomputeDefense(); // step 2: lock the defense snapshot BEFORE judging captures
+
+    const toResolve = dice.filter(d => d.pendingResolve);
+    toResolve.forEach(d => { d.pendingResolve = false; });
+    resolveCapturesForPass(toResolve); // steps 3-4: cell-level capture + knockback
+
+    if (dice.some(d => !d.resting)) {
+      // something (knockback) put a die back in motion — let physics keep
+      // running; step() calls resolveTurn() again once everyone is resting
+      // once more (spec 2.2 step 5's re-entry).
+      if (resolvePassCount >= CONFIG.MAX_RESOLVE_PASSES) {
+        // safety valve: stop everything rather than resolve forever
+        dice.forEach(d => { d.vx = 0; d.vy = 0; d.angVel = 0; d.resting = true; d.pendingResolve = false; });
+      } else {
+        return;
+      }
+    }
+
+    recomputeDefense(); // step 6: final recompute, now current for whoever throws next
+    resolvePassCount = 0;
+
+    turnInProgress = false;
+    turnsUsed[currentPlayer]++;
+    updateTurnHud();
+    checkTurnsWin();
+    if (!gameOver) {
+      currentPlayer = (currentPlayer + 1) % CONFIG.NUM_PLAYERS;
+      playTurnSound(currentPlayer);
+      showTurnToast(currentPlayer);
+      updateTurnHud();
+    }
+  }
+
+  function claimStartingSpot(d) {
+    const { claims } = computeCircleClaims(d);
+    claims.forEach(idx => { owner[idx] = d.owner; });
+  }
+
+  function newGame() {
+    owner.fill(-1);
+    defense.fill(0);
+    buildPlayerUI();
+    setupDice();
+    currentPlayer = 0;
+    turnsUsed = new Array(CONFIG.NUM_PLAYERS).fill(0);
+    turnInProgress = false;
+    gameOver = false;
+    winner = null;
+    resolvePassCount = 0;
+    aimingDie = null;
+    aiming = false;
+    confettiParticles = [];
+    confettiCtx.clearRect(0, 0, ARENA, ARENA);
+    document.getElementById('winBanner').classList.remove('show');
+    dice.forEach(d => claimStartingSpot(d)); // no contest possible at game start — empty board, far corners
+    redrawTerritory();
+    updateOccupancyHud();
+    recomputeDefense();
+    updateTurnHud();
+    showTurnToast(0);
+  }
+  document.getElementById('newGameBtn').addEventListener('click', newGame);
+  document.getElementById('newGameBtn2').addEventListener('click', newGame);
+
+  // --- win celebration: lightweight confetti burst on its own layer ------
+  let confettiParticles = [];
+  function spawnConfetti() {
+    confettiParticles = [];
+    for (let i = 0; i < 90; i++) {
+      confettiParticles.push({
+        x: rand(0, ARENA), y: rand(-120, -10),
+        vx: rand(-60, 60), vy: rand(220, 420),
+        size: rand(5, 10), rot: rand(0, 360), angVel: rand(-320, 320),
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        life: rand(1.6, 2.4),
+      });
+    }
+  }
+  function updateConfetti(dt) {
+    if (confettiParticles.length === 0) return;
+    confettiParticles.forEach(p => {
+      p.vy += 480 * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.angVel * dt;
+      p.life -= dt;
+    });
+    confettiParticles = confettiParticles.filter(p => p.life > 0 && p.y < ARENA + 60);
+    confettiCtx.clearRect(0, 0, ARENA, ARENA);
+    for (const p of confettiParticles) {
+      confettiCtx.save();
+      confettiCtx.translate(p.x, p.y);
+      confettiCtx.rotate(p.rot * Math.PI / 180);
+      confettiCtx.globalAlpha = clamp(p.life / 0.5, 0, 1);
+      confettiCtx.fillStyle = p.color;
+      confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      confettiCtx.restore();
+    }
+    if (confettiParticles.length === 0) confettiCtx.clearRect(0, 0, ARENA, ARENA);
+  }
+
+  // --- aiming (slingshot drag) --------------------------------------------
+  // grab ANY one of your own resting dice as an aim handle — releasing
+  // launches your WHOLE army with that one direction+power in a single volley.
+  let aiming = false;
+  let aimingDie = null;
+  let dragCurrent = { x: 0, y: 0 };
+
+  function canvasPoint(evt) {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (evt.clientX - r.left) * (canvas.width / r.width),
+      y: (evt.clientY - r.top) * (canvas.height / r.height),
+    };
+  }
+
+  canvas.addEventListener('pointerdown', (evt) => {
+    if (gameOver || turnInProgress) return;
+    const p = canvasPoint(evt);
+    let closest = null, closestDist = Infinity;
+    for (const d of dice) {
+      if (d.owner !== currentPlayer || !d.resting) continue;
+      const dist = Math.hypot(p.x - d.x, p.y - d.y);
+      if (dist <= DIE_SIZE * 1.6 && dist < closestDist) { closest = d; closestDist = dist; }
+    }
+    if (!closest) return;
+    aimingDie = closest;
+    aiming = true;
+    dragCurrent = p;
+    canvas.classList.add('aiming');
+    canvas.setPointerCapture(evt.pointerId);
+    getAudioCtx();
+  });
+
+  canvas.addEventListener('pointermove', (evt) => {
+    if (!aiming) return;
+    dragCurrent = canvasPoint(evt);
+  });
+
+  // spec change: one drag now launches EVERY one of the current player's
+  // resting dice with the same velocity vector, instead of just the one
+  // grabbed. They start from different positions and diverge fast once wall
+  // bounces and collisions kick in — resolveTurn()'s batch resolution (6-0)
+  // already handles however many of them settle together, unchanged.
+  // a player's very first turn (turnsUsed[currentPlayer] === 0) is an opening
+  // volley — every one of their dice launches together with this one drag's
+  // direction/power. From their second turn on, it's back to one die per turn.
+  function isOpeningTurn() { return turnsUsed[currentPlayer] === 0; }
+
+  function launchFromDrag() {
+    const anchor = aimingDie;
+    if (!anchor) return;
+    const dx = dragCurrent.x - anchor.x;
+    const dy = dragCurrent.y - anchor.y;
+    const dragLen = Math.min(Math.hypot(dx, dy), MAX_DRAG);
+    if (dragLen < 6) return; // ignore taps/tiny drags
+    const dirX = -dx / (Math.hypot(dx, dy) || 1);
+    const dirY = -dy / (Math.hypot(dx, dy) || 1);
+    const power = (dragLen / MAX_DRAG) * CONFIG.MAX_POWER;
+    const vx = dirX * power, vy = dirY * power;
+
+    const targets = isOpeningTurn()
+      ? dice.filter(d => d.owner === currentPlayer && d.resting)
+      : [anchor];
+    targets.forEach(d => {
+      d.vx = vx; d.vy = vy;
+      d.angVel = (Math.random() < 0.5 ? -1 : 1) * power * 0.35;
+      d.resting = false;
+      d.distSinceTumble = 0;
+    });
+    turnInProgress = true;
+    resolvePassCount = 0;
+    playLaunchSound(power);
+  }
+
+  canvas.addEventListener('pointerup', (evt) => {
+    if (!aiming) return;
+    aiming = false;
+    canvas.classList.remove('aiming');
+    launchFromDrag();
+    aimingDie = null;
+  });
+  canvas.addEventListener('pointercancel', () => {
+    aiming = false;
+    canvas.classList.remove('aiming');
+    aimingDie = null;
+  });
+
+  // --- physics -----------------------------------------------------------
+  // spec 6-0: this is now physics-only. It decides WHEN a die stops moving
+  // and marks it for resolution — it never touches owner/defense itself.
+  let lastTime = null;
+
+  function stepDie(d, dt) {
+    if (d.resting) return;
+    d.x += d.vx * dt;
+    d.y += d.vy * dt;
+    d.rot += d.angVel * dt;
+
+    const moveDist = Math.hypot(d.vx, d.vy) * dt;
+    d.distSinceTumble += moveDist;
+    while (d.distSinceTumble >= CONFIG.TUMBLE_DIST) {
+      reroll(d);
+      d.distSinceTumble -= CONFIG.TUMBLE_DIST;
+    }
+
+    // wall collisions (square arena, all 4 sides)
+    if (d.x - HALF <= 0 || d.x + HALF >= ARENA) {
+      const side = d.x - HALF <= 0 ? 'left' : 'right';
+      d.x = side === 'left' ? HALF : ARENA - HALF;
+      const speed = Math.abs(d.vx);
+      if (speed < WALL_EPSILON) {
+        d.vx = 0;
+      } else {
+        const reflected = -d.vx * CONFIG.WALL_RESTITUTION;
+        d.vx = Math.sign(reflected) * Math.max(Math.abs(reflected), MIN_BOUNCE_SPEED);
+        d.angVel = d.angVel * 0.75 + rand(-1, 1) * speed * 0.3;
+        d.squashAxis = 1; d.squashT = 0;
+        d.bounceCooldown = BOUNCE_COOLDOWN;
+        wallFlash[side] = 1;
+        playWallSound(speed);
+      }
+    }
+    if (d.y - HALF <= 0 || d.y + HALF >= ARENA) {
+      const side = d.y - HALF <= 0 ? 'top' : 'bottom';
+      d.y = side === 'top' ? HALF : ARENA - HALF;
+      const speed = Math.abs(d.vy);
+      if (speed < WALL_EPSILON) {
+        d.vy = 0;
+      } else {
+        const reflected = -d.vy * CONFIG.WALL_RESTITUTION;
+        d.vy = Math.sign(reflected) * Math.max(Math.abs(reflected), MIN_BOUNCE_SPEED);
+        d.angVel = d.angVel * 0.75 + rand(-1, 1) * speed * 0.3;
+        d.squashAxis = 0; d.squashT = 0;
+        d.bounceCooldown = BOUNCE_COOLDOWN;
+        wallFlash[side] = 1;
+        playWallSound(speed);
+      }
+    }
+
+    // constant bi-axial friction (no floor contact needed — top-down view).
+    // spec 2.6: a die that a real hit knocked out of rest decays under
+    // RESTING_FRICTION instead of the base FRICTION, so it doesn't travel far.
+    const friction = Math.pow(d.frictionOverride || CONFIG.FRICTION, dt * 60);
+    d.vx *= friction;
+    d.vy *= friction;
+    d.angVel *= friction;
+
+    if (d.bounceCooldown > 0) {
+      d.bounceCooldown -= dt;
+    } else {
+      const speed = Math.hypot(d.vx, d.vy);
+      if (speed < REST_EPSILON && Math.abs(d.angVel) < 20) {
+        d.vx = 0; d.vy = 0; d.angVel = 0;
+        d.resting = true;
+        d.pendingResolve = true; // resolveTurn() decides what happens next, not here
+        d.frictionOverride = null; // clears once it settles again
+        playSettleSound();
+      }
+    }
+  }
+
+  // spec 2.3: 1 is a small heavy steel ball, 6 is a big soft balloon. Mass is
+  // derived purely from face — no new concept for the player to learn, "숫자 =
+  // 크기" already implies it.
+  function massOf(face) { return CONFIG.MASS_BASE - face; }
+
+  // dice-vs-dice: mass-weighted circle collision (reused from dice2d.html,
+  // generalized off the old equal-mass version — with MASS_BASE - face = 1
+  // for every die this reduces to exactly the old formula). Always resolves
+  // overlap positionally (lighter die yields more of the overlap); only
+  // applies an impulse (and wakes both dice) when they're actually closing in
+  // faster than DIE_EPSILON.
+  // spec 2.6: a die that's currently resting shrugs off anything below
+  // KNOCK_THRESHOLD — only the mover bounces off, exactly as if the resting
+  // die were a wall, and the resting die's position doesn't shift at all.
+  // Reflects only the velocity component along the collision normal (same
+  // idea as the wall-bounce code in stepDie), tangential speed is untouched.
+  function reflectMoverOffStationary(mover, nx, ny) {
+    const vAlongN = mover.vx * nx + mover.vy * ny;
+    const newVAlongN = -vAlongN * 0.6;
+    mover.vx += (newVAlongN - vAlongN) * nx;
+    mover.vy += (newVAlongN - vAlongN) * ny;
+    mover.angVel += rand(-1, 1) * 150;
+    mover.squashAxis = Math.abs(nx) > Math.abs(ny) ? 1 : 0;
+    mover.squashT = 0;
+  }
+
+  function resolveDieCollisions() {
+    for (let i = 0; i < dice.length; i++) {
+      for (let j = i + 1; j < dice.length; j++) {
+        const a = dice[i], b = dice[j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist === 0 || dist >= DIE_MIN_DIST) continue;
+
+        const nx = dx / dist, ny = dy / dist;
+        const overlap = DIE_MIN_DIST - dist;
+        const relVel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+        const isClosing = relVel < -DIE_EPSILON;
+        const impactSpeed = Math.abs(relVel);
+        const aWasResting = a.resting, bWasResting = b.resting;
+
+        if (isClosing && (aWasResting || bWasResting) && impactSpeed < CONFIG.KNOCK_THRESHOLD) {
+          // graze: only the moving side is affected, in both position and
+          // velocity — the resting side does not move even a pixel.
+          if (aWasResting) {
+            b.x += nx * overlap; b.y += ny * overlap;
+            b.x = clamp(b.x, HALF, ARENA - HALF); b.y = clamp(b.y, HALF, ARENA - HALF);
+            reflectMoverOffStationary(b, nx, ny);
+          } else {
+            a.x -= nx * overlap; a.y -= ny * overlap;
+            a.x = clamp(a.x, HALF, ARENA - HALF); a.y = clamp(a.y, HALF, ARENA - HALF);
+            reflectMoverOffStationary(a, nx, ny); // reflecting along n or -n is equivalent here
+          }
+          playDieClackSound(impactSpeed);
+          continue;
+        }
+
+        // shared positional correction, mass-weighted — always resolves any
+        // overlap regardless of whether it's a real (closing) hit or just
+        // resting contact between two already-touching dice.
+        const m1 = massOf(a.face), m2 = massOf(b.face);
+        const totalMass = m1 + m2;
+        a.x -= nx * overlap * (m2 / totalMass); a.y -= ny * overlap * (m2 / totalMass);
+        b.x += nx * overlap * (m1 / totalMass); b.y += ny * overlap * (m1 / totalMass);
+        a.x = clamp(a.x, HALF, ARENA - HALF); b.x = clamp(b.x, HALF, ARENA - HALF);
+        a.y = clamp(a.y, HALF, ARENA - HALF); b.y = clamp(b.y, HALF, ARENA - HALF);
+
+        if (isClosing) {
+          const dieRestitution = 0.7;
+          const impulse = -(1 + dieRestitution) * relVel / (1 / m1 + 1 / m2);
+          a.vx -= (impulse / m1) * nx; a.vy -= (impulse / m1) * ny;
+          b.vx += (impulse / m2) * nx; b.vy += (impulse / m2) * ny;
+          a.angVel += rand(-1, 1) * 180; b.angVel += rand(-1, 1) * 180;
+          // a real hit (>= KNOCK_THRESHOLD) knocks a resting die awake under
+          // RESTING_FRICTION so it moves, but doesn't travel far (spec 2.6).
+          if (aWasResting) a.frictionOverride = CONFIG.RESTING_FRICTION;
+          if (bWasResting) b.frictionOverride = CONFIG.RESTING_FRICTION;
+          a.resting = false; b.resting = false;
+          a.squashAxis = Math.abs(nx) > Math.abs(ny) ? 1 : 0; a.squashT = 0;
+          b.squashAxis = a.squashAxis; b.squashT = 0;
+          playDieClackSound(impactSpeed);
+        }
+      }
+    }
+  }
+
+  const wallFlash = { left: 0, right: 0, top: 0, bottom: 0 };
+
+  function step(now) {
+    if (lastTime === null) lastTime = now;
+    const dt = Math.min((now - lastTime) / 1000, 0.032);
+    lastTime = now;
+
+    if (!gameOver) {
+      for (const d of dice) stepDie(d, dt);
+      resolveDieCollisions();
+      if (turnInProgress && dice.every(d => d.resting)) resolveTurn();
+    }
+
+    for (const d of dice) d.squashT = Math.min(1, d.squashT + dt / 0.14);
+    for (const k in wallFlash) wallFlash[k] = Math.max(0, wallFlash[k] - dt / 0.25);
+    updateConfetti(dt);
+
+    render();
+    updateHud();
+    requestAnimationFrame(step);
+  }
+
+  function drawDie(d) {
+    const squashAmt = (1 - d.squashT) * 0.35;
+    let sx = 1, sy = 1;
+    if (d.squashAxis === 0) { sy = 1 + squashAmt; sx = 1 - squashAmt * 0.85; }
+    else { sx = 1 + squashAmt; sy = 1 - squashAmt * 0.85; }
+
+    const isCurrentPlayers = d.owner === currentPlayer && !gameOver;
+
+    ctx.save();
+    ctx.translate(d.x, d.y);
+    ctx.rotate(d.rot * Math.PI / 180);
+    ctx.scale(sx, sy);
+    ctx.globalAlpha = isCurrentPlayers || turnInProgress ? 1 : 0.55;
+
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 4;
+
+    const grad = ctx.createLinearGradient(-HALF, -HALF, HALF, HALF);
+    grad.addColorStop(0, '#fbfbf9');
+    grad.addColorStop(1, '#e2e2de');
+    ctx.fillStyle = grad;
+    roundRect(ctx, -HALF, -HALF, DIE_SIZE, DIE_SIZE, 10);
+    ctx.fill();
+
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = PLAYER_HUE[d.owner];
+    ctx.lineWidth = 3;
+    roundRect(ctx, -HALF + 1.5, -HALF + 1.5, DIE_SIZE - 3, DIE_SIZE - 3, 9);
+    ctx.stroke();
+
+    ctx.fillStyle = '#1a1a1a';
+    const pipR = DIE_SIZE * 0.09;
+    const off = DIE_SIZE * 0.26;
+    pipPatterns[d.face].forEach(key => {
+      const [px, py] = pipPos[key];
+      ctx.beginPath();
+      ctx.arc(px * off, py * off, pipR, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.restore();
+  }
+
+  function roundRect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  // static background (dark fill + faint scale grid) — drawn once, never
+  // touched again. Territory, defense overlay, dice, and confetti each live
+  // on their own transparent layer stacked on top of this.
+  function drawBackground() {
+    bgCtx.fillStyle = '#12161d';
+    bgCtx.fillRect(0, 0, ARENA, ARENA);
+    bgCtx.strokeStyle = 'rgba(255,255,255,0.03)';
+    bgCtx.lineWidth = 1;
+    const step = 40;
+    for (let i = step; i < ARENA; i += step) {
+      bgCtx.beginPath(); bgCtx.moveTo(i, 0); bgCtx.lineTo(i, ARENA); bgCtx.stroke();
+      bgCtx.beginPath(); bgCtx.moveTo(0, i); bgCtx.lineTo(ARENA, i); bgCtx.stroke();
+    }
+  }
+
+  // per-frame: walls (with fading hit-flash) + dice + aim line
+  function drawWalls() {
+    const wallW = 6;
+    const drawWall = (flash, x, y, w, h) => {
+      ctx.fillStyle = flash > 0
+        ? `rgba(255,138,101,${0.25 + flash * 0.7})`
+        : 'rgba(255,255,255,0.18)';
+      ctx.fillRect(x, y, w, h);
+    };
+    drawWall(wallFlash.left, 0, 0, wallW, ARENA);
+    drawWall(wallFlash.right, ARENA - wallW, 0, wallW, ARENA);
+    drawWall(wallFlash.top, 0, 0, ARENA, wallW);
+    drawWall(wallFlash.bottom, 0, ARENA - wallW, ARENA, wallW);
+  }
+
+  // shows the same drag-derived direction/power for EVERY one of the current
+  // player's resting dice (they all launch with this one vector at once).
+  function drawAimLine() {
+    if (!aiming || !aimingDie) return;
+    const anchor = aimingDie;
+    const dx = dragCurrent.x - anchor.x;
+    const dy = dragCurrent.y - anchor.y;
+    const rawLen = Math.hypot(dx, dy);
+    const dragLen = Math.min(rawLen, MAX_DRAG);
+    const ux = dx / (rawLen || 1), uy = dy / (rawLen || 1);
+    const pct = dragLen / MAX_DRAG;
+    const launchLen = 40 + pct * 140;
+    const hue = 200 - pct * 200; // blue (weak) -> red (strong)
+
+    const previewDice = isOpeningTurn()
+      ? dice.filter(d => d.owner === currentPlayer && d.resting)
+      : [anchor];
+    for (const d of previewDice) {
+      // rubber band back to the pointer
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x + ux * dragLen, d.y + uy * dragLen);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // launch direction preview (opposite of drag), same for every die
+      ctx.strokeStyle = `hsl(${hue}, 90%, 60%)`;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x - ux * launchLen, d.y - uy * launchLen);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(d.x - ux * launchLen, d.y - uy * launchLen, 5, 0, Math.PI * 2);
+      ctx.fillStyle = `hsl(${hue}, 90%, 60%)`;
+      ctx.fill();
+
+      // preview of the capture radius at this die's own current face
+      const radius = d.face * CONFIG.RADIUS_PER_PIP;
+      ctx.strokeStyle = PLAYER_HUE[d.owner];
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, ARENA, ARENA);
+    drawWalls();
+    dice.forEach(drawDie);
+    drawAimLine();
+  }
+
+  function updateHud() {
+    const idle = dice.find(d => d.owner === currentPlayer && d.resting);
+    document.getElementById('hudFace').textContent = idle ? idle.face : '–';
+    const moving = dice.filter(d => !d.resting);
+    document.getElementById('hudSpeed').textContent = moving.length
+      ? Math.round(Math.max(...moving.map(d => Math.hypot(d.vx, d.vy))))
+      : 0;
+    const sample = moving[0];
+    const pct = sample ? clamp((sample.distSinceTumble / CONFIG.TUMBLE_DIST) * 100, 0, 100) : 0;
+    document.getElementById('hudTumbleBar').style.width = pct + '%';
+  }
+
+  drawBackground();
+  buildPlayerUI();
+  setupDice();
+  dice.forEach(d => claimStartingSpot(d)); // claim starting spots so the board isn't empty
+  redrawTerritory();
+  updateOccupancyHud();
+  recomputeDefense();
+  updateTurnHud();
+  showTurnToast(0);
+  render();
+  updateHud();
+  requestAnimationFrame(step);
+</script>
+
+</body>
+</html>

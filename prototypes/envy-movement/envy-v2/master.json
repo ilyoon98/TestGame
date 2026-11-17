@@ -1,0 +1,174 @@
+{
+  "schema": "generate2dsprite.master.v1",
+  "tool": {
+    "name": "master_still",
+    "version": "0.4.0"
+  },
+  "created": "2026-11-12T01:55:08.121Z",
+  "name": "envy",
+  "subject": "Envy from 7 Sins Heist Crew",
+  "identity_recap": "Envy from 7 Sins Heist Crew (Compact figure with a round icy-blue face, worried cyan eyes, angular navy hood with pale trim, oversized sleeves, simple navy jacket with a short icy-blue-edged hem, vivid blue neck ribbon, loose navy pants, chunky blue-and-white sneakers, and a cobalt handheld game-console keyring with a :3 screen)",
+  "facing": "right",
+  "view": "three-quarter facing right",
+  "finish": "hd",
+  "class": "hero",
+  "framing": {
+    "canvas": [
+      1024,
+      1024
+    ],
+    "subject_height_px": 788,
+    "top_margin_px": 138,
+    "lead_px": 0,
+    "preset": "hero",
+    "subject_bbox": [
+      345,
+      138,
+      680,
+      926
+    ],
+    "anchor": [
+      506.5,
+      926.0
+    ],
+    "opaque_area_px": 174373,
+    "width_limited": false
+  },
+  "key": "#FF00FF",
+  "files": {
+    "master": {
+      "path": "master.png",
+      "sha256": "3735be5484b7aec8b3baf85767cca85ff784d4063dd2f10f2b8ee874a3f0fbed",
+      "bytes": 318357,
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    "cutout": {
+      "path": "master_rgba.png",
+      "sha256": "9cf2c44ee7d7c04d873a1a0eb0c4f6abd147ef03b93dfe8a9039eab5edadd3ae",
+      "bytes": 366489,
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    "source": {
+      "path": "source.png",
+      "sha256": "1aad0fc442a5aaaa082682a851ca5a2675cb223fcea253a94860a659891c1631",
+      "bytes": 2155693,
+      "size": [
+        1024,
+        1536
+      ]
+    },
+    "spec": {
+      "path": "spec.json",
+      "sha256": "eea9410fd45827e6260daf78c99832b611e09143faaaac0268ab035dd10af336",
+      "bytes": 1151
+    },
+    "prompt": {
+      "path": "prompt.txt",
+      "sha256": "1e157e690aa9c02b5a3bcc57d34ef0395eade88e62444a933135020f0dddf9a1",
+      "bytes": 1269
+    }
+  },
+  "references": [],
+  "transform": {
+    "mapping": "master = scale * source + offset (continuous pixel coordinates: pixel i spans [i, i + 1))",
+    "source_size": [
+      1024,
+      1536
+    ],
+    "source_subject_bbox": [
+      197,
+      24,
+      825,
+      1505
+    ],
+    "crop_box": [
+      191,
+      18,
+      831,
+      1511
+    ],
+    "crop_margin_px": 6,
+    "scale": 0.5320729237002025,
+    "offset": [
+      240.11073598919648,
+      125.23024983119514
+    ],
+    "canvas": [
+      1024,
+      1024
+    ],
+    "resampler": "lanczos",
+    "premultiplied": true,
+    "alpha_floor_px": 3163,
+    "subject_parts": 1,
+    "ignored_parts": 0,
+    "ignored_px": 0,
+    "source_touches": [],
+    "key_rgb": [
+      255,
+      0,
+      255
+    ]
+  },
+  "route": "host-image_gen",
+  "provenance": {
+    "command": "external",
+    "run": null,
+    "take": null,
+    "source_name": "envy-clothing-patch.v2.tmp.png",
+    "source_sha256": "1aad0fc442a5aaaa082682a851ca5a2675cb223fcea253a94860a659891c1631",
+    "media": null,
+    "media_cli_source": null,
+    "edit": null
+  },
+  "matte": {
+    "requested": "soft",
+    "key_estimate": {
+      "key": [
+        255.0,
+        0.0,
+        255.0
+      ],
+      "source": "native_alpha",
+      "valid": false,
+      "ring_share": 0.0,
+      "coverage": 0.0,
+      "distance_from_declared": 0.0
+    },
+    "quality": "native_alpha",
+    "qa": {
+      "key": [
+        255.0,
+        0.0,
+        255.0
+      ],
+      "opaque_key_px": 0,
+      "outer_ring_spill_fraction": 0.0,
+      "semitransparent_fraction": 1.0,
+      "enclosed_key_pockets": 0,
+      "key_hued_px": 0,
+      "visible_px": 635596,
+      "outer_ring_px": 9273,
+      "thresholds": {
+        "key_tolerance": 48.0,
+        "spill_threshold": 20.0,
+        "min_pocket_area": 16,
+        "opaque_alpha": 128,
+        "spill_hue_balance": 0.5
+      },
+      "method": "forge_matte.matte_qa v1: straight-colour key distance and dominance on the keyed image; two-channel keys count spill only where the key channels are balanced"
+    },
+    "key_choice": {
+      "status": "ok",
+      "overlap_share": 0.0,
+      "rule": "reject a key when more than 0.5% of subject pixels have key dominance >= 40; first acceptable candidate wins"
+    }
+  },
+  "warnings": []
+}

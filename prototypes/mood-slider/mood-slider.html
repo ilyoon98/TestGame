@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>오늘의 기분</title>
+  <style>
+    :root {
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color: #35251e;
+      background: #f5eee5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100svh;
+      margin: 0;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+    }
+
+    .card {
+      --panel: #c49a81;
+      --face: #ead0ba;
+      --ink: #39271e;
+      --rail: #956b55;
+      --paper: #fff8e9;
+      width: min(100%, 420px);
+      min-height: 664px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      padding: 48px 26px 20px;
+      overflow: hidden;
+      border-radius: 36px;
+      background: var(--panel);
+      color: var(--ink);
+      text-align: center;
+      box-shadow: 0 24px 60px #68492d26, inset 0 0 0 1px #fff6e947;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0 0 13px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 7.5vw, 40px);
+      line-height: 1.17;
+      letter-spacing: -.065em;
+      font-weight: 800;
+    }
+
+    .face {
+      display: block;
+      width: 154px;
+      height: 154px;
+      margin: 34px auto 20px;
+      overflow: visible;
+    }
+
+    .face-disc { fill: var(--face); }
+    .face-feature { stroke: var(--ink); stroke-linecap: round; }
+    .face-mouth { stroke-linejoin: round; }
+    .face-effect { display: none; pointer-events: none; }
+    [data-effect="flowers"] .flowers,
+    [data-effect="tears"] .tears,
+    [data-effect="sweat"] .sweat,
+    [data-effect="irritation"] .irritation { display: inline; }
+
+    .face-effect use {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: scatter var(--period, 3.1s) var(--delay, 0s) ease-out infinite;
+    }
+
+    @keyframes scatter {
+      0% { opacity: 0; transform: scale(.45); }
+      22% { opacity: .95; }
+      72%, 100% {
+        opacity: 0;
+        transform: translate(var(--dx, 0px), var(--dy)) rotate(var(--turn, 0deg)) scale(var(--end-scale, 1.05));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .face-effect use { animation: none; }
+    }
+
+    .mood-name {
+      margin: 0 0 16px;
+      font-size: 22px;
+      line-height: 1.4;
+      letter-spacing: -.045em;
+      font-weight: 800;
+    }
+
+    .slider {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      border-radius: 18px;
+      cursor: grab;
+    }
+
+    .slider:active { cursor: grabbing; }
+
+    .slider:focus-visible, button:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 4px;
+    }
+
+    .track { display: block; width: 100%; }
+    .rail { fill: none; stroke-width: 6; stroke-dasharray: 17 9; }
+    .rail-base { stroke: var(--rail); }
+    .rail-active { stroke: var(--paper); }
+    .tick { fill: var(--rail); }
+    .tick.is-passed { fill: var(--paper); }
+    .tick-center { fill: var(--panel); }
+    .thumb { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+    .thumb-center { fill: var(--ink); }
+
+    .endpoints {
+      display: flex;
+      justify-content: space-between;
+      padding-inline: 6px;
+      padding-top: 6px;
+      margin: 0 0 23px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .more-moods { margin: 0 0 12px; }
+
+    .more-moods summary {
+      padding: 9px 10px;
+      border: 1px solid var(--rail);
+      border-radius: 14px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .more-moods summary:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .mood-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .mood-choice {
+      min-height: 36px;
+      padding: 4px 2px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: var(--face);
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mood-choice:hover, .mood-choice[aria-pressed="true"] { background: var(--paper); }
+    .mood-choice[aria-pressed="true"] { border-color: var(--ink); }
+
+    #save {
+      width: 100%;
+      min-height: 52px;
+      padding: 10px 20px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    #save:hover { background: #fffdf7; }
+    #save svg { margin-left: 4px; vertical-align: -3px; }
+
+    .status {
+      min-height: 1.5em;
+      margin: 9px 0 0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0; }
+      .card {
+        width: 100%;
+        min-height: 100svh;
+        padding-top: max(38px, calc(env(safe-area-inset-top) + 24px));
+        padding-bottom: max(18px, env(safe-area-inset-bottom));
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <header>
+      <p class="eyebrow">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M10 1.5c0 4.8 3.7 8.5 8.5 8.5-4.8 0-8.5 3.7-8.5 8.5 0-4.8-3.7-8.5-8.5-8.5 4.8 0 8.5-3.7 8.5-8.5Z" fill="currentColor"/>
+        </svg>
+        오늘의 기분
+      </p>
+      <h1>오늘 하루,<br>어떤 기분인가요?</h1>
+    </header>
+
+    <svg class="face" viewBox="0 0 160 160" aria-hidden="true">
+      <defs>
+        <g id="bloom">
+          <path fill="currentColor" d="M0-3C-4-10-10-4-5 0c-7 1-5 9 1 7 0 6 8 6 9 0 6 1 9-6 3-8C11-7 4-10 0-3Z"/>
+          <circle r="2" fill="#fff4c9"/>
+        </g>
+        <path id="droplet" fill="currentColor" d="M0-7C2-4 5 0 5 3a5 5 0 0 1-10 0c0-3 3-7 5-10Z"/>
+        <path id="vein-mark" d="M-9-2Q-2-2-2-9M2-9Q2-2 9-2M9 2Q2 2 2 9M-2 9Q-2 2-9 2"
+              fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+        <path id="steam-puff" d="M-8 3c-3 0-4-4-1-6 1-1 3-1 4-1 0-6 8-7 10-1 5-2 9 4 4 7-4 3-13 4-17 1Z"
+              fill="#fff6ea" stroke="currentColor" stroke-width="1.3"/>
+      </defs>
+      <circle class="face-disc" cx="80" cy="80" r="77"/>
+      <path id="brows" class="face-feature" fill="none" stroke-width="5" opacity="0"/>
+      <path id="eyes" class="face-feature" d="M48 57v17 M112 57v17" fill="none" stroke-width="11"/>
+      <path id="mouth" class="face-feature face-mouth" d="M51 105 C65 105 95 105 109 105" fill="none" stroke-width="12"/>
+      <path id="teeth" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" opacity="0"/>
+      <g class="face-effect flowers">
+        <g transform="translate(20 75)" color="#c65a75"><use href="#bloom" style="--dx:-31px;--dy:-36px;--turn:-85deg"/></g>
+        <g transform="translate(141 77)" color="#c1749e"><use href="#bloom" style="--dx:29px;--dy:-39px;--turn:75deg;--delay:.55s"/></g>
+        <g transform="translate(126 48)" color="#d58236"><use href="#bloom" style="--dx:15px;--dy:-35px;--turn:70deg;--delay:1.1s"/></g>
+        <g transform="translate(27 107)" color="#c77c8b"><use href="#bloom" style="--dx:-29px;--dy:-29px;--turn:-60deg;--delay:1.65s"/></g>
+      </g>
+      <g class="face-effect tears" color="#528eb3">
+        <g transform="translate(119 79)"><use href="#droplet" style="--dy:49px;--dx:8px;--period:2.55s"/></g>
+        <g transform="translate(119 79)"><use href="#droplet" style="--dy:49px;--dx:8px;--period:2.55s;--delay:1.25s"/></g>
+      </g>
+      <g class="face-effect sweat" color="#548f9c">
+        <g transform="translate(137 38)"><use href="#droplet" style="--dx:10px;--dy:25px;--turn:-15deg;--period:2.4s"/></g>
+        <g transform="translate(150 49) scale(.65)"><use href="#droplet" style="--dx:13px;--dy:28px;--period:2.4s;--delay:.25s"/></g>
+      </g>
+      <g class="face-effect irritation">
+        <g transform="translate(127 39)" color="#a32f36"><use href="#vein-mark" style="--dx:28px;--dy:-26px;--turn:22deg;--period:2.6s"/></g>
+        <g transform="translate(23 87)" color="#a66553"><use href="#steam-puff" style="--dx:-31px;--dy:-32px;--end-scale:1.48;--period:2.6s;--delay:.28s"/></g>
+        <g transform="translate(138 84)" color="#a66553"><use href="#steam-puff" style="--dx:32px;--dy:-29px;--end-scale:1.32;--period:2.6s;--delay:.62s"/></g>
+      </g>
+    </svg>
+    <p class="mood-name" id="mood-name">보통</p>
+
+    <div class="slider" id="mood-slider" role="slider" tabindex="0"
+         aria-label="오늘의 기분" aria-valuemin="0" aria-valuemax="4"
+         aria-valuenow="2" aria-valuetext="보통">
+      <svg class="track" id="track" viewBox="0 0 360 96" aria-hidden="true">
+        <defs>
+          <path id="track-curve" d="M26 24 Q180 122 334 24"/>
+          <clipPath id="active-clip"><rect id="active-width" width="180" height="96"/></clipPath>
+        </defs>
+        <use href="#track-curve" class="rail rail-base"/>
+        <use href="#track-curve" class="rail rail-active" clip-path="url(#active-clip)"/>
+        <g id="ticks"></g>
+        <g id="thumb" transform="translate(180 73)">
+          <circle class="thumb" r="14"/>
+          <circle class="thumb-center" r="3.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="endpoints" aria-hidden="true"><span>매우 슬픔</span><span>매우 기쁨</span></div>
+
+    <details class="more-moods">
+      <summary>다른 감정 고르기</summary>
+      <div class="mood-buttons" id="mood-buttons" role="group" aria-label="감정 버튼"></div>
+    </details>
+
+    <button type="button" id="save">
+      기분 저장
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="m3.5 8 3 3L12.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <p class="status" id="status" role="status"></p>
+  </main>
+
+  <script>
+    const moods = [
+      { name: "매우 슬픔", colors: ["#ed795e", "#ffc1a7", "#492416", "#a44b34"], mouth: [28, 116, 81, 0], eyes: [5, 4, 17], effect: "tears" },
+      { name: "슬픔", colors: ["#fa8b59", "#ffc8a4", "#592b18", "#b85b32"], mouth: [28, 111, 86, 0], eyes: [0, 0, 17], effect: "tears" },
+      { name: "보통", colors: ["#c49a81", "#ead0ba", "#39271e", "#956b55"], mouth: [29, 105, 105, 0], eyes: [0, 0, 17] },
+      { name: "기쁨", colors: ["#f7b56c", "#ffe3b2", "#4c331a", "#ad753b"], mouth: [29, 102, 127, 0], eyes: [0, 0, 17], effect: "flowers" },
+      { name: "매우 기쁨", colors: ["#ffd268", "#fff0bd", "#303517", "#ad802a"], mouth: [30, 101, 140, 0], eyes: [-3, 0, 17], effect: "flowers" }
+    ].map((mood, stop) => ({ ...mood, stop }));
+    const choices = [
+      moods[3],
+      { id: "relaxed", name: "편안함", stop: 3, colors: ["#e8adad", "#fbd6ce", "#4d3133", "#a47778"], mouth: [22, 104, 117, 0], eyes: [14, 0, 0, 19, -16] },
+      { id: "lazy", name: "무기력", stop: 1, colors: ["#b8b2a8", "#ded7cd", "#403b37", "#82796f"], mouth: [18, 112, 107, 0, -3], eyes: [14, 0, 2, 15, 5] },
+      { id: "flustered", name: "당황", stop: 2, colors: ["#a7c8a0", "#d8e9bd", "#304331", "#678563"], mouth: [11, 106, 106, 25], eyes: [-4, 0, 22], brows: [-7, -4, 1], effect: "sweat" },
+      moods[1],
+      { id: "tired", name: "피곤함", stop: 1, colors: ["#a9beda", "#dae6f2", "#33435b", "#6f86a5"], mouth: [13, 109, 110, 38], eyes: [11, 0, 2, 21, 13], brows: [4, 0, .6] },
+      { id: "confused", name: "어리둥절", stop: 2, colors: ["#eec47f", "#ffe5af", "#543917", "#ab8145"], mouth: [15, 106, 106, 3, -10], eyes: [0, 1, 14, 0, 0, 5], brows: [-4, 3, 1, 8] },
+      { id: "worried", name: "걱정", stop: 1, colors: ["#c9abd5", "#edd6ee", "#493151", "#94729d"], mouth: [19, 112, 99, 0], eyes: [5, 1, 12], brows: [0, -16, 1] },
+      { id: "annoyed", name: "짜증", stop: 1, colors: ["#ee9c83", "#ffd0b6", "#572f25", "#a76653"], mouth: [22, 107, 101, 0, 4], eyes: [7, 0, 6, 13, -1], brows: [4, 20, 1], effect: "irritation" },
+      { id: "anxious", name: "불안", stop: 0, colors: ["#c39a8b", "#ecd0bf", "#4f3630", "#916e60"], mouth: [21, 109, 108, 0], eyes: [1, 2, 18], brows: [-5, -9, 1, 3], quiver: 9 },
+      { id: "distressed", name: "괴로움", stop: 0, colors: ["#df8e86", "#fbc1a8", "#532e28", "#a1655a"], mouth: [31, 119, 99, 29, 3], eyes: [0, 0, 22, 0, 0, 0, 26], brows: [0, -19, 1], teeth: 1 }
+    ];
+    const colorProperties = ["--panel", "--face", "--ink", "--rail"];
+    const max = moods.length - 1;
+    const storageKey = "mood-slider.saved";
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    const card = document.querySelector(".card");
+    const slider = document.querySelector("#mood-slider");
+    const track = document.querySelector("#track");
+    const ticks = document.querySelector("#ticks");
+    const thumb = document.querySelector("#thumb");
+    const activeWidth = document.querySelector("#active-width");
+    const eyes = document.querySelector("#eyes");
+    const brows = document.querySelector("#brows");
+    const mouth = document.querySelector("#mouth");
+    const teeth = document.querySelector("#teeth");
+    const moodName = document.querySelector("#mood-name");
+    const moodButtons = document.querySelector("#mood-buttons");
+    const status = document.querySelector("#status");
+    const svgNamespace = "http://www.w3.org/2000/svg";
+
+    let value = 2;
+    let drag = null;
+    let animation = null;
+    let currentPose;
+    let selectedMood;
+    let trackPose = true;
+
+    const choiceButtons = choices.map(mood => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "mood-choice";
+      button.textContent = mood.name;
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => {
+        status.textContent = "";
+        settle(mood.stop, 380 + 35 * Math.abs(mood.stop - value), mood);
+      });
+      moodButtons.append(button);
+      return button;
+    });
+
+    function pointOnTrack(value) {
+      const t = value / max;
+      return { x: 26 + 308 * t, y: 24 + 196 * t * (1 - t) };
+    }
+
+    const stops = moods.map((_, index) => {
+      const point = pointOnTrack(index);
+      const outer = document.createElementNS(svgNamespace, "circle");
+      const center = document.createElementNS(svgNamespace, "circle");
+      for (const circle of [outer, center]) {
+        circle.setAttribute("cx", point.x);
+        circle.setAttribute("cy", point.y);
+      }
+      outer.setAttribute("r", "11");
+      outer.setAttribute("class", "tick");
+      center.setAttribute("r", "3");
+      center.setAttribute("class", "tick-center");
+      ticks.append(outer, center);
+      return { ...point, outer };
+    });
+
+    function nearestStop(point) {
+      let nearest = 0;
+      let shortest = Infinity;
+      stops.forEach((stop, index) => {
+        const distance = (stop.x - point.x) ** 2 + (stop.y - point.y) ** 2;
+        if (distance < shortest) {
+          shortest = distance;
+          nearest = index;
+        }
+      });
+      return nearest;
+    }
+
+    function interpolate(from, to, fraction) {
+      return from + (to - from) * fraction;
+    }
+
+    function mixColor(from, to, fraction) {
+      const channels = [1, 3, 5].map(index => {
+        const a = parseInt(from.slice(index, index + 2), 16);
+        const b = parseInt(to.slice(index, index + 2), 16);
+        return Math.round(interpolate(a, b, fraction));
+      });
+      return "#" + channels.map(channel => channel.toString(16).padStart(2, "0")).join("");
+    }
+
+    const hiddenBrows = [0, 0, 0];
+
+    function blendPose(from, to, amount) {
+      const blend = (a, b) => Array.from({ length: Math.max(a.length, b.length) }, (_, index) =>
+        interpolate(a[index] ?? 0, b[index] ?? 0, amount));
+      return {
+        colors: from.colors.map((color, index) => mixColor(color, to.colors[index], amount)),
+        mouth: blend(from.mouth, to.mouth),
+        eyes: blend(from.eyes, to.eyes),
+        brows: blend(from.brows ?? hiddenBrows, to.brows ?? hiddenBrows),
+        quiver: interpolate(from.quiver ?? 0, to.quiver ?? 0, amount),
+        teeth: interpolate(from.teeth ?? 0, to.teeth ?? 0, amount)
+      };
+    }
+
+    function poseOnTrack(position) {
+      const lower = Math.floor(position);
+      if (lower === position) return moods[lower];
+      return blendPose(moods[lower], moods[lower + 1], position - lower);
+    }
+
+    function paintFace(pose) {
+      const [spread, endsY, bendY, opening, slant = 0] = pose.mouth;
+      const left = 80 - spread;
+      const right = 80 + spread;
+      const leftY = endsY - slant / 2;
+      const rightY = endsY + slant / 2;
+      const inner = spread / 2;
+      const top = bendY - opening / 2;
+      const bottom = bendY + opening / 2;
+      const quiver = pose.quiver ?? 0;
+      // Split the cubic at its midpoint so an anxious mouth can bend without swapping shapes.
+      const centerY = (endsY + 3 * top) / 4;
+      const leftControlY = (leftY + top) / 2;
+      const rightControlY = (rightY + top) / 2;
+      const upper = `M${left} ${leftY} C${left + spread / 4} ${leftControlY} ${80 - 3 * spread / 8} ${(leftY + 3 * top) / 4 - quiver} 80 ${centerY + quiver} C${80 + 3 * spread / 8} ${(rightY + 3 * top) / 4 - quiver} ${right - spread / 4} ${rightControlY} ${right} ${rightY}`;
+      const lower = ` C${80 + inner} ${bottom} ${80 - inner} ${bottom} ${left} ${leftY}Z`;
+      mouth.setAttribute("d", opening > 0 ? upper + lower : upper);
+      const teethAmount = pose.teeth ?? 0;
+      const openingColor = mixColor(pose.colors[2], "#fff6e9", teethAmount);
+      mouth.setAttribute("fill", opening > 0 ? openingColor : "none");
+      mouth.setAttribute("stroke-width", interpolate(12, 5.5, Math.min(Math.max(opening / 13, quiver / 14), 1)));
+      const seam = endsY - 5;
+      teeth.setAttribute("d", `M${80 - spread * .77} ${seam - slant / 3} Q80 ${(seam + bendY) / 2} ${80 + spread * .77} ${seam + slant / 3}`);
+      teeth.setAttribute("opacity", teethAmount);
+      const [eyeY, tilt, height, width = 0, curve = 0, eyeSkew = 0, squeeze = 0] = pose.eyes;
+      const eye = (center, direction) => {
+        const startX = center + direction * (tilt - width / 2);
+        const endX = center + direction * width / 2;
+        const top = 57 + eyeY + direction * eyeSkew / 2;
+        const controlX = (startX + endX) / 2 + direction * squeeze;
+        return `M${startX} ${top} Q${controlX} ${top + height / 2 + curve} ${endX} ${top + height}`;
+      };
+      eyes.setAttribute("d", eye(48, 1) + " " + eye(112, -1));
+      const [browY, browTilt, browOpacity, browSkew = 0] = pose.brows ?? hiddenBrows;
+      const browTop = 43 + browY;
+      const leftBrow = browTop + browSkew / 2;
+      const rightBrow = browTop - browSkew / 2;
+      brows.setAttribute("d", `M35 ${leftBrow - browTilt / 2} Q46 ${leftBrow - 5} 60 ${leftBrow + browTilt / 2} M100 ${rightBrow + browTilt / 2} Q114 ${rightBrow - 5} 125 ${rightBrow - browTilt / 2}`);
+      brows.setAttribute("opacity", browOpacity);
+      colorProperties.forEach((property, index) => card.style.setProperty(property, pose.colors[index]));
+    }
+
+    function render(nextValue, pose, mood) {
+      value = Math.max(0, Math.min(max, nextValue));
+      trackPose = !pose;
+      currentPose = pose ?? poseOnTrack(value);
+      paintFace(currentPose);
+      const point = pointOnTrack(value);
+      thumb.setAttribute("transform", `translate(${point.x} ${point.y})`);
+      activeWidth.setAttribute("width", point.x);
+      stops.forEach(stop => stop.outer.classList.toggle("is-passed", stop.x <= point.x));
+      const trackMood = moods[nearestStop(point)];
+      const nextMood = mood ?? trackMood;
+      if (selectedMood !== nextMood) {
+        selectedMood = nextMood;
+        moodName.textContent = selectedMood.name;
+        choiceButtons.forEach((button, index) =>
+          button.setAttribute("aria-pressed", String(choices[index] === selectedMood)));
+      }
+      const effect = drag || animation ? "" : selectedMood.effect ?? "";
+      if (card.dataset.effect !== effect) card.dataset.effect = effect;
+      slider.setAttribute("aria-valuenow", value.toFixed(2));
+      slider.setAttribute("aria-valuetext", trackMood.name);
+    }
+
+    function stopAnimation() {
+      if (!animation) return;
+      cancelAnimationFrame(animation.frame);
+      animation = null;
+    }
+
+    function settle(target, duration = 210, mood = moods[target]) {
+      stopAnimation();
+      const start = value;
+      const startPose = currentPose;
+      const startMood = selectedMood;
+      const followTrack = trackPose && mood === moods[target];
+      const finish = () => render(target, mood === moods[target] ? undefined : mood, mood);
+      if (reducedMotion.matches || (target === start && startPose === mood)) {
+        finish();
+        return;
+      }
+      const startTime = performance.now();
+      function animate(now) {
+        const progress = Math.max(0, Math.min(1, (now - startTime) / duration));
+        if (progress === 1) {
+          animation = null;
+          finish();
+          return;
+        }
+        const eased = progress * progress * (3 - 2 * progress);
+        const position = interpolate(start, target, eased);
+        if (followTrack) {
+          render(position);
+        } else {
+          render(position, blendPose(startPose, mood, eased), eased < .5 ? startMood : mood);
+        }
+        animation.frame = requestAnimationFrame(animate);
+      }
+      animation = { target, mood, frame: requestAnimationFrame(animate) };
+    }
+
+    function trackPoint(event) {
+      return new DOMPoint(event.clientX, event.clientY).matrixTransform(track.getScreenCTM().inverse());
+    }
+
+    function valueAtX(x) {
+      return Math.max(0, Math.min(max, ((x - 26) / 308) * max));
+    }
+
+    function moveThumb(event) {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (!drag.moved && Math.abs(event.clientX - drag.startX) < 4) return;
+      drag.moved = true;
+      const position = valueAtX(trackPoint(event).x - drag.offset);
+      const distance = Math.abs(position - drag.startValue);
+      const pose = drag.startPose && distance < .45
+        ? blendPose(drag.startPose, poseOnTrack(position), distance / .45)
+        : undefined;
+      render(position, pose);
+    }
+
+    slider.addEventListener("pointerdown", event => {
+      if (event.button !== 0 || drag) return;
+      stopAnimation();
+      status.textContent = "";
+      const point = trackPoint(event);
+      const current = pointOnTrack(value);
+      const onThumb = Math.hypot(point.x - current.x, point.y - current.y) <= 17;
+      drag = {
+        id: event.pointerId,
+        startX: event.clientX,
+        startValue: value,
+        startPose: trackPose ? null : currentPose,
+        offset: onThumb ? point.x - current.x : 0,
+        moved: false
+      };
+      slider.setPointerCapture(drag.id);
+      slider.focus({ preventScroll: true });
+    });
+
+    slider.addEventListener("pointermove", moveThumb);
+
+    function finishDrag(event) {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (event.type === "pointerup") {
+        moveThumb(event);
+        if (!drag.moved) {
+          const tappedValue = valueAtX(trackPoint(event).x - drag.offset);
+          const target = nearestStop(pointOnTrack(tappedValue));
+          drag = null;
+          settle(target, 260 + 65 * Math.abs(target - value));
+          return;
+        }
+      }
+      drag = null;
+      settle(nearestStop(pointOnTrack(value)));
+    }
+
+    slider.addEventListener("pointerup", finishDrag);
+    slider.addEventListener("pointercancel", finishDrag);
+    slider.addEventListener("lostpointercapture", finishDrag);
+
+    const keyboardSteps = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 };
+    slider.addEventListener("keydown", event => {
+      let next = animation?.target ?? nearestStop(pointOnTrack(value));
+      if (Object.hasOwn(keyboardSteps, event.key)) {
+        next += keyboardSteps[event.key];
+      } else if (event.key === "Home" || event.key === "End") {
+        next = event.key === "Home" ? 0 : max;
+      } else {
+        return;
+      }
+      event.preventDefault();
+      stopAnimation();
+      status.textContent = "";
+      render(next);
+    });
+
+    document.querySelector("#save").addEventListener("click", () => {
+      const selected = animation?.mood ?? selectedMood;
+      try {
+        localStorage.setItem(storageKey, selected.id ?? String(selected.stop));
+        status.textContent = `${selected.name} · 저장했어요`;
+      } catch {
+        status.textContent = "이 브라우저에서는 기분을 저장할 수 없어요.";
+      }
+    });
+
+    let savedMood = moods[value];
+    try {
+      const saved = localStorage.getItem(storageKey);
+      savedMood = choices.find(mood => mood.id === saved) ??
+        moods.find(mood => String(mood.stop) === saved) ?? savedMood;
+    } catch {
+      // The slider can still run when browser storage is unavailable.
+    }
+    render(savedMood.stop, savedMood.id ? savedMood : undefined, savedMood);
+  </script>
+</body>
+</html>

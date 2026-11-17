@@ -1,0 +1,69 @@
+/* One readable type scale for the existing chronicle, including narrow screens. */
+:root{--muted:#a4b5c4}
+body{font-size:16px}
+.layout{grid-template-columns:330px minmax(0,1fr)}
+.brand small,.edition,.quiet-button,.eyebrow,.tag{font-size:13px}
+.intro p,.home-card>p,.home-caption,.home-rules p{font-size:15px}
+.home-rules strong,.home-card .primary-button{font-size:16px}
+.panel-heading h2,.depth .panel-heading>span,.sidebar-note,.map-footnote{font-size:13px}
+.race-name,.job-name{font-size:15px}.birth-job{font-size:13px;max-width:none}
+.character-identity h3{font-size:28px}.traits{gap:7px}.trait[type=button]{font-size:14px;padding:5px 8px}
+.trait .pixel-icon,.race-name .pixel-icon,.job-name .pixel-icon{width:16px;height:16px}
+.flavor,.family-summary{font-size:14px;line-height:1.8}
+.age-summary strong{font-size:18px}.age-summary small{font-size:13px}
+.race-effects>small{font-size:13px}.race-effects>p,.race-effects>p:last-child{font-size:14px}
+.attribute-row{grid-template-columns:48px minmax(0,1fr) 83px;gap:9px;min-height:23px}
+.attribute-row>span{font-size:13px}.attribute-row>strong{font-size:15px}.attribute-row small{font-size:11px}.attribute-track{height:9px}
+.potion-supply>span,.equipment>span{font-size:13px}.potion-supply strong{font-size:16px}.potion-supply small{font-size:12px}.equipment li{font-size:14px}
+.town-place>span,.floor-info>span:first-child{font-size:14px}.town-place>small{font-size:12px}
+.journal-title .eyebrow,.journal-footer{font-size:12px}.journal-title h2{font-size:25px}.run-status{font-size:14px}
+.control-button,.speeds button,.auto-control{font-size:14px}.auto-control input{width:16px;height:16px}
+.log-row{font-size:16px;line-height:48px;min-height:48px;gap:13px}.log-floor,.log-floor.world-location{font-size:13px;width:145px}.log-age{font-size:12px;flex-basis:39px}
+.running-action p,.action-copy{font-size:16px}.running-action small,.action-copy small{font-size:14px}
+.primary-button,.secondary-button,.text-button,.follow-button{font-size:14px}
+.result-label,.result-detail,.death-record,.result-stat small,.page-footer{font-size:14px}.result-title{font-size:27px}.result-stat{font-size:17px}
+.history-card h3{font-size:18px}.history-card p,.history-card details,.history-log,.guide-content p{font-size:15px}.history-card time{font-size:12px}
+.creation-dialog{width:min(680px,calc(100% - 32px));padding:24px 28px;max-height:calc(100dvh - 32px)}
+.creation-header h2{font-size:28px;line-height:1.5}.creation-character{height:100px;margin:8px 0 14px}.creation-character .pixel-character{width:64px;height:96px}
+.creation-dialog .draw-slot{min-height:78px;padding:12px 15px}.draw-slot>small{font-size:13px}.draw-slot>strong,.creation-dialog #drawJob{font-size:18px}
+.creation-dialog .draw-traits{min-height:44px;padding-top:12px}.creation-dialog .trait{font-size:14px}
+.creation-dialog .creation-effects{max-height:max(145px,calc(100dvh - 560px));margin:14px 0;gap:9px}
+.creation-effects li{padding:12px 14px;gap:12px}.creation-effects small{font-size:12px}.creation-effects strong{font-size:17px}
+.creation-effects p{font-size:15px;line-height:1.75}.creation-effects p.effect-secondary{font-size:14px;line-height:1.75}
+.creation-dialog #creationStatus{font-size:14px;line-height:1.75;margin:12px 0}.creation-timing{margin:12px 0}
+.creation-timing>div{flex-wrap:wrap;justify-content:center;gap:8px 16px}.creation-timing span,.creation-timing .text-button{font-size:14px}
+.creation-actions{padding-top:16px;gap:12px}.creation-actions .primary-button{font-size:15px;padding:12px 18px}.creation-actions .text-button{font-size:14px}
+.choice-dialog{width:min(680px,calc(100% - 32px))}.choice-dialog .dialog-heading h2{font-size:27px}.choice-dialog .dialog-heading .eyebrow{font-size:13px}
+.choice-scene-label{font-size:14px}#choicePrompt{font-size:16px;line-height:1.75;white-space:normal;overflow:visible}
+.popup-choices .choice-button{padding:17px 18px;min-height:88px}.popup-choices .choice-button strong{font-size:17px}.popup-choices .choice-button small{font-size:14px}
+.popup-choices .choice-number{font-size:14px;width:27px;height:27px}.choice-modal-footer .auto-control,.choice-modal-footer>span{font-size:13px}
+.countdown-heading strong,.countdown-heading button,.auto-target-label,.auto-countdown>small{font-size:13px}.auto-target-label select{font-size:14px;padding:8px}
+.game-tooltip{width:min(340px,calc(100vw - 24px));padding:14px 16px}.game-tooltip strong{font-size:16px}.game-tooltip p{font-size:14px;line-height:1.8}
+.creation-dialog[open]{display:flex;flex-direction:column;height:min(860px,calc(100dvh - 32px));overflow:hidden}
+.creation-header,.creation-character,.draw-slots,.draw-traits,.creation-actions,.creation-timing{flex-shrink:0}
+.creation-character{height:72px;margin:4px 0 8px}.creation-character .pixel-character{width:48px;height:72px}
+.creation-dialog .draw-slot{min-height:70px;padding:8px 12px}.creation-dialog .draw-traits{min-height:36px;padding-top:8px}
+.creation-dialog .creation-effects{flex:1;min-height:70px;max-height:none;margin:10px 0;overflow-y:auto}
+.creation-dialog #creationStatus{flex-shrink:0;max-height:70px;overflow-y:auto;line-height:1.6;margin:8px 0}
+.creation-timing{margin:8px 0}.creation-actions{padding-top:12px}.popup-choices .choice-button>span:nth-child(2){min-width:0}
+@media(max-width:1000px){.layout{grid-template-columns:300px minmax(0,1fr)}.character,.depth{padding:18px}}
+@media(max-width:700px){
+  .layout{grid-template-columns:1fr}.masthead{min-height:96px;height:auto;padding:18px 0;gap:12px}.header-side{gap:8px;justify-content:flex-end}.brand>span{font-size:21px}.brand small{font-size:11px;letter-spacing:1px}.header-side .quiet-button{font-size:13px;padding:8px}.intro p{font-size:15px}
+  .home-card h2{font-size:25px}.home-card>p,.home-caption{font-size:15px}.home-card .eyebrow,.home-rules p{font-size:12px}.home-rules strong{font-size:14px}
+  .character{padding:18px;gap:0 12px}.character-identity h3{font-size:23px}.race-name,.job-name{font-size:14px}.trait[type=button]{font-size:13px;padding:4px 6px}.flavor,.family-summary{font-size:14px}.birth-job{font-size:12px}.age-summary{gap:8px;flex-wrap:wrap}.age-summary strong{font-size:17px}.age-summary small{font-size:12px}
+  .race-effects>small{font-size:12px}.race-effects>p,.race-effects>p:last-child{font-size:14px}.attribute-row{grid-template-columns:47px minmax(0,1fr) 81px;gap:8px}.attribute-row>strong{font-size:15px}.attribute-row>span{font-size:13px}
+  .town-place>span{font-size:13px}.town-place>small{font-size:11px}.journal-header{padding:20px 16px}.journal-title h2{font-size:23px}.run-status{font-size:13px}.toolbar{padding:12px 16px}.play-controls{gap:12px}.control-button,.speeds button,.auto-control{font-size:14px}.log-window{padding:10px 16px}.log-row{font-size:15px;line-height:46px;min-height:46px;gap:10px}.log-floor,.log-floor.world-location{font-size:12px;width:135px}.log-age{font-size:12px;flex-basis:37px}.journal-footer{font-size:12px;flex-wrap:wrap}.result-actions{flex-wrap:wrap}
+  .creation-dialog{padding:20px}.creation-header h2{font-size:25px}.creation-character{height:72px}.creation-dialog .draw-slot{padding:8px 11px;min-height:70px}.draw-slot>small{font-size:13px}.draw-slot>strong,.creation-dialog #drawJob{font-size:17px}.creation-dialog .trait{font-size:14px}.creation-effects li{padding:10px 11px}.creation-effects strong{font-size:16px}.creation-effects p{font-size:15px}.creation-effects p.effect-secondary{font-size:14px}.creation-dialog #creationStatus{font-size:14px}.creation-actions .primary-button{font-size:15px}.creation-actions .text-button{font-size:14px}
+  .choice-dialog{padding:20px}.choice-dialog .dialog-heading h2{font-size:25px}.choice-scene-label{font-size:14px}#choicePrompt{font-size:16px}.popup-choices .choice-button{padding:15px 12px;gap:10px}.popup-choices .choice-button strong{font-size:16px}.popup-choices .choice-button small{font-size:14px}.choice-modal-footer>span,.choice-modal-footer .auto-control{font-size:13px}.auto-countdown>small,.countdown-heading strong,.countdown-heading button{font-size:13px}.game-tooltip p{font-size:14px}
+}
+@media(max-height:700px){.creation-dialog{padding:16px 20px}.creation-header h2{font-size:24px}.creation-character{height:54px;margin:2px 0 6px}.creation-character .pixel-character{width:36px;height:54px}.creation-dialog .draw-slot{min-height:62px;padding:6px 10px}.creation-dialog .draw-traits{min-height:32px;padding-top:5px}.creation-dialog .creation-effects{min-height:54px;margin:8px 0}.creation-dialog #creationStatus{max-height:50px;margin:6px 0}.creation-timing{margin:6px 0}.creation-timing span{display:none}.creation-actions{padding-top:10px}}
+@media(max-height:560px){.creation-dialog[open]{display:block;height:auto;overflow-y:auto}.creation-character{display:none}.creation-dialog .creation-effects{max-height:180px}.creation-actions{position:sticky;bottom:0}}
+.choice-dialog[open]{display:flex;flex-direction:column;height:min(860px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);overflow:hidden}
+@media(max-width:700px){.floor-row:has(+.unknown-depth):before{display:none}}
+.choice-dialog .dialog-heading,.choice-scene,.choice-dialog .auto-countdown,.choice-modal-footer{flex-shrink:0}
+.choice-dialog .popup-choices{flex:1;min-height:70px;overflow-y:auto;overscroll-behavior:contain;padding:2px;scrollbar-width:thin;scrollbar-color:#53667b transparent}
+.choice-dialog .popup-choices .choice-button{flex-shrink:0;min-height:80px;padding:12px 14px}
+.choice-dialog .choice-modal-footer{position:static;margin-top:12px;padding-top:10px}
+.choice-dialog .auto-countdown{padding:10px 12px;margin-bottom:10px}.choice-dialog #popupAutoLabel,.choice-dialog .auto-countdown>small:last-child{display:none}
+@media(max-height:560px){.choice-dialog .choice-scene>div:first-child{display:none}.choice-dialog .dialog-heading{margin-bottom:7px;padding-bottom:8px}.choice-dialog .choice-scene{margin-bottom:8px}.choice-dialog .dialog-heading h2{font-size:23px}.choice-dialog .choice-modal-footer>span{display:none}.choice-dialog .choice-modal-footer{margin-top:8px}}
+@media(max-height:560px){.choice-dialog[open]{display:block;height:auto;overflow-y:auto;overscroll-behavior:contain}.choice-dialog .popup-choices{overflow:visible;max-height:none}.choice-dialog .choice-modal-footer{position:static}}
