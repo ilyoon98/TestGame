@@ -30,4 +30,11 @@ HEX War Lobby와 Dungeon Chronicle은 기본 포트가 모두 `4173`입니다. �
 
 ## 새 실험 추가
 
-`prototypes/<이름>/`에 실행 파일과 전용 에셋을 함께 넣고, 위 표에 실행 방법을 한 줄 추가합니다. Codex로 작업할 때는 채팅을 실험별로 열고 대상 폴더를 지정합니다.
+[브라우저 실험 템플릿](templates/browser-prototype/)은 설치 없이 실행할 수 있는 HTML, CSS, JavaScript 기본 틀입니다. 저장소 루트에서 `my-experiment`를 새 폴더 이름으로 바꿔 아래 명령을 실행합니다.
+
+```powershell
+Copy-Item -Recurse templates/browser-prototype prototypes/my-experiment
+Invoke-Item prototypes/my-experiment/index.html
+```
+
+복사한 폴더에서 화면과 동작을 수정하고 전용 에셋을 함께 넣습니다. 위 표에 새 실험 이름과 실행 방법을 추가합니다. Codex로 작업할 때는 실험별로 채팅을 열고 대상 폴더를 지정합니다.
