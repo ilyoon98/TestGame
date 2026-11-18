@@ -4,6 +4,7 @@ import {engine} from "./helpers/game-engine.mjs";
 
 test("a battle finishes automatically and waits for the reward choice",()=>{
   const run=engine();
+  assert.equal(run("game.distance"),5);
   run("scheduleAutoBattle();");
   let ticks=0;
   while(run.tick()) assert.ok(++ticks<80,"automatic combat must terminate");
@@ -43,11 +44,12 @@ test("blind automatic combat cannot inspect a hidden enemy plan",()=>{
 
 test("unusable cards and lost body parts do not stall automatic turns",()=>{
   const run=engine();
+  const startDistance=run("game.distance");
   run("game.hand=['heavy','aid']; game.player.body.arms.hp=0; game.player.body.legs.hp=0; game.plan=[];");
   assert.equal(run("chooseAutoAction()"),null);
   assert.equal(run("advanceAutoBattle().endedTurn"),true);
   assert.equal(run("game.round"),2);
-  assert.equal(run("game.distance"),8);
+  assert.equal(run("game.distance"),startDistance-1);
   run("game.hand=['rethink','heavy']; game.stamina=0; advanceAutoBattle();");
   assert.equal(run("game.rethought"),true);
   assert.equal(run("game.selected"),null);
@@ -71,6 +73,7 @@ test("repeated renders, pause, speed, hidden tabs and restart cannot duplicate o
   const oldRun=run.timers.values().next().value.callback;
   run("start();");
   assert.equal(run.timers.size,0);
+  assert.equal(run("game.distance"),5);
   run("scheduleAutoBattle(); globalThis.newTimer=autoTimer;");
   oldRun();
   assert.equal(run("game.enemy.hp"),8);

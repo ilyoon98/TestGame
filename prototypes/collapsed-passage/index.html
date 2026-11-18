@@ -658,7 +658,7 @@ function start(){
     routeTravel=null;
     document.querySelector("#stage").inert=false;
   }
-  game = {phase:"combat", area:"threshold", trail:["threshold"], distance:9, steps:0, turns:0,
+  game = {phase:"combat", area:"threshold", trail:["threshold"], distance:5, steps:0, turns:0,
     player:fighter("수녀",[9,5,7,7,6,7],28), companion:null, pendingCompanion:null, deadCompanions:[], deck:[...starterDeck], rewards:[], acquired:[], log:[], feedback:[], enemy:null, enemyAction:null, stairTreatment:null, qaUses:0, autoNote:"손패와 부상을 살펴 자동으로 전투해요."};
   record("사형수를 위한 기도를 마치자 폭동 경보가 울렸어요. 기도를 받았던 사형수가 뒤에서 쫓아와요.");
   record("폭동으로 풀려난 죄수들이 통로를 막고 있어요. 지상 출구로 가야 해요.");

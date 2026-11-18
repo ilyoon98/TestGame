@@ -14,6 +14,7 @@ test("victory offers three distinct cards, blocks travel, and accepts only one r
   const run=engine();
   run("game.enemy.hp=0; settleTurn();");
   assert.equal(run("game.phase"),"reward");
+  const rewardDistance=run("game.distance");
   assert.equal(run("new Set(game.rewards).size"),3);
   assert.equal(run("game.rewards.every(id=>cards[id].reward)"),true);
   assert.equal(run("game.deck.length"),12);
@@ -22,14 +23,14 @@ test("victory offers three distinct cards, blocks travel, and accepts only one r
   assert.equal(run("recruitCompanion('guard')"),false);
   run("moveTo('duct'); endTurn();");
   assert.equal(run("game.area"),"threshold");
-  assert.equal(run("game.distance"),8);
+  assert.equal(run("game.distance"),rewardDistance);
   assert.equal(run("chooseReward('strike')"),false);
   run("globalThis.picked=game.rewards[0]; chooseReward(picked);");
   assert.equal(run("game.phase"),"route");
   assert.equal(run("game.deck.length"),13);
   assert.equal(run("game.acquired[0]===picked"),true);
   assert.equal(run("chooseReward(picked)"),false);
-  assert.equal(run("game.distance"),8);
+  assert.equal(run("game.distance"),rewardDistance);
 });
 
 test("rewards survive safe rooms and every battle reshuffle without duplicating companion cards",()=>{
