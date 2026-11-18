@@ -26,6 +26,7 @@
 | [HEX War Lobby](prototypes/hex-war-lobby/README.md) | `cd prototypes/hex-war-lobby` 후 `npm ci`, `npm start`. 브라우저에서 `http://localhost:4173`을 엽니다. |
 | [Dungeon Chronicle](prototypes/dungeon-chronicle/README.md) | Node.js 18 이상에서 `cd prototypes/dungeon-chronicle` 후 `npm start`. `http://127.0.0.1:4173`에서 플레이하고 `npm test`로 검증합니다. |
 | [Limbus Check Panel](prototypes/limbus-check-panel/사용법.txt) | Windows x64와 Node.js가 필요합니다. 한국어 OCR을 설치하고 폴더의 `Start.cmd`를 실행합니다. |
+| [Steam 일일 게임 브리핑 스킬](prototypes/steam-epic-daily-brief/steam-epic-daily-brief/SKILL.md) | 매일 오전 9시 Steam 신작·할인·무료 배포를 14개 장르별로 조사합니다. 성인 게임 모아보기와 장르·유형 필터를 제공합니다. `$steam-epic-daily-brief 오늘 전체 장르 조사`로 실행합니다. 저장된 조사 예시는 `cd prototypes/steam-epic-daily-brief` 후 `python steam-epic-daily-brief/scripts/preview_report.py reports/steam-all-genres-2026-11-18.json reports/preview.html --serve`로 엽니다. 검증은 같은 폴더에서 `npm ci`, `npm test`를 실행합니다. |
 
 HEX War Lobby와 Dungeon Chronicle은 기본 포트가 모두 `4173`입니다. 동시에 실행하려면 하나의 포트를 환경 변수 `PORT`(HEX) 또는 `DUNGEON_PORT`(Dungeon)로 바꿉니다.
 

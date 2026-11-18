@@ -1,0 +1,80 @@
+<div id="steam-daily-report" lang="ko">
+  <style>
+    #steam-daily-report { display: grid; gap: calc(var(--font-size-base) * 1.5); color: var(--foreground); }
+    #steam-daily-report .report-heading, #steam-daily-report .report-section { display: grid; gap: calc(var(--font-size-base) * .5); }
+    #steam-daily-report .report-heading { padding-inline-end: 90px; }
+    #steam-daily-report .report-list { display: grid; gap: calc(var(--font-size-base) * 1.25); }
+    #steam-daily-report .report-game { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: calc(var(--font-size-base) * .5) calc(var(--font-size-base) * 1); }
+    #steam-daily-report .report-copy, #steam-daily-report .report-price { display: grid; gap: calc(var(--font-size-base) * .25); }
+    #steam-daily-report .report-price { text-align: end; align-content: start; }
+    #steam-daily-report .report-links { display: flex; flex-wrap: wrap; gap: calc(var(--font-size-base) * .75); }
+    #steam-daily-report a { overflow-wrap: anywhere; }
+    @media (max-width: 460px) {
+      #steam-daily-report .report-game { grid-template-columns: minmax(0, 1fr); }
+      #steam-daily-report .report-price { text-align: start; }
+    }
+  </style>
+  <div class="report-heading">
+    <div class="text-small text-muted">STEAM DAILY</div>
+    <h3>오늘의 게임 브리핑</h3>
+    <div data-meta class="text-small text-muted"></div>
+    <div data-filters class="text-small"></div>
+  </div>
+  <div data-highlights></div>
+  <section class="report-section" data-section="free"><h3>무료로 받을 게임</h3><div class="report-list"></div></section>
+  <hr>
+  <section class="report-section" data-section="new"><h3>주목할 신작</h3><div class="report-list"></div></section>
+  <hr>
+  <section class="report-section" data-section="deals"><h3>살펴볼 할인</h3><div class="report-list"></div></section>
+  <div class="report-section"><div data-limits class="text-small text-muted"></div><div data-sources class="report-links text-small"></div></div>
+</div>
+<script id="steam-daily-report-data" type="application/json">
+{"asOf":"","genres":[],"includeMature":true,"highlights":[],"free":[],"new":[],"deals":[],"emptyMessages":{},"limits":"","sources":[]}
+</script>
+<script>
+(() => {
+  const root = document.getElementById('steam-daily-report');
+  const data = JSON.parse(document.getElementById('steam-daily-report-data').textContent);
+  function make(tag, text, className) {
+    const element = document.createElement(tag);
+    element.textContent = text || '';
+    if (className) element.className = className;
+    return element;
+  }
+  function officialLink(label, url) {
+    const element = make('a', label);
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' && ['store.steampowered.com', 'steamcommunity.com'].includes(parsed.hostname)) {
+        element.href = parsed.href; element.target = '_blank'; element.rel = 'noopener noreferrer';
+      }
+    } catch {}
+    return element;
+  }
+  root.querySelector('[data-meta]').textContent = data.asOf ? `기준: ${data.asOf} KST · 대한민국` : '조사 기준 시각 미입력';
+  root.querySelector('[data-filters]').textContent = `장르: ${data.genres.join(' · ') || '미선택'} · 성인등급 ${data.includeMature ? '포함' : '제외'}`;
+  const highlights = root.querySelector('[data-highlights]');
+  for (const item of data.highlights.slice(0, 3)) highlights.append(make('p', item));
+  for (const category of ['free', 'new', 'deals']) {
+    const list = root.querySelector(`[data-section="${category}"] .report-list`);
+    for (const game of data[category]) {
+      const article = make('article', '', 'report-game');
+      const copy = make('div', '', 'report-copy');
+      copy.append(officialLink(game.title, game.url));
+      if (game.status) copy.append(make('span', game.status, 'viz-badge'));
+      copy.append(make('div', game.description));
+      copy.append(make('div', [game.genre, game.korean, game.rating, game.mature ? '성인등급' : ''].filter(Boolean).join(' · '), 'text-small text-muted'));
+      if (game.note) copy.append(make('div', game.note, 'text-small'));
+      const price = make('div', '', 'report-price tabular-nums');
+      if (game.originalPrice) price.append(make('s', game.originalPrice, 'text-small text-muted'));
+      price.append(make('strong', game.price || '한국 가격 미확인'));
+      if (game.discount) price.append(make('span', game.discount, 'viz-badge'));
+      if (game.deadline) price.append(make('div', game.deadline, 'text-small'));
+      article.append(copy, price); list.append(article);
+    }
+    if (!data[category].length) list.append(make('p', data.emptyMessages[category] || '확인 결과 미입력', 'text-small text-muted'));
+  }
+  root.querySelector('[data-limits]').textContent = data.limits;
+  for (const source of data.sources) root.querySelector('[data-sources]').append(officialLink(source.label, source.url));
+})();
+</script>

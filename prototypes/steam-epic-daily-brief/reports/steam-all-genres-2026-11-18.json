@@ -1,0 +1,931 @@
+{
+  "asOf": "2026-11-18 15:10",
+  "genres": [
+    "전체 14개 장르·유형"
+  ],
+  "includeMature": true,
+  "groups": [
+    {
+      "name": "RPG",
+      "free": [],
+      "new": [
+        {
+          "title": "등불이 이끄는 곳",
+          "url": "https://store.steampowered.com/app/5445740/?cc=kr&l=koreana",
+          "description": "중국 민속 세계에서 수련 일정·자원·계략을 조합하는 싱글 플레이 육성 RPG.",
+          "genre": "시간 관리 · 전략 · RPG · 로그라이트",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 16일 출시",
+          "note": "짧은 선택을 쌓아 캐릭터를 키우는 저가 신작 후보. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "3,350원",
+          "price": "2,850원",
+          "discount": "−15%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5445740/4fe7ea8cd1288c1013f78d93f27de77dd7973e4a/capsule_184x69.jpg?t=1794900433",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5445740/3a4b37f0c26090a2b102457177727f0190a8cfb6/header.jpg?t=1794900433",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5445740/4fe7ea8cd1288c1013f78d93f27de77dd7973e4a/capsule_231x87.jpg?t=1794900433"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "Kingdom Come: Deliverance II",
+          "url": "https://store.steampowered.com/app/1771300/?cc=kr&l=koreana",
+          "description": "15세기 보헤미아를 탐험하며 선택과 전투로 헨리의 이야기를 이어 가는 오픈 월드 RPG.",
+          "genre": "RPG · 중세 · 오픈 월드 · 싱글 플레이어",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 92% · 1,683개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "이야기와 중세 세계 탐험을 중시한다면 우선 살펴볼 할인. 공식 성인 콘텐츠 안내 있음.",
+          "originalPrice": "60,800원",
+          "price": "20,060원",
+          "discount": "−67%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/93e28946c46f09d761bbfab1e17e8c1c4a8323a0/capsule_184x69.jpg?t=1777975568",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/header.jpg?t=1777975568",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/93e28946c46f09d761bbfab1e17e8c1c4a8323a0/capsule_231x87.jpg?t=1777975568"
+          ],
+          "matureContent": true
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "액션",
+      "free": [],
+      "new": [
+        {
+          "title": "Last Buzz",
+          "url": "https://store.steampowered.com/app/4927030/?cc=kr&l=koreana",
+          "description": "2~6명이 인간과 파리로 나뉘어 추격·잠입·음식 훔치기를 벌이는 비대칭 파티 게임.",
+          "genre": "앞서 해보기 · 파티 게임 · 멀티플레이어 · 잠입",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 사용자 평가 2개",
+          "mature": false,
+          "status": "2026년 11월 17일 출시 · 앞서 해보기",
+          "note": "함께할 친구가 있을 때 살펴볼 후보. 앞서 해보기 단계. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "5,600원",
+          "price": "4,760원",
+          "discount": "−15%",
+          "deadline": "할인 종료 2026-11-25 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4927030/0f5341cc8980178dc857adea004890d5df835759/capsule_184x69.jpg?t=1794962072",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4927030/af75e73122fae7958c0c496f3734b5db37d19f5d/header.jpg?t=1794962072",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4927030/0f5341cc8980178dc857adea004890d5df835759/capsule_231x87.jpg?t=1794962072"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "P의 거짓 (Lies of P)",
+          "url": "https://store.steampowered.com/app/1627720/?cc=kr&l=koreana",
+          "description": "피노키오를 어두운 동화로 재해석한 소울라이크. 무기 조합과 정교한 방어가 전투의 중심.",
+          "genre": "소울라이크 · 다크 판타지 · 액션 · 싱글 플레이어",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 89% · 468개",
+          "mature": true,
+          "status": "본편 할인",
+          "note": "본편 기준 가격이며 DLC 포함판과 구분. 공식 데이터상 이용 연령 19세.",
+          "originalPrice": "64,800원",
+          "price": "32,400원",
+          "discount": "−50%",
+          "deadline": "할인 종료 2026-12-02 02:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627720/capsule_184x69.jpg?t=1794963244",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627720/header.jpg?t=1794963244",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627720/capsule_231x87.jpg?t=1794963244"
+          ],
+          "matureContent": true
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "어드벤처",
+      "free": [],
+      "new": [
+        {
+          "title": "Raku",
+          "url": "https://store.steampowered.com/app/5450130/?cc=kr&l=koreana",
+          "description": "교토의 사계절과 사찰을 여행하며 전통 활동과 요괴 세계를 만나는 픽셀 아트 어드벤처.",
+          "genre": "어드벤처 · 캐주얼 · RPG · 걷기 시뮬레이션",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "전투보다 느긋한 여행과 이야기를 찾을 때 살펴볼 신작. 현재 정가 판매. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "",
+          "price": "11,000원",
+          "discount": "",
+          "deadline": "",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5450130/12ab9696a214cfa8dbae209652e206a94fab469e/capsule_184x69.jpg?t=1794927129",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5450130/e1ca7f013bdcef019551ebe0ba5dfa8a695dd43a/header.jpg?t=1794927129",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5450130/12ab9696a214cfa8dbae209652e206a94fab469e/capsule_231x87.jpg?t=1794927129"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "로그라이크·로그라이트",
+      "free": [],
+      "new": [
+        {
+          "title": "Australia Did It: End-of-the-World Railway Defense Business",
+          "url": "https://store.steampowered.com/app/2396130/?cc=kr&l=koreana",
+          "description": "화물 열차를 지키며 유닛을 배치·합성하는 턴제 방어와 역탄막 슈팅의 결합.",
+          "genre": "타워 디펜스 · 탄막 지옥 · 액션 로그라이크 · 턴제 전술",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 전체 긍정 75% · 12개",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "전술 배치와 전투가 번갈아 나오는 독특한 구조를 찾는다면 후보.",
+          "originalPrice": "17,000원",
+          "price": "15,300원",
+          "discount": "−10%",
+          "deadline": "할인 종료 2026-12-02 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2396130/56599b697fbab2a02c9cb69fe844ea354b905e84/capsule_184x69.jpg?t=1794938777",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2396130/539d31e1e3a5c49971cae9fdeb7fc0a79a4bc5d4/header.jpg?t=1794938777",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2396130/56599b697fbab2a02c9cb69fe844ea354b905e84/capsule_231x87.jpg?t=1794938777"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "Skul: The Hero Slayer",
+          "url": "https://store.steampowered.com/app/1147560/?cc=kr&l=koreana",
+          "description": "해골을 바꿔 능력을 전환하고 매번 다른 빌드로 싸우는 2D 액션 로그라이트.",
+          "genre": "인디 · 액션 · 액션 로그라이크 · 픽셀 그래픽",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 91% · 95개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "여러 전투 스타일을 반복해서 실험하기 좋은 할인 후보.",
+          "originalPrice": "20,500원",
+          "price": "10,250원",
+          "discount": "−50%",
+          "deadline": "할인 종료 2026-12-02 02:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1147560/capsule_184x69.jpg?t=1774420210",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1147560/header.jpg?t=1774420210",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1147560/capsule_231x87.jpg?t=1774420210"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "전략",
+      "free": [],
+      "new": [
+        {
+          "title": "앨로이스 택틱스(ALOES Tactics)",
+          "url": "https://store.steampowered.com/app/5509420/?cc=kr&l=koreana",
+          "description": "중세 판타지 부대를 편성해 전투를 진행하는 오토 배틀 로그라이크 전략 게임.",
+          "genre": "오토 배틀러 · 전략 · 로그라이크 · 덱빌딩",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "전략에 대표 분류하고 덱빌딩·자동 전투 태그를 함께 표기. 중복 수록하지 않음. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "4,450원",
+          "price": "3,340원",
+          "discount": "−25%",
+          "deadline": "할인 종료 2026-12-02 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5509420/bbb92f5d805946c128784b4c5425e60ae0e08973/capsule_184x69.jpg?t=1794935529",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5509420/b4e57ab3702de9e82f64711338e17bd58a0b0c40/header.jpg?t=1794935529",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5509420/bbb92f5d805946c128784b4c5425e60ae0e08973/capsule_231x87.jpg?t=1794935529"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "토탈워: 워해머 3",
+          "url": "https://store.steampowered.com/app/1142710/?cc=kr&l=koreana",
+          "description": "턴제 제국 운영과 대규모 실시간 전투를 결합한 판타지 전략 게임.",
+          "genre": "전략 · 턴제 전략 · 대전략 · 실시간 전략",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 79% · 970개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "이번 목록의 큰 할인 폭을 보이는 후보. 본편 가격이며 추가 종족·DLC는 별도. 공식 성인 콘텐츠 안내 있음.",
+          "originalPrice": "60,000원",
+          "price": "9,000원",
+          "discount": "−85%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1142710/capsule_184x69.jpg?t=1790321531",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1142710/header.jpg?t=1790321531",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1142710/capsule_231x87.jpg?t=1790321531"
+          ],
+          "matureContent": true
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "시뮬레이션·경영",
+      "free": [],
+      "new": [
+        {
+          "title": "SonaCraft – Instrument Repair",
+          "url": "https://store.steampowered.com/app/5459010/?cc=kr&l=koreana",
+          "description": "오래된 악기를 분해하고 결함을 찾아 부품 교체·조율·음향 테스트를 하는 공방 시뮬레이션.",
+          "genre": "시뮬레이션 · 직업 시뮬레이션 · 취미 시뮬레이션 · 캐주얼",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 17일 출시 · 앞서 해보기",
+          "note": "차분한 수리 과정을 즐기고 싶을 때 살펴볼 앞서 해보기 신작. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "14,500원",
+          "price": "13,050원",
+          "discount": "−10%",
+          "deadline": "할인 종료 2026-11-25 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5459010/51ccf222b37a493b1ef4a9ad76702679d9259c50/capsule_184x69.jpg?t=1794950462",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5459010/13018b9685696daa1d5b9ddda7c9cb2acc1f6817/header.jpg?t=1794950462",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5459010/51ccf222b37a493b1ef4a9ad76702679d9259c50/capsule_231x87.jpg?t=1794950462"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "Cities: Skylines II",
+          "url": "https://store.steampowered.com/app/949230/?cc=kr&l=koreana",
+          "description": "도로·서비스·경제를 설계하며 작은 도시를 대도시로 키우는 도시 건설 시뮬레이션.",
+          "genre": "도시 건설 · 시뮬레이션 · 건설 · 샌드박스",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 최근 30일 긍정 76% · 666개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "11/20 새벽 할인 종료. 시스템 요구 사항과 최근 평가를 함께 확인할 후보.",
+          "originalPrice": "55,000원",
+          "price": "38,500원",
+          "discount": "−30%",
+          "deadline": "할인 종료 2026-11-20 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/949230/2b264fcfffbdc89083c626e70d8e5f0b352672a9/capsule_184x69.jpg?t=1794506466",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/949230/header.jpg?t=1794506466",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/949230/2b264fcfffbdc89083c626e70d8e5f0b352672a9/capsule_231x87.jpg?t=1794506466"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "생존·제작",
+      "free": [],
+      "new": [
+        {
+          "title": "Stack Island - Survival card game",
+          "url": "https://store.steampowered.com/app/2322420/?cc=kr&l=koreana",
+          "description": "수상한 섬에서 자원 카드를 조합해 도구를 만들고 퍼즐을 풀며 탈출하는 생존 게임.",
+          "genre": "시뮬레이션 · 카드 게임 · 생존 · 크래프팅",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 전체 긍정 70% · 10개",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "카드 조합형 생존을 찾는다면 후보. 현재 정가 판매.",
+          "originalPrice": "",
+          "price": "10,500원",
+          "discount": "",
+          "deadline": "",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322420/b5e80c188710dab7a492e1e27503b9fc6654930b/capsule_184x69.jpg?t=1794933748",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322420/37d7f7f03c9bae92585c975db24ae40a3358e4e1/header.jpg?t=1794933748",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322420/b5e80c188710dab7a492e1e27503b9fc6654930b/capsule_231x87.jpg?t=1794933748"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "ZED ZONE",
+          "url": "https://store.steampowered.com/app/1211600/?cc=kr&l=koreana",
+          "description": "좀비 재난 지역에서 자원을 수집하고 은신처와 장비를 마련하며 탈출을 준비하는 생존 게임.",
+          "genre": "생존 · 좀비 · 온라인 협동 · 픽셀 그래픽",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 78% · 1,099개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "11/20 새벽 할인 종료. 정식 출시일 표기가 11/5라 최근 7일 신작에는 넣지 않음.",
+          "originalPrice": "13,500원",
+          "price": "8,100원",
+          "discount": "−40%",
+          "deadline": "할인 종료 2026-11-20 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1211600/efa28f2c599298ab7049bb994e6ef7ead9109076/capsule_184x69_alt_assets_2.jpg?t=1794911298",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1211600/aac7446006d1fb3898eccf697406d0c357cf20a3/header_alt_assets_2.jpg?t=1794911298",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1211600/efa28f2c599298ab7049bb994e6ef7ead9109076/capsule_231x87_alt_assets_2.jpg?t=1794911298"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "공포",
+      "free": [],
+      "new": [
+        {
+          "title": "The Further",
+          "url": "https://store.steampowered.com/app/5524120/?cc=kr&l=koreana",
+          "description": "1970년대 장비로 증거를 모으고 영체를 식별하는 1~4인 협동 유령 조사 게임.",
+          "genre": "공포 · 온라인 협동 · 심리적 공포 · 생존 공포",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 17일 출시 · 앞서 해보기",
+          "note": "공포 협동을 찾는다면 후보. 앞서 해보기이며 공식 성인 콘텐츠 안내 있음. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "",
+          "price": "8,950원",
+          "discount": "",
+          "deadline": "",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5524120/d1521546c04a4ff730b46d6202e3c12eae975e08/capsule_184x69.jpg?t=1794948979",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5524120/d03140a1931665e21ba0744b14e4b570ce4314d5/header.jpg?t=1794948979",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5524120/d1521546c04a4ff730b46d6202e3c12eae975e08/capsule_231x87.jpg?t=1794948979"
+          ],
+          "matureContent": true
+        }
+      ],
+      "deals": [
+        {
+          "title": "CloverPit",
+          "url": "https://store.steampowered.com/app/3314790/?cc=kr&l=koreana",
+          "description": "기묘한 방에서 슬롯 조합과 아이템 시너지로 빚 상환을 시도하는 심리 공포 로그라이트.",
+          "genre": "도박 · 로그라이크 · 로그라이트 · 심리적 공포",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 87% · 327개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "점프 스케어 중심보다 불안한 분위기와 반복 빌드를 원하는 경우 살펴볼 후보.",
+          "originalPrice": "11,000원",
+          "price": "7,700원",
+          "discount": "−30%",
+          "deadline": "할인 종료 2026-11-29 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3314790/708aa35adb8f17727284204955531d3ca237b6a4/capsule_184x69.jpg?t=1794909983",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3314790/8ba81356b84aa937573fa29fdd708dbd96b01537/header.jpg?t=1794909983",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3314790/708aa35adb8f17727284204955531d3ca237b6a4/capsule_231x87.jpg?t=1794909983"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "퍼즐",
+      "free": [],
+      "new": [
+        {
+          "title": "The Heir: Steampunk Escape Room",
+          "url": "https://store.steampowered.com/app/4959760/?cc=kr&l=koreana",
+          "description": "빅토리아 시대 실험실의 기계 장치와 단서를 풀어 가는 1인칭 스팀펑크 방탈출.",
+          "genre": "방 탈출 · 숨은 그림 및 물체 · 포인트 앤드 클릭 · 미스터리",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 사용자 평가 1개",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "기계 장치·환경 퍼즐을 천천히 풀고 싶을 때 살펴볼 신작. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "11,000원",
+          "price": "9,350원",
+          "discount": "−15%",
+          "deadline": "할인 종료 2026-12-02 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4959760/038747bca408f25973c0aac3435fe8d7a0a8fc93/capsule_184x69.jpg?t=1794953542",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4959760/64e2040bf481a6154f8b0c9156583f0bead4f145/header.jpg?t=1794953542",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4959760/038747bca408f25973c0aac3435fe8d7a0a8fc93/capsule_231x87.jpg?t=1794953542"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "Order of the Sinking Star",
+          "url": "https://store.steampowered.com/app/499170/?cc=kr&l=koreana",
+          "description": "여러 영웅의 능력과 규칙이 연결되는 대규모 퍼즐 어드벤처.",
+          "genre": "퍼즐 · 어드벤처 · 창고지기 · 탐험",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 96% · 1,358개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "많은 퍼즐을 오래 파고들고 싶은 이용자를 위한 할인 후보.",
+          "originalPrice": "31,000원",
+          "price": "24,800원",
+          "discount": "−20%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/499170/6932c737232e6b2ba967b37509f3d38c6e063706/capsule_184x69.jpg?t=1793039241",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/499170/deda420d9e42288f4734a068c707f4c156203969/header.jpg?t=1793039241",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/499170/6932c737232e6b2ba967b37509f3d38c6e063706/capsule_231x87.jpg?t=1793039241"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "플랫포머·메트로배니아",
+      "free": [],
+      "new": [
+        {
+          "title": "Tool Land",
+          "url": "https://store.steampowered.com/app/3669160/?cc=kr&l=koreana",
+          "description": "서로 다른 도구의 기능을 발견하며 세계를 탐험하는 2D 퍼즐 플랫포머.",
+          "genre": "퍼즐 플랫폼 · 2D 플랫폼 · 퍼즐 · 플랫폼",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 사용자 평가 6개",
+          "mature": false,
+          "status": "2026년 11월 16일 출시",
+          "note": "전투보다 도구 사용과 탐색 중심의 저가 신작을 찾을 때 후보. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "5,600원",
+          "price": "5,040원",
+          "discount": "−10%",
+          "deadline": "할인 종료 2026-11-24 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669160/31726e4bd084c86d185483e7766deec63e335f4e/capsule_184x69.jpg?t=1794828713",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669160/29632fba27d3242444a366769903007368de7a1f/header.jpg?t=1794828713",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669160/31726e4bd084c86d185483e7766deec63e335f4e/capsule_231x87.jpg?t=1794828713"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "ENDER MAGNOLIA: Bloom in the Mist",
+          "url": "https://store.steampowered.com/app/2725260/?cc=kr&l=koreana",
+          "description": "호문쿨루스의 힘을 빌려 폐허를 탐색하고 강적을 상대하는 다크 판타지 메트로배니아.",
+          "genre": "메트로배니아 · 2D · 여주인공 · 다크 판타지",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 92% · 143개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "분위기 있는 2D 탐험과 보스전을 선호한다면 살펴볼 할인.",
+          "originalPrice": "27,000원",
+          "price": "14,850원",
+          "discount": "−45%",
+          "deadline": "할인 종료 2026-11-23 00:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725260/capsule_184x69.jpg?t=1740447961",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725260/header.jpg?t=1740447961",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725260/capsule_231x87.jpg?t=1740447961"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "스포츠·레이싱",
+      "free": [],
+      "new": [
+        {
+          "title": "Micro Grid: Racing Team Manager",
+          "url": "https://store.steampowered.com/app/5434480/?cc=kr&l=koreana",
+          "description": "차량 개발·드라이버 계약·날씨 판단·피트 전략을 맡는 싱글 시터 레이싱 팀 경영 게임.",
+          "genre": "경영 · 전략 · 레이싱 · 시뮬레이션",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 16일 출시",
+          "note": "직접 운전보다 팀 운영과 레이스 의사결정을 즐기고 싶을 때 후보. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "22,500원",
+          "price": "20,250원",
+          "discount": "−10%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5434480/bc4ae4862c4219c31ba30cae39248eb5431d833e/capsule_184x69.jpg?t=1794845185",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5434480/2ff52ef4da8456d08184d51154be89e971402d92/header.jpg?t=1794845185",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5434480/bc4ae4862c4219c31ba30cae39248eb5431d833e/capsule_231x87.jpg?t=1794845185"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "The Crew Motorfest",
+          "url": "https://store.steampowered.com/app/2698940/?cc=kr&l=koreana",
+          "description": "하와이의 오픈 월드에서 다양한 차량과 테마 레이스를 즐기는 온라인 레이싱.",
+          "genre": "레이싱 · 오픈 월드 · 운전 · 멀티플레이어",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 77% · 445개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "본편 가격. Ubisoft 계정·온라인 요구 사항 확인 필요. 5시간 체험은 무료 소장과 다름.",
+          "originalPrice": "69,000원",
+          "price": "13,800원",
+          "discount": "−80%",
+          "deadline": "할인 종료 2026-11-25 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2698940/b10d861da7e81ea1ad0af0283e047c5d08ec86d7/capsule_184x69.jpg?t=1791551745",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2698940/715d1f1e53a55a46ca00e689a1b7651c17fa592f/header.jpg?t=1791551745",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2698940/b10d861da7e81ea1ad0af0283e047c5d08ec86d7/capsule_231x87.jpg?t=1791551745"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "리듬·음악",
+      "free": [],
+      "new": [
+        {
+          "title": "Purrfect Beats",
+          "url": "https://store.steampowered.com/app/4866510/?cc=kr&l=koreana",
+          "description": "고양이와 신스웨이브 음악을 따라 한 버튼으로 박자를 맞추는 리듬 게임.",
+          "genre": "리듬 · 음악 · 1980년대 · 복고풍",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 전체 긍정 100% · 15개",
+          "mature": false,
+          "status": "2026년 11월 12일 출시",
+          "note": "간단한 조작으로 리듬에 집중하고 싶은 경우의 저가 신작 후보.",
+          "originalPrice": "6,700원",
+          "price": "5,360원",
+          "discount": "−20%",
+          "deadline": "할인 종료 2026-11-27 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4866510/acbed1bef8d028291e90cce744d70e3bf3ad880c/capsule_184x69.jpg?t=1794510976",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4866510/5380388116eeb22986375e66536e2d5d1fdfc180/header.jpg?t=1794510976",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4866510/acbed1bef8d028291e90cce744d70e3bf3ad880c/capsule_231x87.jpg?t=1794510976"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "하츠네 미쿠 Project DIVA MEGA39’s+",
+          "url": "https://store.steampowered.com/app/1761390/?cc=kr&l=koreana",
+          "description": "하츠네 미쿠의 노래와 뮤직비디오를 따라 입력하는 보컬로이드 리듬 게임.",
+          "genre": "리듬 · 애니메이션 · 아케이드 · 귀여운",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 최근 30일 긍정 95% · 152개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "본편 기준 가격이며 추가 곡 DLC와 구분. 일본어 음성·한국어 인터페이스 지원.",
+          "originalPrice": "44,800원",
+          "price": "17,920원",
+          "discount": "−60%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1761390/capsule_184x69_koreana.jpg?t=1763684613",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1761390/header_koreana.jpg?t=1763684613",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1761390/capsule_231x87_koreana.jpg?t=1763684613"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "방치형",
+      "free": [],
+      "new": [
+        {
+          "title": "Underbloom",
+          "url": "https://store.steampowered.com/app/5340870/?cc=kr&l=koreana",
+          "description": "버섯의 균사망을 확장하고 아홉 세계를 깨우는 차분한 인크리멘탈 게임.",
+          "genre": "캐주얼 · 인크리멘탈 · 아이들러 · 픽셀 그래픽",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 사용자 평가 2개",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "엔딩이 있는 짧은 성장 게임을 찾을 때 살펴볼 2천 원 미만 신작. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "3,300원",
+          "price": "1,980원",
+          "discount": "−40%",
+          "deadline": "할인 종료 2026-12-02 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5340870/33438890a6cc234016b92d5cb628580fc771b819/capsule_184x69.jpg?t=1794940251",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5340870/fa63a0fdbf38c83c6482fc148073c806df6507e6/header.jpg?t=1794940251",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5340870/33438890a6cc234016b92d5cb628580fc771b819/capsule_231x87.jpg?t=1794940251"
+          ],
+          "matureContent": false
+        },
+        {
+          "title": "Only Sheep",
+          "url": "https://store.steampowered.com/app/5506410/?cc=kr&l=koreana",
+          "description": "양과 잔디깎이를 늘리며 목장을 확장하고 귀환 시점을 고르는 점진 성장 게임.",
+          "genre": "캐주얼 · 인크리멘탈 · 시뮬레이션 · 동물",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 사용자 평가 없음",
+          "mature": false,
+          "status": "2026년 11월 17일 출시",
+          "note": "오프라인 싱글 플레이. 방치형 구역에는 자동화·인크리멘탈 유형으로 포함. 평가 표본이 부족해 완성도 판단은 유보.",
+          "originalPrice": "8,950원",
+          "price": "6,710원",
+          "discount": "−25%",
+          "deadline": "할인 종료 2026-12-02 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5506410/abeaadd0aad4658ae833fefc0f50a5747c92d450/capsule_184x69.jpg?t=1794951568",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5506410/3d27f470e53d6c9885ed389680693a2e65efe8ea/header.jpg?t=1794951568",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5506410/abeaadd0aad4658ae833fefc0f50a5747c92d450/capsule_231x87.jpg?t=1794951568"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "Scritchy Scratchy",
+          "url": "https://store.steampowered.com/app/3948120/?cc=kr&l=koreana",
+          "description": "복권을 긁어 재화를 얻고 자동 긁기와 업그레이드를 해금하는 인크리멘탈 게임.",
+          "genre": "인크리멘탈 · 도박 · 아이들러 · 자원관리",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 최근 30일 긍정 90% · 829개",
+          "mature": false,
+          "status": "본편 할인",
+          "note": "11/20 새벽 할인 종료. 도박 소재의 게임으로 분류되며 이 목록은 상품 정보만 제공.",
+          "originalPrice": "5,750원",
+          "price": "3,740원",
+          "discount": "−35%",
+          "deadline": "할인 종료 2026-11-20 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3948120/3d9dad2f02502bbe5c3d4b1566e5ee250d4a327f/capsule_184x69_alt_assets_0.jpg?t=1794326919",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3948120/dc726b9c35076bb0bfbf63a664bbf61638cbc2ab/header_alt_assets_0.jpg?t=1794326919",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3948120/3d9dad2f02502bbe5c3d4b1566e5ee250d4a327f/capsule_231x87_alt_assets_0.jpg?t=1794326919"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    },
+    {
+      "name": "덱빌딩·자동 전투",
+      "free": [],
+      "new": [
+        {
+          "title": "Dungeonbound",
+          "url": "https://store.steampowered.com/app/5200620/?cc=kr&l=koreana",
+          "description": "전사·마법사·도적을 던전으로 보내 전리품을 회수하고 장비를 합성하는 레트로 1인칭 오토 배틀러.",
+          "genre": "오토 배틀러 · 비동기 멀티플레이어 · 판타지 · 던전 크롤러",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 전체 긍정 82% · 350개",
+          "mature": false,
+          "status": "2026년 11월 16일 출시",
+          "note": "자동 전투와 영구 성장을 반복하는 신작. 현재 공식 설명을 기준으로 정리.",
+          "originalPrice": "13,500원",
+          "price": "12,150원",
+          "discount": "−10%",
+          "deadline": "할인 종료 2026-12-01 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5200620/e30d65018c1956b58d1664ed7e52fdd799a84197/capsule_184x69.jpg?t=1794917663",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5200620/b3a32d9086038acf42c9457c2bc062f93d90ea3e/header.jpg?t=1794917663",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5200620/e30d65018c1956b58d1664ed7e52fdd799a84197/capsule_231x87.jpg?t=1794917663"
+          ],
+          "matureContent": false
+        }
+      ],
+      "deals": [
+        {
+          "title": "Slay the Spire 2",
+          "url": "https://store.steampowered.com/app/2868840/?cc=kr&l=koreana",
+          "description": "카드·유물의 시너지를 설계해 반복 등반하는 로그라이크 덱빌더.",
+          "genre": "로그라이크 · 카드 게임 · 덱빌딩 · 협동",
+          "korean": "한국어 인터페이스",
+          "rating": "Steam 최근 30일 긍정 80% · 4,752개",
+          "mature": false,
+          "status": "본편 할인 · 앞서 해보기",
+          "note": "앞서 해보기. 이전 덱빌딩 보고서와 동일한 할인가 21,600원으로 확인.",
+          "originalPrice": "27,000원",
+          "price": "21,600원",
+          "discount": "−20%",
+          "deadline": "할인 종료 2026-11-27 03:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/fb0ad136e9eaa4297a1ab3440d88ecb7209f44a2/capsule_184x69.jpg?t=1787169309",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/b0958d387dc366211e0f353443710cfcf9fdb020/header.jpg?t=1787169309",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/fb0ad136e9eaa4297a1ab3440d88ecb7209f44a2/capsule_231x87.jpg?t=1787169309"
+          ],
+          "matureContent": false
+        },
+        {
+          "title": "9 Kings 나인 킹즈",
+          "url": "https://store.steampowered.com/app/2784470/?cc=kr&l=koreana",
+          "description": "건물·병력·카드 조합으로 왕국을 확장하고 대규모 전투를 버티는 로그라이크 전략 게임.",
+          "genre": "전략 · RPG · 로그라이크 · 멀티플레이어",
+          "korean": "한국어 인터페이스·자막",
+          "rating": "Steam 최근 30일 긍정 87% · 736개",
+          "mature": false,
+          "status": "11/12 정식 출시 전환 · 본편 할인",
+          "note": "11/12 정식 출시 표기(기존 앞서 해보기 작품). 이전 보고서와 동일한 할인가 9,950원.",
+          "originalPrice": "19,900원",
+          "price": "9,950원",
+          "discount": "−50%",
+          "deadline": "할인 종료 2026-11-27 04:00 KST",
+          "thumbnailUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2784470/1fe9b65362ae25d8f86e743fc37c1e71bc2e46e1/capsule_184x69_koreana.jpg?t=1794803229",
+          "thumbnailAlternates": [
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2784470/432782f54e92648a38696ace5fde4924814cfc2e/header_koreana.jpg?t=1794803229",
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2784470/1fe9b65362ae25d8f86e743fc37c1e71bc2e46e1/capsule_231x87_koreana.jpg?t=1794803229"
+          ],
+          "matureContent": false
+        }
+      ],
+      "emptyMessages": {
+        "free": "확인한 범위에서 현재 무료 소장 배포 없음.",
+        "new": "이번 장르의 별도 신작 선정 없음.",
+        "deals": "별도 할인 추천 없음. 신작의 출시 할인은 위 가격에 함께 표시."
+      }
+    }
+  ],
+  "highlights": [
+    "큰 할인: 토탈워: 워해머 3 9,000원(−85%), 킹덤 컴: 딜리버런스 II 20,060원(−67%).",
+    "11/20 03:00 KST 종료: ZED ZONE 8,100원, Scritchy Scratchy 3,740원, Cities: Skylines II 38,500원.",
+    "현재 무료 소장 배포는 확인한 범위에서 찾지 못했습니다. 데모·상시 무료·시간 제한 체험은 무료 소장에 넣지 않았습니다."
+  ],
+  "limits": "2026-11-18에 14개 장르·유형의 공식 태그별 신작·할인 목록과 29개 선정 상품의 공개 스토어 데이터·상품 페이지를 확인했습니다. 신작은 최근 7일 본편만 선정했으며 DLC·데모·카드 제작 유틸리티를 제외했습니다. 전체 Steam 카탈로그의 전수 조사는 아닙니다. 음악 태그 목록은 일시적 요청 제한으로 확인하지 못했으며 리듬 태그와 개별 상품으로 보완했습니다. 성인등급 포함 상태지만 연령·로그인·지역 제한 상품의 완전한 포괄을 보장하지 않습니다. 계정 설정은 변경하지 않았습니다. 가격은 KRW 응답과 동일 앱 본편 구매 옵션을 대조했고 종료는 상품 페이지 내 discount_end_date(Unix 시각)를 KST로 변환했습니다. 최근 평가는 스토어 집계 기준이며 비주제성 리뷰 제외 정책이 반영될 수 있습니다. 신작의 적은 표본은 별도로 표시했습니다. 무료 소장은 무료 할인 검색 0건과 공식 도메인 공지 검색 범위에서 확인했으며 배포 자체가 전혀 없다고 단정하지 않습니다. 이전 보고서와 비교 가능한 Slay the Spire 2·9 Kings의 가격만 동일함을 확인했고, 나머지는 첫 전체 장르 보고입니다.",
+  "sources": [
+    {
+      "label": "Steam 무료 할인 검색(0건)",
+      "url": "https://store.steampowered.com/search/?maxprice=free&specials=1"
+    },
+    {
+      "label": "Steam 공지 검색: free to keep",
+      "url": "https://store.steampowered.com/news/search/?term=free%20to%20keep"
+    },
+    {
+      "label": "등불이 이끄는 곳 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5445740&cc=kr&l=koreana"
+    },
+    {
+      "label": "Kingdom Come: Deliverance II 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1771300&cc=kr&l=koreana"
+    },
+    {
+      "label": "Last Buzz 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=4927030&cc=kr&l=koreana"
+    },
+    {
+      "label": "P의 거짓 (Lies of P) 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1627720&cc=kr&l=koreana"
+    },
+    {
+      "label": "Raku 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5450130&cc=kr&l=koreana"
+    },
+    {
+      "label": "Australia Did It: End-of-the-World Railway Defense Business 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2396130&cc=kr&l=koreana"
+    },
+    {
+      "label": "Skul: The Hero Slayer 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1147560&cc=kr&l=koreana"
+    },
+    {
+      "label": "앨로이스 택틱스(ALOES Tactics) 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5509420&cc=kr&l=koreana"
+    },
+    {
+      "label": "토탈워: 워해머 3 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1142710&cc=kr&l=koreana"
+    },
+    {
+      "label": "SonaCraft – Instrument Repair 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5459010&cc=kr&l=koreana"
+    },
+    {
+      "label": "Cities: Skylines II 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=949230&cc=kr&l=koreana"
+    },
+    {
+      "label": "Stack Island - Survival card game 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2322420&cc=kr&l=koreana"
+    },
+    {
+      "label": "ZED ZONE 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1211600&cc=kr&l=koreana"
+    },
+    {
+      "label": "The Further 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5524120&cc=kr&l=koreana"
+    },
+    {
+      "label": "CloverPit 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=3314790&cc=kr&l=koreana"
+    },
+    {
+      "label": "The Heir: Steampunk Escape Room 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=4959760&cc=kr&l=koreana"
+    },
+    {
+      "label": "Order of the Sinking Star 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=499170&cc=kr&l=koreana"
+    },
+    {
+      "label": "Tool Land 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=3669160&cc=kr&l=koreana"
+    },
+    {
+      "label": "ENDER MAGNOLIA: Bloom in the Mist 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2725260&cc=kr&l=koreana"
+    },
+    {
+      "label": "Micro Grid: Racing Team Manager 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5434480&cc=kr&l=koreana"
+    },
+    {
+      "label": "The Crew Motorfest 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2698940&cc=kr&l=koreana"
+    },
+    {
+      "label": "Purrfect Beats 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=4866510&cc=kr&l=koreana"
+    },
+    {
+      "label": "하츠네 미쿠 Project DIVA MEGA39’s+ 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=1761390&cc=kr&l=koreana"
+    },
+    {
+      "label": "Underbloom 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5340870&cc=kr&l=koreana"
+    },
+    {
+      "label": "Only Sheep 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5506410&cc=kr&l=koreana"
+    },
+    {
+      "label": "Scritchy Scratchy 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=3948120&cc=kr&l=koreana"
+    },
+    {
+      "label": "Dungeonbound 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=5200620&cc=kr&l=koreana"
+    },
+    {
+      "label": "Slay the Spire 2 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2868840&cc=kr&l=koreana"
+    },
+    {
+      "label": "9 Kings 나인 킹즈 가격·상품 데이터",
+      "url": "https://store.steampowered.com/api/appdetails?appids=2784470&cc=kr&l=koreana"
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Steam Daily · 게임 브리핑</title>
+  <style>
+    :root { color-scheme:light dark; --bg:light-dark(#edf1f5,#18222d); --panel:light-dark(#fff,#202e3d); --ink:light-dark(#203143,#edf2f7); --sub:light-dark(#536679,#a9b9c8); --line:light-dark(#cfdae3,#354557); --blue:light-dark(#1765a3,#84bded); --deal:light-dark(#34591c,#c3dcaa); --dealbg:light-dark(#e7efd9,#32462e); }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.65 'Segoe UI','Malgun Gothic',sans-serif; word-break:keep-all; overflow-wrap:anywhere; }
+    main { max-width:1180px; margin:auto; padding:30px 32px 56px; }
+    a { color:var(--blue); text-underline-offset:3px; }
+    a:focus-visible,button:focus-visible,summary:focus-visible { outline:3px solid var(--blue); outline-offset:4px; }
+    h1,h2,h3,p { margin:0; }
+    header { display:grid; gap:8px; }
+    .masthead { display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; }
+    h1 { font:650 clamp(22px,3vw,28px)/1.4 'Malgun Gothic','Segoe UI',sans-serif; letter-spacing:-.045em; }
+    .meta,.facts,.deadline,.note,.load-state,.filters { color:var(--sub); font-size:13px; }
+    .tabs-shell { position:sticky; top:0; z-index:5; padding-top:12px; background:var(--bg); container-type:inline-size; }
+    .tabs { display:flex; flex-wrap:nowrap; justify-content:space-between; align-items:stretch; gap:1px; width:100%; border-bottom:1px solid var(--line); }
+    .tabs .genre-tab { flex:0 0 auto; min-width:0; white-space:nowrap; padding:10px 0 9px; border:0; border-bottom:2px solid transparent; border-radius:0; color:var(--sub); background:transparent; font-size:clamp(8px,1.68cqw,12px); font-weight:500; letter-spacing:-.035em; line-height:1.4; }
+    .tabs .genre-tab:hover { color:var(--ink); }
+    .tabs .genre-tab[aria-selected="true"] { color:var(--blue); border-bottom-color:var(--blue); font-weight:700; }
+    .tab-full { display:none; }
+    .type-filters { display:flex; flex-wrap:nowrap; gap:22px; border-bottom:1px solid var(--line); }
+    .type-filters button { flex:0 0 auto; white-space:nowrap; padding:11px 0 8px; border:0; border-bottom:2px solid transparent; border-radius:0; color:var(--sub); background:transparent; font-size:12px; font-weight:500; }
+    .type-filters button[aria-pressed="true"] { border-bottom-color:var(--blue); color:var(--blue); background:transparent; font-weight:700; }
+    @container(min-width:950px) { .tab-full { display:inline; } .tab-compact { display:none; } }
+    .view-info { display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:18px 0 0; color:var(--sub); font-size:13px; }
+    .view-info strong { color:var(--ink); font-weight:600; }
+    section { margin-top:24px; }
+    h2 { font-size:19px; font-weight:650; margin-bottom:14px; letter-spacing:-.025em; }
+    .category-heading { color:var(--sub); font-size:12px; font-weight:600; margin:16px 0 8px; }
+    .games { display:grid; background:var(--panel); border-radius:4px; overflow:hidden; }
+    .game { display:grid; grid-template-columns:200px minmax(0,1fr) 148px; gap:20px; align-items:start; padding:20px; border-bottom:1px solid var(--line); }
+    .game:last-child { border-bottom:0; }
+    .cover { display:grid; gap:8px; min-width:0; }
+    .image-link { display:block; aspect-ratio:231/87; background:var(--bg); border-radius:2px; overflow:hidden; }
+    .cover img { display:block; width:100%; height:100%; object-fit:cover; }
+    .cover-failed { padding:12px; color:var(--sub); font-size:12px; }
+    .copy { display:grid; gap:7px; min-width:0; }
+    h3 { font-size:17px; line-height:1.4; font-weight:650; letter-spacing:-.02em; }
+    h3 a { color:var(--ink); text-decoration:none; }
+    h3 a:hover { text-decoration:underline; }
+    .status { color:var(--blue); font-size:12px; }
+    .price { display:grid; justify-items:end; gap:5px; font-variant-numeric:tabular-nums; }
+    .amount { font-size:23px; font-weight:650; white-space:nowrap; letter-spacing:-.025em; }
+    .original { color:var(--sub); font-size:12px; }
+    .discount { color:var(--deal); background:var(--dealbg); padding:2px 9px; border-radius:3px; font-size:14px; font-weight:700; }
+    .deadline { text-align:end; }
+    .empty { color:var(--sub); font-size:13px; padding:5px 0; }
+    .report-details { margin-top:32px; border-top:1px solid var(--line); padding-top:15px; }
+    .game-details { font-size:13px; }
+    .game-details .note { padding-top:7px; line-height:1.7; }
+    .tags { color:var(--sub); padding-top:7px; font-size:12px; }
+    summary { cursor:pointer; color:var(--sub); }
+    .limits { margin-top:12px; color:var(--sub); font-size:12px; }
+    .sources { display:flex; flex-wrap:wrap; gap:14px; margin-top:12px; font-size:12px; }
+    button { color:var(--blue); background:transparent; border:1px solid var(--line); border-radius:4px; padding:5px 10px; cursor:pointer; font:inherit; }
+    [hidden] { display:none!important; }
+    @media(max-width:820px) { main { padding-inline:22px; } .game { grid-template-columns:160px minmax(0,1fr); gap:14px; padding:18px; } .cover { grid-row:1 / 3; } .price { grid-column:2; grid-row:2; justify-items:start; display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 12px; } .deadline { text-align:start; width:100%; } .original { order:1; } .amount { order:2; } .discount { order:3; } .deadline { order:4; } }
+    @media(max-width:920px) { .view-info { padding-top:14px; } }
+    @media(max-width:460px) { main { padding:22px 16px 36px; } .game { grid-template-columns:minmax(0,1fr); padding:16px; gap:12px; } .cover { grid-row:auto; max-width:300px; } .price { grid-column:1; grid-row:auto; border-top:1px solid var(--line); padding-top:10px; } .meta { font-size:12px; } }
+    @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="masthead"><h1>Steam 게임 소식</h1><div class="meta" id="meta"></div></div>
+    </header>
+    <nav id="tabs-shell" class="tabs-shell" aria-label="게임 필터"><div id="genre-tabs" class="tabs" role="tablist" aria-label="장르별 게임" hidden></div><div id="type-filters" class="type-filters" role="group" aria-label="소식 유형"><button type="button" data-type="all" aria-pressed="true">전체</button><button type="button" data-type="new" aria-pressed="false">신작</button><button type="button" data-type="deals" aria-pressed="false">할인</button><button type="button" data-type="free" aria-pressed="false">무료 배포</button></div></nav>
+    <div class="view-info"><strong id="view-title">전체 게임</strong><span id="view-count" role="status" aria-live="polite"></span></div>
+    <div id="sections"></div>
+    <p id="empty-state" class="empty" role="status" hidden></p>
+    <details class="report-details"><summary>출처와 조사 기준</summary><p class="limits" id="limits"></p><div class="sources" id="sources"></div><p class="load-state" id="image-state" role="status">썸네일 확인 중</p></details>
+  </main>
+  <script type="application/json" id="report-data">__REPORT_DATA__</script>
+  <script>
+  (() => {
+    const data = JSON.parse(document.getElementById('report-data').textContent);
+    const byId = id => document.getElementById(id);
+    const make = (tag, text, cls) => { const node = document.createElement(tag); node.textContent = text || ''; if (cls) node.className = cls; return node; };
+    const storeHosts = new Set(['store.steampowered.com','steamcommunity.com']);
+    const imageHosts = new Set(['shared.akamai.steamstatic.com','shared.fastly.steamstatic.com','shared.cloudflare.steamstatic.com','cdn.akamai.steamstatic.com','cdn.cloudflare.steamstatic.com']);
+    function safeURL(value, hosts) { try { const u = new URL(value); return u.protocol === 'https:' && hosts.has(u.hostname) && !u.username && !u.password && !u.port ? u.href : null; } catch { return null; } }
+    const images = [];
+    function imageStatus() { const loaded = images.filter(img => img.complete && img.naturalWidth > 0).length; const failed = images.filter(img => img.dataset.failed === 'true').length; byId('image-state').textContent = `썸네일 ${loaded}/${images.length}개 표시${failed ? ` · ${failed}개 연결 확인 필요` : ''}`; }
+    function link(label, url) { const node = make('a', label); const target = safeURL(url, storeHosts); if (target) { node.href=target; node.target='_blank'; node.rel='noopener noreferrer'; } return node; }
+    byId('meta').textContent = `${data.asOf} KST 기준`;
+    const labels = {all:'전체',free:'무료 배포',new:'신작',deals:'할인'};
+    const grouped = Array.isArray(data.groups);
+    const groups = grouped ? data.groups : [data];
+    const seen = new Map();
+    const panels = [];
+    let selectedGenre=-1;
+    let selectedType='all';
+    const discounted=game=>Number(game.discount?.match(/(\d+(?:\.\d+)?)\s*%/)?.[1] || 0)>0;
+    for (const group of groups) {
+      const section = make('section');
+      if (grouped) section.append(make('h2',group.name));
+      byId('sections').append(section);
+      const panel={section,name:group.name || data.genres.join(' · '),items:[],emptyMessages:group.emptyMessages || {}};
+      panels.push(panel);
+      const list=make('div','','games'); section.append(list);
+      for (const category of ['free','new','deals']) {
+      for (const game of (group[category] || [])) {
+        const url = safeURL(game.url,storeHosts);
+        const key = url && (new URL(url).pathname.match(/\/app\/(\d+)/)?.[1] || url);
+        if (!key) continue;
+        if (seen.has(key)) {
+          const existing=seen.get(key); existing.categories.add(category);
+          existing.mature ||= game.mature===true || game.matureContent===true;
+          continue;
+        }
+        const row = make('article','','game');
+        const item={row,categories:new Set([category]),mature:game.mature===true || game.matureContent===true};
+        if(discounted(game)) item.categories.add('deals');
+        seen.set(key,item); panel.items.push(item);
+        const cover = make('div','','cover');
+        const anchor = link('',game.url); anchor.className='image-link';
+        const img = document.createElement('img'); img.alt=`${game.title} Steam 썸네일`; img.loading='eager'; img.referrerPolicy='no-referrer';
+        const appId = new URL(game.url).pathname.match(/\/app\/(\d+)/)?.[1];
+        const candidates = [...new Set([game.thumbnailUrl,...(game.thumbnailAlternates || [])])].map(url=>safeURL(url,imageHosts)).filter(url=>url && appId && new URL(url).pathname.includes(`/apps/${appId}/`));
+        let next = 0;
+        const error = make('div','Steam 이미지에 연결하지 못했습니다.','cover-failed'); error.hidden=true;
+        const retry = make('button','이미지 다시 불러오기'); retry.type='button'; retry.hidden=true;
+        function attempt() { if (next < candidates.length) img.src=candidates[next++]; else { img.dataset.failed='true'; img.hidden=true; error.hidden=false; retry.hidden=false; imageStatus(); } }
+        img.addEventListener('load',()=>{ delete img.dataset.failed; imageStatus(); });
+        img.addEventListener('error',attempt);
+        retry.addEventListener('click',()=>{next=0; img.hidden=false; delete img.dataset.failed; error.hidden=true; retry.hidden=true; attempt();});
+        anchor.append(img,error); cover.append(anchor,retry); images.push(img);
+        const copy = make('div','','copy');
+        const title = make('h3'); title.append(link(game.title,game.url)); copy.append(title);
+        if (game.status) copy.append(make('div',game.status.replace(/\d{4}년 (\d+)월 (\d+)일/g,(_,m,d)=>`${m}.${d}`),'status'));
+        copy.append(make('p',game.description));
+        copy.append(make('div',[game.korean,game.rating,game.mature?'성인등급':game.matureContent?'성인 콘텐츠':''].filter(Boolean).join(' · '),'facts'));
+        if(game.note || game.genre) {
+          const more=make('details','','game-details'); more.append(make('summary','추가 정보'));
+          if(game.note) more.append(make('p',game.note,'note'));
+          if(game.genre) more.append(make('p',game.genre,'tags'));
+          copy.append(more);
+        }
+        const price = make('div','','price');
+        if(game.originalPrice) price.append(make('s',game.originalPrice,'original'));
+        price.append(make('div',game.price || '한국 가격 미확인','amount'));
+        if(game.discount) price.append(make('div',game.discount,'discount'));
+        if(game.deadline) {
+          const deadline=make('div',game.deadline.replace(/^할인 종료 \d{4}-(\d{2})-(\d{2}) (\d{2}:\d{2}) KST$/,(_,m,d,t)=>`${m}.${d} ${t} KST 종료`),'deadline');
+          deadline.title=game.deadline; price.append(deadline);
+        }
+        row.append(cover,copy,price); list.append(row); attempt();
+      }
+      }
+    }
+    const typeButtons=[...byId('type-filters').querySelectorAll('[data-type]')];
+    function renderView() {
+      let count=0;
+      panels.forEach((panel,index)=>{
+        const inGenre=selectedGenre===-1 || selectedGenre===-2 || selectedGenre===index;
+        let visible=0;
+        panel.items.forEach(item=>{
+          const match=(selectedType==='all' || item.categories.has(selectedType)) && (selectedGenre!==-2 || item.mature);
+          item.row.hidden=!match;
+          if(match) visible++;
+        });
+        panel.section.hidden=!inGenre || visible===0;
+        const heading=panel.section.querySelector('h2');
+        if(heading) heading.hidden=selectedGenre!==-1;
+        if(inGenre) count+=visible;
+      });
+      const name=selectedGenre===-1?'전체 장르':selectedGenre===-2?'성인 게임':panels[selectedGenre].name;
+      byId('view-title').textContent=selectedType==='all'?name:`${name} · ${labels[selectedType]}`;
+      byId('view-count').textContent=`${count}개 게임`;
+      typeButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.type===selectedType)));
+      const empty=byId('empty-state'); empty.hidden=count!==0;
+      if(!count) {
+        const messages=panels.filter((_,index)=>selectedGenre===-1 || selectedGenre===-2 || selectedGenre===index).map(panel=>panel.emptyMessages[selectedType] || '').join(' ');
+        const incomplete=/실패|불가|제한|미기재/.test(messages);
+        empty.textContent=selectedType==='free'?(incomplete?'무료 배포 정보를 확인하지 못했습니다.':'현재 확인된 무료 배포가 없습니다.'):(incomplete?'이 조건의 정보를 확인하지 못했습니다.':'조건에 맞는 게임이 없습니다.');
+      }
+    }
+    typeButtons.forEach(button=>button.addEventListener('click',()=>{selectedType=button.dataset.type; renderView();}));
+    if (grouped && panels.length) {
+      const tabs=[];
+      const entries=[{name:'전체',index:-1},...panels.map((panel,index)=>({name:panel.name,index})),...(data.includeMature?[{name:'성인 게임',index:-2}]:[])];
+      byId('genre-tabs').hidden=false;
+      byId('sections').setAttribute('role','tabpanel');
+      function activate(index) {
+        tabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(i===index)); tab.tabIndex=i===index?0:-1;});
+        selectedGenre=entries[index].index;
+        byId('sections').setAttribute('aria-labelledby',tabs[index].id);
+        renderView();
+      }
+      entries.forEach((entry,index)=>{
+        const compactNames={'로그라이크·로그라이트':'로그라이크','시뮬레이션·경영':'시뮬·경영','플랫포머·메트로배니아':'플랫폼','덱빌딩·자동 전투':'덱·자동전투','성인 게임':'성인'};
+        const tab=make('button','','genre-tab'); tab.type='button'; tab.id=`genre-tab-${index}`;
+        tab.append(make('span',entry.name,'tab-full'),make('span',compactNames[entry.name] || entry.name,'tab-compact'));
+        tab.title=entry.name; tab.setAttribute('aria-label',entry.name);
+        tab.setAttribute('role','tab'); tab.setAttribute('aria-controls','sections');
+        tab.addEventListener('click',()=>activate(index));
+        tab.addEventListener('keydown',event=>{
+          let next=index;
+          if(event.key==='ArrowRight') next=(index+1)%tabs.length;
+          else if(event.key==='ArrowLeft') next=(index+tabs.length-1)%tabs.length;
+          else if(event.key==='Home') next=0;
+          else if(event.key==='End') next=tabs.length-1;
+          else return;
+          event.preventDefault(); activate(next); tabs[next].focus(); tabs[next].scrollIntoView?.({block:'nearest',inline:'nearest'});
+        });
+        tabs.push(tab); byId('genre-tabs').append(tab);
+      });
+      activate(0);
+    } else renderView();
+    byId('limits').textContent=`대한민국 · KRW · 성인등급 ${data.includeMature?'포함':'제외'}\n\n${data.limits || ''}`;
+    data.sources.forEach(source=>byId('sources').append(link(source.label,source.url)));
+    imageStatus();
+  })();
+  </script>
+</body>
+</html>

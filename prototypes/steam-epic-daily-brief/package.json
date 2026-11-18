@@ -1,0 +1,11 @@
+{
+  "name": "steam-daily-brief",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node verify-picker.cjs && node verify-preview.cjs"
+  },
+  "devDependencies": {
+    "linkedom": "0.18.15"
+  }
+}

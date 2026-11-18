@@ -1,0 +1,126 @@
+<div id="steam-brief-genre-picker" lang="ko">
+  <style>
+    #steam-brief-genre-picker { display: grid; gap: calc(var(--font-size-base) * 1); color: var(--foreground); }
+    #steam-brief-genre-picker .picker-heading { display: grid; gap: calc(var(--font-size-base) * .25); padding-inline-end: 90px; }
+    #steam-brief-genre-picker .picker-footer { display: grid; gap: calc(var(--font-size-base) * .5); }
+    #steam-brief-genre-picker .picker-options { display: grid; gap: calc(var(--font-size-base) * .5); }
+    #steam-brief-genre-picker [hidden] { display: none; }
+  </style>
+  <div class="picker-heading">
+    <div class="text-small text-muted">STEAM · 원하는 장르만 추가 조사</div>
+    <h3>오늘 찾아볼 장르</h3>
+    <div class="text-small text-muted">여러 개 선택 가능 · 선택한 장르 중 하나 이상에 해당하는 게임</div>
+  </div>
+  <div class="viz-grid" role="group" aria-label="장르 여러 개 선택">
+    <button class="btn" type="button" data-genre="전체" aria-pressed="false">전체 장르</button>
+    <button class="btn" type="button" data-genre="RPG" aria-pressed="false">RPG</button>
+    <button class="btn" type="button" data-genre="액션" aria-pressed="false">액션</button>
+    <button class="btn" type="button" data-genre="어드벤처" aria-pressed="false">어드벤처</button>
+    <button class="btn" type="button" data-genre="로그라이크·로그라이트" aria-pressed="false">로그라이크·로그라이트</button>
+    <button class="btn" type="button" data-genre="전략" aria-pressed="false">전략</button>
+    <button class="btn" type="button" data-genre="시뮬레이션·경영" aria-pressed="false">시뮬레이션·경영</button>
+    <button class="btn" type="button" data-genre="생존·제작" aria-pressed="false">생존·제작</button>
+    <button class="btn" type="button" data-genre="공포" aria-pressed="false">공포</button>
+    <button class="btn" type="button" data-genre="퍼즐" aria-pressed="false">퍼즐</button>
+    <button class="btn" type="button" data-genre="플랫포머·메트로배니아" aria-pressed="false">플랫포머·메트로배니아</button>
+    <button class="btn" type="button" data-genre="스포츠·레이싱" aria-pressed="false">스포츠·레이싱</button>
+    <button class="btn" type="button" data-genre="리듬·음악" aria-pressed="false">리듬·음악</button>
+    <button class="btn" type="button" data-genre="방치형" aria-pressed="false">방치형</button>
+    <button class="btn" type="button" data-genre="덱빌딩·자동 전투" aria-pressed="false">덱빌딩·자동 전투</button>
+  </div>
+  <div class="picker-options">
+    <label class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" data-mature checked>
+      <span class="form-check-label">성인등급 게임 포함</span>
+    </label>
+    <label class="form-label">추가 조건 · 선택 사항
+      <input class="form-control" data-extra type="text" maxlength="300" placeholder="예: 한국어 지원, 2만원 이하, 공포 제외">
+    </label>
+  </div>
+  <div class="picker-footer">
+    <div data-summary aria-live="polite">장르를 선택해 주세요.</div>
+    <div class="viz-row">
+      <button class="btn btn-primary" type="button" data-submit disabled>선택한 장르로 조사</button>
+      <span class="text-small text-muted">신작 · 할인 · 무료 배포</span>
+    </div>
+    <div class="text-small" data-status aria-live="polite"></div>
+    <label class="form-label" data-fallback-label hidden>이 요청을 채팅 입력창에 보내 주세요.
+      <textarea class="form-control" data-fallback readonly rows="4"></textarea>
+    </label>
+  </div>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('steam-brief-genre-picker');
+  const genreButtons = Array.from(root.querySelectorAll('[data-genre]'));
+  const mature = root.querySelector('[data-mature]');
+  const extra = root.querySelector('[data-extra]');
+  const summary = root.querySelector('[data-summary]');
+  const submit = root.querySelector('[data-submit]');
+  const status = root.querySelector('[data-status]');
+  const fallbackLabel = root.querySelector('[data-fallback-label]');
+  const fallback = root.querySelector('[data-fallback]');
+  const allowed = new Set(genreButtons.map(button => button.dataset.genre));
+  const day = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(new Date());
+  let state = { day, genres: [], includeMature: true, extra: '' };
+  let sending = false;
+
+  function restore(snapshot) {
+    const saved = snapshot && snapshot.modelContent;
+    if (!saved || saved.day !== day || !Array.isArray(saved.genres)) return;
+    const genres = Array.from(new Set(saved.genres.filter(item => allowed.has(item))));
+    state = { day, genres: genres.includes('전체') ? ['전체'] : genres,
+      includeMature: saved.includeMature !== false,
+      extra: typeof saved.extra === 'string' ? saved.extra.slice(0, 300) : '' };
+  }
+  function render() {
+    genreButtons.forEach(button => button.setAttribute('aria-pressed', String(state.genres.includes(button.dataset.genre))));
+    mature.checked = state.includeMature;
+    if (extra.value !== state.extra) extra.value = state.extra;
+    summary.textContent = state.genres.length ? `선택: ${state.genres.join(' · ')}` : '장르를 선택해 주세요.';
+    submit.disabled = sending || state.genres.length === 0;
+  }
+  function save() {
+    if (window.openai && typeof window.openai.setWidgetState === 'function') {
+      window.openai.setWidgetState({ modelContent: state, privateContent: null }).catch(() => {});
+    }
+  }
+  genreButtons.forEach(button => button.addEventListener('click', () => {
+    const genre = button.dataset.genre;
+    if (genre === '전체') state.genres = state.genres.includes('전체') ? [] : ['전체'];
+    else {
+      const selected = new Set(state.genres.filter(item => item !== '전체'));
+      if (selected.has(genre)) selected.delete(genre); else selected.add(genre);
+      state.genres = Array.from(selected);
+    }
+    status.textContent = '';
+    fallbackLabel.hidden = true;
+    render(); save();
+  }));
+  mature.addEventListener('change', () => { state.includeMature = mature.checked; save(); });
+  extra.addEventListener('input', () => { state.extra = extra.value; save(); });
+  submit.addEventListener('click', async () => {
+    if (!state.genres.length || sending) return;
+    const prompt = `Steam 브리핑의 추가 조사 장르를 제출합니다. 장르: ${state.genres.join(', ')} (여러 장르는 OR). 성인등급 게임: ${state.includeMature ? '포함' : '제외'}. 추가 조건: ${state.extra || '없음'}. 지금 Steam만 새로 조사해서 신작·할인·무료 배포를 한국어로 보기 좋게 정리해 주세요. 선택은 이번 조사에만 적용하며 매일 오전 9시의 전체 장르별 정기 보고 설정은 유지해 주세요. $steam-epic-daily-brief 스킬을 사용해 주세요.`;
+    if (!window.openai || typeof window.openai.sendFollowUpMessage !== 'function') {
+      fallback.value = prompt; fallbackLabel.hidden = false;
+      status.textContent = '채팅에 요청을 보내면 조사가 시작됩니다.';
+      return;
+    }
+    sending = true; render(); status.textContent = '조사를 요청하고 있습니다…';
+    try {
+      await window.openai.sendFollowUpMessage({ prompt, title: '선택한 장르로 Steam 조사' });
+      status.textContent = '조사 요청을 보냈습니다.';
+    } catch {
+      status.textContent = '요청이 전송되지 않았습니다. 다시 누르거나 아래 문장을 채팅에 보내 주세요.';
+      fallback.value = prompt; fallbackLabel.hidden = false;
+    } finally { sending = false; render(); }
+  });
+  restore(window.openai && window.openai.widgetState);
+  render();
+  window.addEventListener('openai:set_globals', event => {
+    const snapshot = event.detail && event.detail.globals && event.detail.globals.widgetState;
+    if (snapshot) { restore(snapshot); render(); }
+  });
+})();
+</script>

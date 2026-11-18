@@ -1,0 +1,4 @@
+interface:
+  display_name: "스팀 데일리 게임 브리핑"
+  short_description: "Steam 신작·할인·무료 배포를 장르별 한국어 보고서로 정리"
+  default_prompt: "$steam-epic-daily-brief 오늘 Steam 신작·할인·무료 배포를 선택 질문 없이 장르별로 조사해 썸네일·가격·설명을 함께 정리해줘."
