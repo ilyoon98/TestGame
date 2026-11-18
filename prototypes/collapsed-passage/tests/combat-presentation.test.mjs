@@ -50,7 +50,8 @@ function presentation({reduced=false,speed=1}={}){
   run(`
     cancelAutoBattleTimer(); autoPaused=true; autoSpeed=${speed};
     matchMedia=()=>({matches:${reduced}});
-    scheduleAutoBattle=()=>{};showImpact=()=>{};showCombatIllustration=()=>{};
+    scheduleAutoBattle=()=>{};showImpact=()=>{};
+    globalThis.actionReadout={className:'combat-action',innerHTML:''};
     globalThis.sprites=Object.fromEntries(['player','companion','enemy'].map(side=>[side,{
       tagName:side==='enemy'?'DIV':'IMG',dataset:{},style:{backgroundImage:''},src:side+'-idle.png',
       getAttribute(name){return this[name];},setAttribute(name,value){this[name]=value;},
@@ -61,7 +62,7 @@ function presentation({reduced=false,speed=1}={}){
       querySelector:()=>sprites[side]
     }]));
     globalThis.scene={
-      querySelector(selector){return panels[selector.replace('.actor-','')]??null;},
+      querySelector(selector){return selector==='.combat-action'?actionReadout:panels[selector.replace('.actor-','')]??null;},
       querySelectorAll(selector){return selector==='.actor-sprite[data-pose]'?Object.values(sprites).filter(s=>s.dataset.pose):[];}
     };
     document.querySelector('#stage').querySelector=selector=>selector==='.stage-combat'?scene:null;
@@ -99,6 +100,9 @@ test("a completely blocked attack never uses the hurt image",()=>{
   run(`game.feedback=${JSON.stringify([{...hit("enemy","player",0),blocked:2}])};playCombatFeedback();`);
   at(105);assert.equal(run("sprites.player.src"),"player-idle.png");
   assert.match(run("sprites.enemy.style.backgroundImage"),/janitor-attack/);
+  const readout=run("actionReadout.innerHTML");
+  assert.match(readout,/기본 공격.*수녀 가슴.*완전 방어 · 2 막음/s);
+  assert.doesNotMatch(readout,/보상 카드/);
   at(575);assert.equal(run("sprites.enemy.style.backgroundImage"),"");
 });
 
@@ -107,12 +111,26 @@ test("companion poses honor reduced motion and speed, and cancellation restores 
   run(`game.feedback=${JSON.stringify([hit("companion","enemy")])};playCombatFeedback();`);
   at(0);assert.match(run("sprites.companion.src"),/guard-attack/);
   assert.match(run("sprites.enemy.style.backgroundImage"),/janitor-hit/);
-  assert.equal(Math.max(...[...run.timers.values()].map(t=>t.delay)),117.5);
+  at(117.5);assert.equal(run("sprites.companion.src"),"companion-idle.png");
+  assert.match(run("actionReadout.innerHTML"),/피해 2/);
   run("cancelCombatPresentation();");
   assert.equal(run("sprites.companion.src"),"companion-idle.png");
   assert.equal(run("sprites.enemy.style.backgroundImage"),"");
+  assert.equal(run("actionReadout.innerHTML"),"");
   assert.equal(run.timers.size,0);
   at(200);assert.equal(run("sprites.companion.src"),"companion-idle.png");
+});
+
+test("an activated reward card shows its real effects and stays readable at 4× speed",()=>{
+  const {run,at}=presentation({speed:4});
+  run("applyCard('cover',game.player,game.enemy,['arms','legs']);playCombatFeedback();");
+  at(0);
+  assert.match(run("actionReadout.innerHTML"),/퇴로 엄호.*보상 카드.*수녀 팔·다리.*각 가드 \+3/s);
+  assert.match(run("document.querySelector('#combat-announcement').textContent"),/보상 카드 · 퇴로 엄호/);
+  at(649);assert.match(run("actionReadout.className"),/is-reward/);
+  at(650);assert.equal(run("actionReadout.innerHTML"),"");
+  assert.equal(run("actionReadout.className"),"combat-action");
+  assert.equal(run("combatPresentation"),null);
 });
 
 test("unloaded or failed pose images leave the idle art visible",()=>{

@@ -265,15 +265,21 @@
   .impact-copy b{color:#ffe1c2;background:#3d2116;border:1px solid #ffb188;border-radius:5px;padding:2px 7px;font-size:23px;line-height:1.12;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px black}
   .impact-copy .block{color:#d3f5ff;background:#122e3a;border-color:#a8e6f7;font-size:15px}
   .impact-copy .heal{color:#def7e8;background:#1c382d;border-color:#9ce1bf;font-size:15px}
-  .combat-illustration{position:absolute;left:50%;bottom:8px;width:min(38%,176px);translate:-50% 0;pointer-events:none}
+  .combat-action{display:grid;align-items:center;min-height:60px;padding:6px 10px;border-top:1px solid var(--edge);background:#161c17;line-height:1.35}
+  .combat-action.is-reward{border-top-color:#bc9552;background:#2b251a}
+  .combat-action-content{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:8px;width:min(100%,520px);margin-inline:auto}
+  .combat-action-art{width:38px;height:38px;border:1px solid #71624e;border-radius:4px;background:center/cover var(--action-art) #293429}
+  .combat-action-title,.combat-action-result{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:7px}
+  .combat-action-title strong{font-size:15px;color:var(--ink)}
+  .combat-action-result{font-size:13px;color:var(--soft)}
+  .combat-action-result b{color:var(--ink);font-weight:600}
+  .combat-action-reward{padding:0 5px;border:1px solid #bc9552;border-radius:4px;color:#ffdf9f;font-size:11px;white-space:nowrap}
   .event-illustration{display:grid;align-content:end;min-height:70px;padding:6px 8px;border:1px solid var(--event-color);border-radius:5px;background:linear-gradient(0deg,#101612fa,#10161299 40%,transparent 85%),center 45%/cover var(--event-art) #26352a;box-shadow:0 3px 12px #0008;color:var(--event-color);line-height:1.25}
   .event-illustration strong{font-size:13px}
   .event-illustration small{font-size:11px;color:var(--ink)}
-  .event-illustration.attack{--event-color:#ffd39f}
-  .event-illustration.damage{--event-color:#ffad9f}
-  .event-illustration.defense{--event-color:#b9e9ff}
   .event-illustration.healing{--event-color:#b6f5ca}
   .treatment .event-illustration{width:min(100%,215px);min-height:78px}
+  .combat-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .target-hint{text-align:center;font-size:12px;margin-top:9px;min-height:17px}
   .routes,.journal,details{border-radius:5px}
   .intent-arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;color:#ffad83}
@@ -324,7 +330,7 @@
     .actor-sprite{background-position:center}.hotspots .part{width:47px;height:29px;padding:2px}.hotspots .part-top{font-size:10px;line-height:10px}.hotspots .part-top small,.hotspots .part-stats{font-size:8px;line-height:8px}
     .part-guard{font-size:9px;line-height:9px}
     .impact-ring{width:53px;height:35px}.impact-copy{left:27px}.actor-enemy .impact-copy{right:27px}.impact-copy b{font-size:19px;padding:2px 5px}.impact-copy .block{font-size:13px}
-    .combat-illustration .event-illustration{min-height:58px;padding:4px 5px}
+    .combat-action{min-height:68px;padding-inline:6px}
     .event-illustration strong{font-size:12px}.event-illustration small{font-size:10px}
     .status-box.pursuit{grid-column:1/-1}.status-box.health{grid-column:auto}.status-box.health .health-bar{min-width:9px;margin:0}
     .intent-rail{padding-top:5px}.stage-combat .intent{font-size:10px;padding:3px 4px;gap:3px}
@@ -395,6 +401,7 @@
     <button type="button" class="btn" data-action="qa" data-value="heal" aria-keyshortcuts="H">아군 완전 회복 (H)</button>
     <button type="button" class="btn" data-action="qa" data-value="margin" aria-keyshortcuts="J">도망 여유 +5 (J)</button>
   </section>
+  <p class="combat-announcement" id="combat-announcement" role="status"></p>
   <section id="stage" aria-label="현재 구역"></section>
   <details class="run-deck" id="run-deck"><summary id="deck-summary">이번 탈출의 덱</summary>
     <p>전투가 끝나도 덱 구성은 유지돼요. 카드 보상은 건너뛰어 덱을 작게 유지할 수도 있어요. 새로 시작하면 기본 덱으로 돌아가요.</p>
@@ -659,7 +666,7 @@ function start(){
     document.querySelector("#stage").inert=false;
   }
   game = {phase:"combat", area:"threshold", trail:["threshold"], distance:5, steps:0, turns:0,
-    player:fighter("수녀",[9,5,7,7,6,7],28), companion:null, pendingCompanion:null, deadCompanions:[], deck:[...starterDeck], rewards:[], acquired:[], log:[], feedback:[], enemy:null, enemyAction:null, stairTreatment:null, qaUses:0, autoNote:"손패와 부상을 살펴 자동으로 전투해요."};
+    player:fighter("수녀",[9,5,7,7,6,7],28), companion:null, pendingCompanion:null, deadCompanions:[], deck:[...starterDeck], rewards:[], acquired:[], log:[], feedback:[], enemy:null, enemyAction:null, stairTreatment:null, qaUses:0};
   record("사형수를 위한 기도를 마치자 폭동 경보가 울렸어요. 기도를 받았던 사형수가 뒤에서 쫓아와요.");
   record("폭동으로 풀려난 죄수들이 통로를 막고 있어요. 지상 출구로 가야 해요.");
   enterArea("threshold",true);
@@ -808,10 +815,13 @@ function hit(attacker, defender, target, damage, {id,pierce=0,removed=0},state){
   part.hp-=dealt;
   defender.hp=Math.max(0,defender.hp-dealt);
   const side=sideOf(defender,state);
-  const fallen=side==="companion" && isDown(defender);
-  queueFeedback({type:"hit",card:id,from:sideOf(attacker,state),side,targets:[target],dealt,blocked,removed,fallen},state);
-  record(`${attacker.name} → ${defender.name} ${parts[target]} · 피해 ${dealt}${blocked?` · 가드 ${blocked}`:""}`,state);
+  const defeated=isDown(defender);
+  const fallen=side==="companion" && defeated;
   const after=condition(defender,target);
+  const event={type:"hit",card:id,from:sideOf(attacker,state),side,targets:[target],dealt,blocked,removed,defeated,fallen};
+  if(before!==after) event.injury=after;
+  queueFeedback(event,state);
+  record(`${attacker.name} → ${defender.name} ${parts[target]} · 피해 ${dealt}${blocked?` · 가드 ${blocked}`:""}`,state);
   if(after!==before) record(`${defender.name}의 ${parts[target]} ${labels[after]}`,state);
   if(after==="lost") part.guard=0;
   if(fallen){
@@ -853,15 +863,16 @@ function applyCard(id, actor, opponent, targets,state=game,recipient=actor){
     case "aid":{
       const before=condition(recipient,target);
       const recovered=healPart(recipient,target,healValue(recipient,amount));
-      if(recovered) queueFeedback({type:"heal",card:id,side:sideOf(recipient,state),targets:[target],recovered},state);
-      record(`${recipient.name} · ${parts[target]} 내구도 +${recovered}${before!==condition(recipient,target)?" · 정상 회복":""}`,state);
+      const restored=before!==condition(recipient,target);
+      queueFeedback({type:"heal",card:id,side:sideOf(recipient,state),targets:[target],recovered,restored},state);
+      record(`${recipient.name} · ${parts[target]} 내구도 +${recovered}${restored?" · 정상 회복":""}`,state);
       break;
     }
     case "rethink":{
       state.enemyHand.shift();
       const drawn=state.enemyDraw.splice(0,amount);
       state.enemyHand.push(...drawn);
-      queueFeedback({type:"rethink",side:"enemy",targets:[]},state);
+      queueFeedback({type:"rethink",card:id,side:"enemy",targets:[],drawn:drawn.length},state);
       record(`${actor.name} · 재정비로 다음 턴에 쓸 카드 ${drawn.length}장 확보`,state);
       break;
     }
@@ -889,7 +900,9 @@ function chooseCard(index){
     const amount=power(cards[id],game.player);
     game.hand=game.hand.filter((_,i)=>i!==index && i!==game.selected);
     game.discard.push(discarded);
+    const remaining=game.hand.length;
     draw(amount);
+    queueFeedback({type:"rethink",card:id,side:"player",targets:[],discarded,drawn:game.hand.length-remaining},game);
     game.discard.push(id);
     game.rethought=true;
     game.selected=null;
@@ -1020,13 +1033,9 @@ function advanceAutoBattle(){
   game.pairSide=null;
   const action=chooseAutoAction();
   if(!action){
-    game.autoNote="쓸 행동을 마쳤어요. 적의 행동을 지켜봐요.";
     endTurn();
     return {endedTurn:true};
   }
-  const owner=game[cards[action.id].owner || "player"];
-  const target=action.side?`${game[action.side].name} ${action.targets.map(id=>parts[id]).join("·")}`:"손패 정리";
-  game.autoNote=`${owner.name} · ${cards[action.id].name} → ${target}`;
   chooseCard(action.index);
   if(action.discardIndex!==undefined) chooseCard(action.discardIndex);
   else for(const part of action.targets) chooseTarget(action.side,part);
@@ -1399,10 +1408,10 @@ function handPanel(dealt){
       <span class="card-art" aria-hidden="true"></span>
       <strong>${card.name}</strong><p>${description}</p><p class="card-note">${note}</p></button>`;
   }).join("");
-  const hint=autoPaused?"일시정지 · Space 또는 ‘전투 계속’으로 다시 관전해요.":game.autoNote;
+  const hint=autoPaused?'<p class="target-hint">Space 또는 ‘전투 계속’으로 다시 관전해요.</p>':"";
   return `<section class="hand watch-only ${dealt?"dealt":""}"><div class="hand-head"><div><h2>자동 전투 손패</h2><small>덱 ${game.draw.length} · 버림 ${game.discard.length}</small></div>
     <span class="auto-badge">${autoPaused?"일시정지":"자동 전투 진행 중"}</span></div>
-    <div class="hand-grid">${hand||"<p class='muted'>다음 행동을 준비해요.</p>"}</div><p class="target-hint" aria-live="polite">${hint}</p></section>`;
+    <div class="hand-grid">${hand||"<p class='muted'>다음 행동을 준비해요.</p>"}</div>${hint}</section>`;
 }
 
 function routeType(id){
@@ -1524,7 +1533,8 @@ function render(){
     const eyes=condition(game.player,"eyes"), intents=battleIntent();
     const sameBattle=lastRender?.enemy===game.enemy;
     const dealt=!sameBattle || lastRender.round!==game.round;
-    stage.innerHTML=`<div class="stage-combat"><div class="combat-field">${intentPanel(intents,eyes)}<div class="combat ${livingCompanion()?"party-combat":""}">${bodyPanel("player",intents,eyes)}${companionPanel(intents,eyes)}${bodyPanel("enemy",intents,eyes)}</div></div></div>${handPanel(dealt)}${partyNotice()}${cardPreview()}`;
+    stage.innerHTML=`<div class="stage-combat"><div class="combat-field">${intentPanel(intents,eyes)}<div class="combat ${livingCompanion()?"party-combat":""}">${bodyPanel("player",intents,eyes)}${companionPanel(intents,eyes)}${bodyPanel("enemy",intents,eyes)}</div></div>
+      <div class="combat-action" aria-hidden="true"></div></div>${handPanel(dealt)}${partyNotice()}${cardPreview()}`;
     for(const detail of stage.querySelectorAll(".actor-body-status")) detail.open=expandedBodies.has(detail.dataset.side);
     const scene=stage.querySelector(".stage-combat");
     layoutCombatHud(scene);
@@ -1671,30 +1681,50 @@ function eventIllustration(card,kind,title,detail){
   return `<div class="event-illustration ${kind}" style="--event-art:var(--art-${cards[card].art || card})"><strong>${title}</strong><small>${detail}</small></div>`;
 }
 
-function showCombatIllustration(scene,event){
-  const friendly=event.side!=="enemy";
-  const recipient={player:"내",companion:game.companion?.name,enemy:"적"}[event.side];
-  const targets=event.targets.map(id=>parts[id]).join("·");
-  let kind, title, detail;
-  if(event.type==="hit"){
-    kind=friendly?(event.dealt?"damage":"defense"):"attack";
-    title=friendly?(event.dealt?"피격":"가드로 방어"):event.from==="companion"?`${game.companion.name} 공격`:"공격";
-    detail=friendly?`${recipient} ${targets} · ${cards[event.card].name}`:`${cards[event.card].name} · 적 ${targets}`;
-  }else{
-    const heal=event.type==="heal";
-    kind=heal?"healing":"defense";
-    title=heal?"회복":"가드";
-    const change=heal?event.recovered:event.added;
-    detail=`${recipient} ${targets} +${change}`;
+function showCombatAction(scene,event){
+  const card=cards[event.card];
+  const recipient={player:"수녀",companion:"동료",enemy:"적"}[event.side];
+  const targets=event.targets.map(id=>parts[id]).join("·") || "손패";
+  let result;
+  switch(event.type){
+    case "hit":{
+      const damage=event.card==="counter"?"반격 피해":"피해";
+      const outcomes=[!event.dealt && event.blocked?"완전 방어":`${damage} ${event.dealt}`];
+      if(event.blocked) outcomes.push(`${event.blocked} 막음`);
+      if(event.removed) outcomes.push(`가드 −${event.removed}`);
+      if(event.injury) outcomes.push(labels[event.injury]);
+      if(event.defeated) outcomes.push("쓰러짐");
+      result=outcomes.join(" · ");
+      break;
+    }
+    case "guard":
+      result=`${event.targets.length>1?"각 ":""}가드 +${event.added}${event.card==="counter"?" · 반격 준비":""}`;
+      break;
+    case "heal":
+      result=`내구도 +${event.recovered}${event.restored?" · 정상 회복":""}`;
+      break;
+    case "rethink":
+      result=event.discarded?`${cards[event.discarded].name} 버림 · ${event.drawn}장 뽑음`:`다음 턴 카드 ${event.drawn}장 확보`;
+      break;
   }
-  scene.querySelector(".combat-field").insertAdjacentHTML("beforeend",`<div class="combat-illustration" aria-hidden="true">${eventIllustration(event.card,kind,title,detail)}</div>`);
+  const badge=card.reward?'<span class="combat-action-reward">보상 카드</span>':"";
+  const action=scene.querySelector(".combat-action");
+  action.className=`combat-action${card.reward?" is-reward":""}`;
+  action.innerHTML=`<div class="combat-action-content"><span class="combat-action-art" style="--action-art:var(--art-${card.art || event.card})"></span>
+    <div><div class="combat-action-title"><strong>${card.name}</strong>${badge}</div>
+    <div class="combat-action-result"><span>${recipient} ${targets}</span><b>→ ${result}</b></div></div></div>`;
+  document.querySelector("#combat-announcement").textContent=`${card.reward?"보상 카드 · ":""}${card.name} · ${recipient} ${targets} · ${result}`;
 }
 
 function cancelCombatPresentation(){
   if(!combatPresentation) return;
   for(const timer of combatPresentation.timers) clearTimeout(timer);
   restoreActorPoses(combatPresentation.scene);
-  combatPresentation.scene.querySelectorAll(".impact, .combat-illustration").forEach(el=>el.remove());
+  combatPresentation.scene.querySelectorAll(".impact").forEach(el=>el.remove());
+  const action=combatPresentation.scene.querySelector(".combat-action");
+  action.className="combat-action";
+  action.innerHTML="";
+  document.querySelector("#combat-announcement").textContent="";
   combatPresentation.stage.inert=false;
   combatPresentation=null;
 }
@@ -1771,6 +1801,8 @@ function playCombatFeedback(after, endOfTurn=false){
 
   for(const event of pending){
     const starts=elapsed;
+    let resultAt=starts;
+    let poseEnds=starts+400;
     if(event.intent!==null) schedule(()=>{
       scene.querySelector(".intent-chip.executing")?.classList.remove("executing");
       scene.querySelector(`[data-intent="${event.intent}"]`)?.classList.add("executing");
@@ -1778,26 +1810,27 @@ function playCombatFeedback(after, endOfTurn=false){
     if(event.type==="hit"){
       const from=event.from;
       schedule(()=>setActorPose(scene,from,"attack"),starts);
-      const impactAt=starts+(reduced?0:105);
-      schedule(()=>showCombatIllustration(scene,event),from==="enemy"?impactAt:starts);
+      resultAt=starts+(reduced?0:105);
+      poseEnds=resultAt+470;
       schedule(()=>{
         showImpact(scene,event);
         if(soundEnabled && audioContext?.state==="running") synthesizeImpact(audioContext,audioOutput,event);
         if(event.dealt) setActorPose(scene,event.side,"hit");
-      },impactAt);
-      elapsed=impactAt+470;
-    }else{
+      },resultAt);
+    }else if(event.type==="guard" || event.recovered){
       schedule(()=>{
-        if(event.card) showCombatIllustration(scene,event);
         showImpact(scene,event);
         if(event.type==="heal") playHealingSound();
       },starts);
-      elapsed=starts+400;
     }
+    schedule(()=>showCombatAction(scene,event),resultAt);
     schedule(()=>{
       restoreActorPoses(scene);
-      scene.querySelectorAll(".impact, .combat-illustration").forEach(el=>el.remove());
-    },elapsed);
+      scene.querySelectorAll(".impact").forEach(el=>el.remove());
+    },poseEnds);
+    // Speed scales the poses. Keep the result visible long enough to read it.
+    const readTime=cards[event.card].reward?650:420;
+    elapsed=Math.max(poseEnds,resultAt+readTime*speed);
   }
   schedule(()=>{
     scene.querySelector(".intent-chip.executing")?.classList.remove("executing");
