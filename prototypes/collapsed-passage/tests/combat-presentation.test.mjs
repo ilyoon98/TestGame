@@ -76,7 +76,7 @@ function presentation({reduced=false,speed=1}={}){
   };
   return {run,at};
 }
-const hit=(from="player",side="enemy",dealt=2)=>({type:"hit",from,side,dealt,blocked:0,targets:["chest"],card:"strike",intent:null});
+const hit=(from="player",side="enemy",dealt=2)=>({type:"hit",from,side,dealt,hp:6,blocked:0,targets:["chest"],card:"strike",intent:null});
 
 test("attack and hit stills hold through contact and restore idle before a counter or final result",()=>{
   const {run,at}=presentation();

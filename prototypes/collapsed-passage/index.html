@@ -89,7 +89,7 @@
   .route-map{margin-top:14px;padding:8px;background:var(--well);border:1px solid var(--edge);border-radius:8px}
   .map-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:3px 6px 7px}
   .map-head small{font-size:11px}
-  .map-layout{position:relative;isolation:isolate;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(3,minmax(57px,auto));align-items:center}
+  .map-layout{position:relative;isolation:isolate;display:grid;grid-template-columns:repeat(var(--map-stages,5),minmax(0,1fr));grid-template-rows:repeat(3,minmax(57px,auto));align-items:center}
   .map-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1}
   .map-lines line{stroke:#59665b;stroke-width:1.5px;vector-effect:non-scaling-stroke}
   .map-lines line.walked{stroke:var(--lime);stroke-width:2px}
@@ -104,6 +104,12 @@
   .map-node.traveling{border-color:#f6d693;box-shadow:0 0 16px #ecd18b55}
   .map-traveler{position:absolute;z-index:2;left:var(--from-x);top:var(--from-y);display:grid;place-items:center;width:29px;height:29px;border:1px solid #f6d693;border-radius:50%;background:#302a1b;color:#f6d693;box-shadow:0 0 11px #f6d69377;pointer-events:none}
   .map-traveler svg{width:21px;height:21px}
+  .map-settings{margin-bottom:8px;padding:6px 10px;border-radius:4px}
+  .map-settings form{display:flex;align-items:end;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .map-settings label{display:grid;gap:3px;color:var(--soft);font-size:12px}
+  .map-settings input{max-width:100%;padding:6px;background:var(--well);border:1px solid var(--edge);border-radius:4px;color:var(--ink);font:inherit}
+  .map-settings input[type=number]{width:56px}.map-settings input[name=widths]{width:94px}
+  .map-settings [role=alert]:not(:empty){color:var(--loss);font-size:12px;margin-top:4px}
   .treatment{display:grid;gap:7px;margin-top:13px;padding:10px;border:1px solid #537769;background:#1c3028;border-radius:6px}
   .treatment p{font-size:13px;margin:0;color:var(--soft)}
   .treatment-options{display:flex;gap:5px;flex-wrap:wrap}
@@ -124,7 +130,7 @@
     .body-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.part{padding:3px 4px}.part-top{font-size:12px}.part-top small,.part-stats{font-size:9px}
     .intent,.panel-note{font-size:10px;min-height:30px;padding:4px;margin-top:3px}.hand{padding:8px}.hand-head{margin-bottom:5px}
     .hand-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.card{min-height:96px}.lower{grid-template-columns:1fr}
-    .routes{padding:10px}.map-head{gap:5px;flex-wrap:wrap}.map-layout{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(5,minmax(49px,auto))}
+    .routes{padding:10px}.map-head{gap:5px;flex-wrap:wrap}.map-layout{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(var(--map-stages,5),minmax(49px,auto))}
     .map-node{grid-column:var(--row);grid-row:var(--col);margin:3px 2px;padding:4px 2px}
   }
   @media(prefers-reduced-motion:no-preference){.part,.card,.btn,.map-node{transition:filter .12s,background .12s,border-color .12s}}
@@ -189,7 +195,14 @@
   .actor-caption h2{color:var(--accent);font-size:clamp(15px,2vw,23px);text-shadow:0 2px 4px black}
   .actor-caption .tag{font-size:11px}
   .actor-enemy .actor-caption{flex-direction:row-reverse;justify-content:flex-start;text-align:right}
-  .actor-caption .foe-health{padding:3px 6px;background:#171914db;border:1px solid #625347;border-radius:4px;white-space:nowrap;margin-top:2px}
+  .combat .foe-health{position:absolute;z-index:3;left:50%;bottom:29px;transform:translateX(-50%);width:min(calc(100% - 12px),234px);display:grid;align-items:center;border:1px solid #776454;border-radius:4px;background:#231e18;color:#fff3e2;text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+  .foe-health .health-bar,.foe-health .hp-value{grid-area:1/1}
+  .foe-health .health-bar{height:17px;min-width:0;margin:0;background:#2e2923}
+  .foe-health .health-bar i{background:#4b9278}
+  .actor-companion .health-bar i{background:#8062a1}
+  .actor-enemy .health-bar i{background:#a95843}
+  .foe-health .hp-value{position:relative;font-size:12px;text-shadow:0 1px 2px #000}
+  @media(min-width:581px){.status:not(:has(.health)){grid-template-columns:1.25fr 1fr}}
   .actor-figure{position:absolute;top:clamp(40px,6vh,56px);bottom:24px;left:53%;transform:translateX(-50%);width:min(100%,370px)}
   .actor-enemy .actor-figure{left:47%}
   .actor-sprite{position:absolute;inset:0;background:bottom center/contain no-repeat var(--portrait);filter:drop-shadow(0 8px 6px #0c0e0bd9)}
@@ -233,8 +246,11 @@
   .stage-combat .intent{position:relative;z-index:4;max-width:min(100%,520px);min-height:0;margin:0;padding:4px 6px;border-color:#775349;background:#221712f0;color:#ffe0c7;font-size:11px;line-height:1.25;display:flex;align-items:center;gap:5px;flex-wrap:wrap;word-break:keep-all;translate:var(--intent-offset,0px) 0}
   .intent b{color:var(--rust);white-space:nowrap}
   .intent-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 5px;border:1px solid #855943;border-radius:4px;background:#38231a}
-  .intent-chip strong{white-space:nowrap}
+  .intent-chip strong{white-space:nowrap;font-variant-numeric:tabular-nums}
   .intent-chip svg{flex:none;width:14px;height:14px;color:#ffc69f}
+  .intent-chip .intent-target{display:inline-flex;gap:2px;padding-left:3px;border-left:1px solid #c9ac8d54}
+  .intent-chip .intent-target.player svg{color:var(--lime)}
+  .intent-chip .intent-target.companion svg{color:#d6b0f1}
   .intent-chip.defense{background:#182c33;border-color:#4f788a;color:#d9eff8}.intent-chip.defense svg{color:#a8def0}
   .intent-chip.skill{background:#243024;border-color:#637d60;color:#ddf1d7}.intent-chip.skill svg{color:#b8e2b7}
   .intent-chip.executing{outline:2px solid #fbe5c8;outline-offset:0}
@@ -326,13 +342,14 @@
   @media(max-width:580px){
     .frame{padding:9px 8px}.combat-field{padding-bottom:32px}.combat{height:276px}.actor-caption{top:5px;left:5px;right:5px}.actor-caption .foe-health{font-size:9px;padding:2px 3px}
     .companion-parts{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .actor-caption .health-bar{min-width:34px}.actor-figure{left:49%;top:42px;bottom:11px}.actor-enemy .actor-figure{left:51%}
+    .actor-figure{left:49%;top:42px;bottom:11px}.actor-enemy .actor-figure{left:51%}
     .actor-sprite{background-position:center}.hotspots .part{width:47px;height:29px;padding:2px}.hotspots .part-top{font-size:10px;line-height:10px}.hotspots .part-top small,.hotspots .part-stats{font-size:8px;line-height:8px}
     .part-guard{font-size:9px;line-height:9px}
     .impact-ring{width:53px;height:35px}.impact-copy{left:27px}.actor-enemy .impact-copy{right:27px}.impact-copy b{font-size:19px;padding:2px 5px}.impact-copy .block{font-size:13px}
     .combat-action{min-height:68px;padding-inline:6px}
     .event-illustration strong{font-size:12px}.event-illustration small{font-size:10px}
     .status-box.pursuit{grid-column:1/-1}.status-box.health{grid-column:auto}.status-box.health .health-bar{min-width:9px;margin:0}
+    .status:not(:has(.health)) .status-box:last-child{grid-column:1/-1}
     .intent-rail{padding-top:5px}.stage-combat .intent{font-size:10px;padding:3px 4px;gap:3px}
     .intent-chip svg{width:12px;height:12px}
     .hand{padding:5px 5px 6px}.hand-head{padding:0 4px}.hand-grid{padding:1px 3px 0;min-height:135px;gap:3px}.hand .card{min-height:133px;padding:3px 4px 4px}
@@ -346,10 +363,9 @@
   .combat .actor-caption{flex-direction:column;align-items:flex-start;gap:2px}
   .combat .actor-enemy .actor-caption{align-items:flex-end}
   .party-combat .actor-caption h2{font-size:clamp(12px,1.8vw,20px)}
-  .combat .actor-caption .foe-health{font-size:11px;margin:0;padding:2px 4px}
-  .combat .sd-actor .actor-figure{top:auto;bottom:44px;left:50%;width:min(96%,calc((var(--combat-height) - 104px)*2/3));height:auto;aspect-ratio:2/3}
+  .combat .sd-actor .actor-figure{top:auto;bottom:53px;left:50%;width:min(96%,calc((var(--combat-height) - 108px)*2/3));height:auto;aspect-ratio:2/3}
   img.actor-sprite{width:100%;height:100%;object-fit:contain;user-select:none}
-  .combat .actor-enemy .actor-figure{left:50%;bottom:44px}
+  .combat .actor-enemy .actor-figure{left:50%;bottom:53px}
   .combat .hotspots .part{width:12px;height:12px;min-height:0;padding:0;border-radius:50%;background:#1b1728b8;border:1px solid #d0c8b9;box-shadow:0 0 0 1px #15121a8a}
   .combat .hotspots .part>span{display:none}
   .combat .hotspots{visibility:hidden;pointer-events:none}
@@ -363,6 +379,7 @@
   .map-node .room-icon svg{width:22px;height:22px}
   .map-node[data-room-type=elite] .room-icon{color:var(--rust)}
   .map-node[data-room-type=rest] .room-icon{color:var(--blue)}
+  .map-node[data-room-type=shop] .room-icon{color:var(--warn)}
   .map-node .room-state{font-size:10px;color:var(--lime)}
   .combat .hotspots .part.injured{background:#b87939;border-color:#ffcf8c}
   .combat .hotspots .part.lost{background:#913e48;border-color:#ffacac}
@@ -380,7 +397,7 @@
   @media(max-width:580px){
     .combat{--combat-height:304px}.combat-field{padding-bottom:18px}
     .combat .actor-caption{left:4px;right:4px;top:5px}.combat .actor-caption .tag{font-size:9px}
-    .combat .actor-caption .foe-health{font-size:9px}.combat .actor-caption .health-bar{min-width:20px}
+    .foe-health .hp-value{font-size:11px}
     .combat .hotspots .part{width:10px;height:10px}
     .actor-body-status{left:2px;right:2px;padding:3px}.actor-body-status summary{font-size:9px}
     .actor-body-status .part-top{font-size:9px}.actor-body-status .part-stats,.actor-body-status .part-top small{font-size:8px}
@@ -394,6 +411,17 @@
       <button type="button" class="btn" id="auto-pause" data-action="auto-pause" aria-pressed="false" aria-keyshortcuts="Space">전투 일시정지</button>
       <button type="button" class="btn" id="auto-speed" data-action="auto-speed">배속 1×</button>
       <button type="button" class="btn" id="restart" data-action="restart">다시 시작</button></div></header>
+  <details class="map-settings" id="map-settings"><summary>지도 설정</summary>
+    <form id="map-form">
+      <label>시드<input name="seed" maxlength="24" size="13" placeholder="무작위" autocomplete="off"></label>
+      <label>구간별 방 수<input name="widths" value="3,3" maxlength="12" required></label>
+      <label>상점<input name="shops" type="number" min="0" max="12" value="1" required></label>
+      <label>휴게소<input name="rests" type="number" min="0" max="12" value="1" required></label>
+      <label>엘리트<input name="elites" type="number" min="0" max="12" value="1" required></label>
+      <button type="submit" class="btn primary">시드로 시작</button>
+      <button type="button" class="btn" data-action="classic-map">기본 지도</button>
+    </form><p id="map-error" role="alert"></p>
+  </details>
   <section class="status" id="status" aria-label="전투 및 추격 상태"></section>
   <section class="qa-tools" id="qa-tools" aria-label="QA 도구" hidden>
     <b>QA · F8</b>
@@ -430,9 +458,19 @@ const icons = {
   attack:'<path d="m5 19 5-5m-1-3 4 4m-2-3L19 4l1 1-8 8M4 20l3-3"/>',
   defense:'<path d="M12 3 5 6v5c0 4 2.9 7.6 7 10 4.1-2.4 7-6 7-10V6l-7-3Z"/>',
   skill:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/>',
+  head:'<circle cx="12" cy="8" r="5"/><path d="M7 21v-2a5 5 0 0110 0v2"/>',
+  eyes:'<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2"/>',
+  hiddenIntent:'<path d="M3 3l18 18M10 6a11 11 0 012 0c6 0 10 6 10 6a15 15 0 01-3 3M6 7a16 16 0 00-4 5s4 6 10 6c1 0 3 0 4-1"/>',
+  arms:'<path d="M4 14l3-5 4 1 2 4 3-2V8l-2-1 1-3 4 1 2 5-2 8-5 2-8-1Z"/>',
+  chest:'<path d="M8 4l-4 3 2 5 1 6h10l1-6 2-5-4-3-4 3Z"/><path d="M12 7v9"/>',
+  belly:'<path d="M7 5l-1 6-2 7 3 2h10l3-2-2-7-1-6"/><circle cx="12" cy="14" r="1"/>',
+  legs:'<path d="M8 3h8l-1 9 2 8h-4l-2-7-1 7H6l1-8Z"/>',
+  redraw:'<rect x="7" y="5" width="12" height="15" rx="2"/><path d="M4 16V7l2-3m4 8 2 2 4-4"/>',
   routeBattle:'<path d="m4 3 9 9-2 2-9-9 2-2Zm16 0-9 9 2 2 9-9-2-2ZM4 16l4 4m-6 2 5-5m13-1-4 4m6 2-5-5"/>',
   routeRest:'<path d="M9 4h6v5h5v6h-5v5H9v-5H4V9h5V4Z"/>',
+  routeShop:'<path d="M5 8h14l2 12H3L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>',
   routeElite:'<path d="m4 7 4 3 4-7 4 7 4-3-2 12H6L4 7Zm3 9h10"/>',
+  routeBoss:'<path d="M5 10a7 7 0 1114 0c0 3-2 4-3 5v4H8v-4c-1-1-3-2-3-5Zm5 6v3m4-3v3"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/>',
   routeExit:'<path d="M5 21V3h13v18M9 21V7h9M12 14h1M2 21h20"/>',
   pursuer:'<circle cx="12" cy="5" r="3"/><path d="m7 21 1-10h8l1 10M8 12l-4 5m12-5 4 5M9 5h6M4 17l2 3 3-2m11-1-2 3-3-2"/>',
   runner:'<circle cx="16" cy="5" r="2"/><path d="m5 10 5-3 4 3 3 2 4-1M12 10l-3 4 5 2 1 5m-6-7-3 5H2"/>'
@@ -534,15 +572,71 @@ function companionCardIds(actor=livingCompanion()){
 function cardOwnerName(card){
   return card.owner?companionTypes[card.companion].name:"수녀";
 }
-const areas = {
-  threshold:{name:"격리문", foe:"janitor", col:1, row:2, next:["duct","infirmary","corridor"]},
+const standardAreas = {
+  threshold:{name:"격리문", foe:"janitor", companion:"guard", col:1, row:2, next:["duct","infirmary","corridor"]},
   duct:{name:"환기 통로", foe:"crawler", col:2, row:1, detail:"기어오는 탈옥수가 팔을 노려요.", next:["lift"]},
-  infirmary:{name:"의무실", foe:"medic", col:2, row:2, detail:"붕대를 감은 탈옥수는 부상 부위를 치료해요.", next:["lift"]},
-  corridor:{name:"정비 계단", col:2, row:3, detail:"전투 없이 들어가 한 부위를 치료할 수 있어요.", next:["landing"]},
+  infirmary:{name:"의무실", foe:"medic", companion:"awakened", col:2, row:2, detail:"붕대를 감은 탈옥수는 부상 부위를 치료해요.", next:["lift"]},
+  corridor:{name:"정비 계단", type:"rest", col:2, row:3, detail:"전투 없이 들어가 한 부위를 치료할 수 있어요.", next:["landing"]},
   landing:{name:"계단참", foe:"sentinel", col:3, row:3, detail:"방패를 든 탈옥수가 머리를 단단히 지켜요.", next:["lift"]},
   lift:{name:"승강기실", foe:"warden", col:4, row:2, detail:"출구 앞 마지막 전투예요.", next:["exit"]},
   exit:{name:"지상 출구", col:5, row:2, detail:"던전 밖으로 나가요."}
 };
+let areas=standardAreas;
+
+function mapRandom(seed){
+  let state=2166136261;
+  for(const letter of seed) state=Math.imul(state^letter.codePointAt(0),16777619);
+  return ()=>{
+    state=(state+0x6D2B79F5)|0;
+    let value=Math.imul(state^(state>>>15),state|1);
+    value^=value+Math.imul(value^(value>>>7),value|61);
+    return ((value^(value>>>14))>>>0)/4294967296;
+  };
+}
+
+function generateMap({seed,widths,shops,rests,elites}){
+  const random=mapRandom(seed);
+  const total=widths.reduce((sum,width)=>sum+width,0);
+  const pool=shuffle([
+    ...Array(shops).fill("shop"),...Array(rests).fill("rest"),...Array(elites).fill("elite"),
+    ...Array(total-shops-rests-elites).fill("battle")
+  ],random);
+  const map={threshold:{...standardAreas.threshold,next:[]}};
+  const battleRooms=[{name:"환기 통로",foe:"crawler"},{name:"의무실",foe:"medic"},{name:"계단참",foe:"sentinel"}];
+  const specialRooms={shop:{name:"암시장"},rest:{name:"휴게소"},elite:{name:"독방",foe:"sentinel"}};
+  let medicEncounter=false;
+  const stages=[["threshold"],...widths.map((width,stage)=>{
+    const rows=width===1?[2]:shuffle([1,2,3],random).slice(0,width).sort((a,b)=>a-b);
+    return rows.map(row=>{
+      const type=pool.pop();
+      const room=type==="battle"?battleRooms[Math.floor(random()*battleRooms.length)]:specialRooms[type];
+      const id=`room-${stage+1}-${row}`;
+      map[id]={...room,type,col:stage+2,row,next:[]};
+      if(room.foe==="medic" && !medicEncounter){
+        map[id].companion="awakened";
+        medicEncounter=true;
+      }
+      return id;
+    });
+  }),["lift"],["exit"]];
+  map.lift={...standardAreas.lift,type:"boss",col:stages.length-1,next:[]};
+  map.exit={...standardAreas.exit,col:stages.length,next:[]};
+  // Walk each ordered layer together so every room is connected and edges do not cross.
+  for(let stage=0;stage<stages.length-1;stage++){
+    const from=stages[stage],to=stages[stage+1];
+    let left=0,right=0;
+    while(true){
+      map[from[left]].next.push(to[right]);
+      const lastLeft=left===from.length-1,lastRight=right===to.length-1;
+      if(lastLeft && lastRight) break;
+      const choice=random();
+      if(!lastLeft && (lastRight || choice<.67)) left++;
+      if(!lastRight && (lastLeft || choice>.33)) right++;
+    }
+  }
+  return map;
+}
+
 const foes = {
   janitor:{name:"탈옥한 죄수", hp:[8,4,5,6,4,5], vitality:8, armor:{head:2},
     patterns:[ [["heavy","legs"],["guard","chest"]], [["aim","arms"],["guard","head"]], [["heavy","chest"],["counter","head"]] ]},
@@ -636,10 +730,10 @@ function record(message,state=game){
   if(state.log.length > 24) state.log.pop();
 }
 
-function shuffle(items){
+function shuffle(items,random=Math.random){
   const result = [...items];
   for(let i=result.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
+    const j = Math.floor(random()*(i+1));
     [result[i],result[j]] = [result[j],result[i]];
   }
   return result;
@@ -656,7 +750,7 @@ function draw(count){
   }
 }
 
-function start(){
+function start(mapConfig=game?.mapConfig){
   cancelAutoBattleTimer();
   cancelCombatPresentation();
   autoPaused=false;
@@ -665,7 +759,8 @@ function start(){
     routeTravel=null;
     document.querySelector("#stage").inert=false;
   }
-  game = {phase:"combat", area:"threshold", trail:["threshold"], distance:5, steps:0, turns:0,
+  areas=mapConfig?generateMap(mapConfig):standardAreas;
+  game = {phase:"combat", area:"threshold", trail:["threshold"], distance:5, steps:0, turns:0, mapConfig, coins:0,
     player:fighter("수녀",[9,5,7,7,6,7],28), companion:null, pendingCompanion:null, deadCompanions:[], deck:[...starterDeck], rewards:[], acquired:[], log:[], feedback:[], enemy:null, enemyAction:null, stairTreatment:null, qaUses:0};
   record("사형수를 위한 기도를 마치자 폭동 경보가 울렸어요. 기도를 받았던 사형수가 뒤에서 쫓아와요.");
   record("폭동으로 풀려난 죄수들이 통로를 막고 있어요. 지상 출구로 가야 해요.");
@@ -680,6 +775,7 @@ function clearDefense(actor){
 
 function enterArea(id, opening=false){
   game.area=id;
+  game.shopBought=false;
   const area=areas[id];
   if(!area.foe){
     game.phase = id==="exit" ? "won" : "route";
@@ -687,7 +783,7 @@ function enterArea(id, opening=false){
   }
   const foe=foes[area.foe];
   game.foe=foe;
-  game.enemy=fighter(foe.name,foe.hp,foe.vitality);
+  game.enemy=fighter(foe.name,foe.hp,foe.vitality+(area.type==="elite"?2:0));
   const [held,...reserve]=foe.reserve || [];
   game.enemyHand=held?[held]:[];
   game.enemyDraw=reserve;
@@ -818,7 +914,7 @@ function hit(attacker, defender, target, damage, {id,pierce=0,removed=0},state){
   const defeated=isDown(defender);
   const fallen=side==="companion" && defeated;
   const after=condition(defender,target);
-  const event={type:"hit",card:id,from:sideOf(attacker,state),side,targets:[target],dealt,blocked,removed,defeated,fallen};
+  const event={type:"hit",card:id,from:sideOf(attacker,state),side,targets:[target],dealt,hp:defender.hp,blocked,removed,defeated,fallen};
   if(before!==after) event.injury=after;
   queueFeedback(event,state);
   record(`${attacker.name} → ${defender.name} ${parts[target]} · 피해 ${dealt}${blocked?` · 가드 ${blocked}`:""}`,state);
@@ -864,7 +960,7 @@ function applyCard(id, actor, opponent, targets,state=game,recipient=actor){
       const before=condition(recipient,target);
       const recovered=healPart(recipient,target,healValue(recipient,amount));
       const restored=before!==condition(recipient,target);
-      queueFeedback({type:"heal",card:id,side:sideOf(recipient,state),targets:[target],recovered,restored},state);
+      queueFeedback({type:"heal",card:id,side:sideOf(recipient,state),targets:[target],recovered,restored,hp:recipient.hp},state);
       record(`${recipient.name} · ${parts[target]} 내구도 +${recovered}${restored?" · 정상 회복":""}`,state);
       break;
     }
@@ -1103,7 +1199,8 @@ function settleTurn(){
     clearDefense(game.player);
     if(livingCompanion()) clearDefense(game.companion);
     record(`${game.enemy.name} 격파 · 다음 길을 선택하세요.`);
-    game.pendingCompanion={threshold:"guard",infirmary:"awakened"}[game.area] || null;
+    game.pendingCompanion=areas[game.area].companion || null;
+    if(game.mapConfig) game.coins++;
     if(hasUpcomingBattle(game.area)){
       game.rewards=shuffle(rewardPool).slice(0,3);
       game.phase="reward";
@@ -1190,7 +1287,7 @@ function moveTo(id){
 
 function treatAtStairs(target,side="player"){
   const actor=game[side], part=actor?.body[target];
-  if(game.phase!=="route" || game.area!=="corridor" || game.stairTreatment || game.distance<=1 ||
+  if(game.phase!=="route" || areas[game.area].type!=="rest" || game.stairTreatment || game.distance<=1 ||
      !partySides().includes(side) || !part?.hp || part.hp===part.max) return false;
   const recovered=healPart(actor,target,2);
   game.distance--;
@@ -1201,6 +1298,11 @@ function treatAtStairs(target,side="player"){
 
 function healthBar(actor){
   return `<span class="health-bar" aria-hidden="true"><i style="--life:${actor.hp/actor.maxHp*100}%"></i></span>`;
+}
+
+function actorHealth(actor,defeated=""){
+  const label=defeated || `체력 ${actor.hp}/${actor.maxHp}`;
+  return `${healthBar(defeated?{...actor,hp:0}:actor)}<b class="hp-value" role="img" aria-label="${label}">${defeated || `${actor.hp}/${actor.maxHp}`}</b>`;
 }
 
 function pursuerPosition(distance){
@@ -1218,7 +1320,7 @@ function gauges(){
     </div></div>
     <div class="status-box"><strong>${combat?game.stamina:game.steps}</strong><div><p>${combat?(livingCompanion()?"공용 스태미너":"스태미너"):"이동한 칸"}</p>
     <small>${combat?`이 전투 ${game.round}턴 · 사용 가능 최대 ${energy(game.player)} / 턴`:`전투에서 쓴 턴 ${game.turns}`}</small></div></div>
-    <div class="status-box health ${game.player.hp<=7?"urgent":""}"><strong>${game.player.hp}/${game.player.maxHp}</strong><div><p>내 전체 HP</p></div>${healthBar(game.player)}</div>`;
+    ${combat?"":`<div class="status-box health ${game.player.hp<=7?"urgent":""}"><strong>${game.player.hp}/${game.player.maxHp}</strong><div><p>체력</p></div>${healthBar(game.player)}</div>`}`;
 }
 
 function intentLabel(action,state=game){
@@ -1299,15 +1401,19 @@ function intentPanel(intents, eyes){
   });
   const heading=changes&&eyes==="healthy"?"변경된 예고":"적 행동 예고";
   const chips=eyes!=="healthy"
-    ? "<span>눈 상태로 행동 예고를 볼 수 없어요.</span>"
+    ? `<span class="intent-chip" title="눈 부상으로 예고가 가려짐" role="img" aria-label="눈 부상으로 예고가 가려짐">${icon("hiddenIntent")}<strong>?</strong></span>`
     : intents.map(action=>{
-      const type=cards[action.id].type;
-      const category=type==="defense"?"수비":action.id==="aid"?"회복":categories[type];
+      const {id}=action;
+      const card=cards[id],type=card.type,amount=power(card,game.enemy);
+      const value=id==="aim"?2:id==="break"?1:id==="aid"?`+${healValue(game.enemy)}`:
+        id==="rethink"?Math.min(amount,game.enemyDraw.length):type==="defense"?`+${guardAmount(id,game.enemy)}`:amount;
       const attackLink=type==="attack"?` data-attack-side="${action.side}" data-attack-target="${action.targets[0]}" data-attack-source="${cards[action.id].part || "chest"}"`:"";
       const targetName=type==="attack" && livingCompanion()?`${game[action.side].name} `:"";
-      return `<span class="intent-chip ${type}" data-intent="${action.planIndex}"${attackLink}>${icon(type)}<strong>${category}</strong><span>${targetName}${intentLabel(action)}</span></span>`;
-    }).join("") || "<span>행동 취소</span>";
-  return `<div class="intent-rail"><div class="intent" aria-label="${heading}"><b>${heading}</b>${chips}</div></div>`;
+      const label=`${targetName}${intentLabel(action)}`;
+      const targets=action.targets.length?`<span class="intent-target ${action.side || "enemy"}">${action.targets.map(icon).join("")}</span>`:"";
+      return `<span class="intent-chip ${type}" data-intent="${action.planIndex}"${attackLink} role="img" title="${label}" aria-label="${label}">${icon(id==="rethink"?"redraw":type)}<strong>${value}</strong>${targets}</span>`;
+    }).join("") || '<span aria-label="행동 없음">—</span>';
+  return `<div class="intent-rail"><div class="intent" role="group" aria-label="${heading}">${chips}</div></div>`;
 }
 
 function bodyTiles(side,intents,eyes,anchors){
@@ -1345,10 +1451,9 @@ function bodyPanel(side, intents, eyes){
   const status=lost?`결손 ${lost}`:injured?`부상 ${injured}`:"정상";
   const portrait=art?`<img class="actor-sprite" src="${art.src}" width="1024" height="1536" alt="" aria-hidden="true" draggable="false">`:
     `<div class="actor-sprite" aria-hidden="true" style="--portrait:var(--art-${sprite})"></div>`;
-  return `<section class="panel actor-${side} ${art?"sd-actor":""}" data-portrait="${art?.kind || sprite}" aria-label="${side==="companion"?"동료 ":""}${actor.name}"><div class="actor-caption"><div><h2>${actor.name}</h2>
-    <span class="tag">${enemy?`적 스태미너 ${game.enemyStamina}`:side==="companion"?"동료 · 공용 스태미너":"수녀 · 자동 전투"}</span></div>
-    <span class="foe-health">전체 HP ${actor.hp}/${actor.maxHp}${healthBar(actor)}</span></div>
+  return `<section class="panel actor-${side} ${art?"sd-actor":""}" data-portrait="${art?.kind || sprite}" aria-label="${side==="companion"?"동료 ":""}${actor.name}"><div class="actor-caption"><h2>${actor.name}</h2></div>
     <div class="actor-figure">${portrait}<div class="body-grid hotspots" aria-hidden="true">${tiles}</div></div>
+    <div class="foe-health">${actorHealth(actor)}</div>
     <details class="actor-body-status" data-side="${side}"><summary>부위 상태 · ${status}</summary><div class="body-grid body-readout">${bodyTiles(side,intents,eyes)}</div></details></section>`;
 }
 
@@ -1415,13 +1520,15 @@ function handPanel(dealt){
 }
 
 function routeType(id){
-  return id==="exit"?"exit":id==="lift"?"elite":areas[id].foe?"battle":"rest";
+  return areas[id].type || (id==="exit"?"exit":id==="lift"?"elite":"battle");
 }
 
 function mapPanel(){
   const next=areas[game.area].next;
   const gain=travelGain();
-  const types={battle:{icon:"routeBattle",label:"전투"},rest:{icon:"routeRest",label:"휴식·치료"},elite:{icon:"routeElite",label:"강적"},exit:{icon:"routeExit",label:"출구"}};
+  const types={battle:{icon:"routeBattle",label:"전투"},rest:{icon:"routeRest",label:"휴식·치료"},shop:{icon:"routeShop",label:"상점"},elite:{icon:"routeElite",label:"강적"},boss:{icon:"routeBoss",label:"보스"},exit:{icon:"routeExit",label:"출구"}};
+  const roomTypes=new Set(Object.keys(areas).map(routeType));
+  const columns=Math.max(...Object.values(areas).map(area=>area.col));
   const traveled=new Set(game.trail.slice(1).map((id,i)=>`${game.trail[i]}-${id}`));
   const nodes=Object.entries(areas).map(([id,area])=>{
     const current=id===game.area;
@@ -1439,9 +1546,9 @@ function mapPanel(){
     const edge=`${id}-${dest}`;
     return `<line class="${traveled.has(edge)?"walked":""}" data-edge="${edge}" data-from="${id}" data-to="${dest}"/>`;
   })).join("");
-  return `<section class="route-map" aria-label="전체 경로 지도"><div class="map-head"><h3>전체 경로</h3><small>다음 이동 · 도망 여유 +${gain}</small></div>
-    <div class="route-legend">${Object.values(types).map(type=>`<span>${icon(type.icon)}${type.label}</span>`).join("")}</div>
-    <div class="map-layout"><svg class="map-lines" aria-hidden="true">${lines}</svg>${nodes}</div></section>`;
+  return `<section class="route-map" aria-label="전체 경로 지도"><div class="map-head"><h3>전체 경로</h3><small>${game.mapConfig?`동전 ${game.coins} · `:""}다음 이동 · 도망 여유 +${gain}</small></div>
+    <div class="route-legend">${Object.entries(types).filter(([key])=>roomTypes.has(key)).map(([,type])=>`<span>${icon(type.icon)}${type.label}</span>`).join("")}</div>
+    <div class="map-layout" style="--map-stages:${columns}"><svg class="map-lines" aria-hidden="true">${lines}</svg>${nodes}</div></section>`;
 }
 
 function centerInFrame(node,frame){
@@ -1464,7 +1571,8 @@ function layoutMapLinks(layout){
 const mapResize=new ResizeObserver(([entry])=>layoutMapLinks(entry.target));
 
 function treatmentPanel(){
-  if(game.area!=="corridor") return "";
+  const area=areas[game.area];
+  if(area.type!=="rest") return "";
   const patients=partySides().map(side=>({side,actor:game[side],wounds:woundedParts(game[side])}));
   const treated=game.stairTreatment;
   let message="도망 여유 1을 써서 한 부위의 내구도를 최대 2 회복해요.";
@@ -1475,8 +1583,22 @@ function treatmentPanel(){
     return `<div class="treatment-group" data-patient="${side}"><strong>${actor.name}</strong>${buttons?`<div class="treatment-options">${buttons}</div>`:'<small>치료할 부상 없음</small>'}</div>`;
   }).join("");
   const illustration=treated?eventIllustration("aid","healing","치료 완료",`${treated.name} ${parts[treated.target]} 내구도 +${treated.recovered}`):"";
-  return `<section class="treatment" aria-label="정비 계단 치료"><h3>정비 계단 치료</h3>${treated?"":`<p>${message}</p>`}
+  return `<section class="treatment" aria-label="${area.name} 치료"><h3>${area.name} 치료</h3>${treated?"":`<p>${message}</p>`}
     ${options?`<div class="treatment-options">${options}</div>`:""}${illustration}</section>`;
+}
+
+function buyShortcut(){
+  if(game.phase!=="route" || areas[game.area].type!=="shop" || game.shopBought || game.coins<1) return;
+  game.coins--;
+  game.distance+=2;
+  game.shopBought=true;
+  record("암시장 · 뒷길 정보 · 도망 여유 +2");
+}
+
+function shopPanel(){
+  if(areas[game.area].type!=="shop") return "";
+  return `<section class="treatment" aria-label="암시장"><h3>암시장 · 동전 ${game.coins}</h3>
+    ${game.shopBought?'<small>도망 여유 +2</small>':`<div><button type="button" class="btn" data-action="buy-shortcut" ${game.coins<1?"disabled":""}>뒷길 정보 · 동전 1 · 도망 여유 +2</button></div>`}</section>`;
 }
 
 function partyNotice(){
@@ -1503,12 +1625,12 @@ function routePanel(){
   const gain=travelGain();
   const heading=next.length>1?"갈림길에서 방향을 고르세요":"다음 칸으로 이동하세요";
   return `<section class="routes"><h2>${heading}</h2>${game.distance+gain<=0?'<p class="danger">이동해도 도망 여유가 0이라 따라잡혀요.</p>':""}
-    ${partyNotice()}${companionEncounterPanel()}${treatmentPanel()}${mapPanel()}</section>`;
+    ${partyNotice()}${companionEncounterPanel()}${treatmentPanel()}${shopPanel()}${mapPanel()}</section>`;
 }
 
 
 function render(){
-  document.querySelector("#location").textContent=areas[game.area].name;
+  document.querySelector("#location").textContent=areas[game.area].name+(game.mapConfig?` · ${game.mapConfig.seed}`:"");
   document.querySelector("#status").innerHTML=gauges();
   renderQaTools();
   renderAutoControls();
@@ -1777,6 +1899,12 @@ function showImpact(scene,event){
   }
 }
 
+function showActorHealth(panel,event){
+  const maxHp=game[event.side].maxHp;
+  const defeated=event.defeated?(event.side==="enemy"?"격파":"쓰러짐"):"";
+  panel.querySelector(".foe-health").innerHTML=actorHealth({hp:event.hp,maxHp},defeated);
+}
+
 function playCombatFeedback(after, endOfTurn=false){
   cancelAutoBattleTimer();
   const pending=game.feedback.splice(0);
@@ -1815,12 +1943,16 @@ function playCombatFeedback(after, endOfTurn=false){
       schedule(()=>{
         showImpact(scene,event);
         if(soundEnabled && audioContext?.state==="running") synthesizeImpact(audioContext,audioOutput,event);
+        showActorHealth(scene.querySelector(`.actor-${event.side}`),event);
         if(event.dealt) setActorPose(scene,event.side,"hit");
       },resultAt);
     }else if(event.type==="guard" || event.recovered){
       schedule(()=>{
         showImpact(scene,event);
-        if(event.type==="heal") playHealingSound();
+        if(event.type==="heal"){
+          showActorHealth(scene.querySelector(`.actor-${event.side}`),event);
+          playHealingSound();
+        }
       },starts);
     }
     schedule(()=>showCombatAction(scene,event),resultAt);
@@ -1970,6 +2102,27 @@ async function travelAlongMap(button){
   finishBoardAction("move",id);
 }
 
+document.querySelector("#map-form").addEventListener("submit",event=>{
+  event.preventDefault();
+  const fields=event.currentTarget.elements;
+  const widths=fields.widths.value.split(",").map(value=>Number(value.trim()));
+  const shops=fields.shops.valueAsNumber,rests=fields.rests.valueAsNumber,elites=fields.elites.valueAsNumber;
+  const message=document.querySelector("#map-error");
+  if(widths.length>4 || widths.some(width=>!Number.isInteger(width) || width<1 || width>3)){
+    message.textContent="구간 1~4개, 방 1~3개씩 입력하세요. 예: 3,2,3";
+    return;
+  }
+  if([shops,rests,elites].some(count=>!Number.isInteger(count) || count<0) || shops+rests+elites>widths.reduce((a,b)=>a+b,0)){
+    message.textContent="상점·휴게소·엘리트 합계가 전체 방 수를 넘습니다.";
+    return;
+  }
+  const seed=fields.seed.value.trim() || Math.floor(Math.random()*4294967296).toString(36).toUpperCase();
+  fields.seed.value=seed;
+  message.textContent="";
+  document.querySelector("#map-settings").open=false;
+  start({seed,widths,shops,rests,elites});
+});
+
 board.addEventListener("click",event=>{
   if(drag?.ghost || (suppressDragClick && event.detail>0)){
     suppressDragClick=false;
@@ -1984,11 +2137,18 @@ board.addEventListener("click",event=>{
   if(action==="qa"){runQaAction(value);return;}
   unlockCombatAudio();
   if(action==="restart"){start();return;}
+  if(action==="classic-map"){
+    document.querySelector("#map-error").textContent="";
+    document.querySelector("#map-settings").open=false;
+    start(null);
+    return;
+  }
   if(action==="move"){travelAlongMap(button);return;}
   if(action==="reward") chooseReward(value);
   if(action==="skip-reward") chooseReward(null);
   if(action==="recruit") recruitCompanion(value);
   if(action==="decline-companion") declineCompanion();
+  if(action==="buy-shortcut") buyShortcut();
   if(["target","card","end"].includes(action)) return;
   if(action==="treat" && treatAtStairs(value,side)) playHealingSound();
   finishBoardAction(action,value);
