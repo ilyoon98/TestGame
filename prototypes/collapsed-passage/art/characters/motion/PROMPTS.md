@@ -147,3 +147,19 @@ RIGHT / HIT: One heavy standing RECOIL pose from SCREEN LEFT: helmet/shoulders w
 Direction: this character faces SCREEN LEFT in BOTH poses. The hit is a reaction to the opposite direction of their attack. Do not mirror.
 This is the still-pose impact technique of 2D combat games: a highly readable attack CONTACT image, a highly readable hurt RECOIL image. Each full character must be freshly drawn by the image model in that pose; do not fake movement by only rotating the idle cutout.
 Keep SD characters non-sexual and fully clothed; no nudity or erotic posing. Keep enemy portraits faithful to the provided original. No blood or added injury gore.
+
+## 사망 컷
+
+내장 ImageGen으로 인물별 `*-hit.png`를 참조하고 투명 배경을 요청했다. 결과물은 인물별 `*-defeat.webp`다.
+
+### 수녀와 동료
+
+> Game sprite, a new defeated pose for the same original game character as the supplied identity reference. Preserve exactly the face/helmet, colors, clothing coverage, hairstyle, rendering style, anatomy proportions and recognizable equipment. Draw a full-body isolated sprite slumped motionless on one side or on staggered collapsed knees with upper body and head bowed almost to ground, all props and limbs readable and contained inside the image. Weight is supported by the ground, clearly distinct from the standing hit pose. Face relaxed, eyes closed if visible. Non-graphic, no wounds or blood. Preserve the front three-quarter side-view perspective of the original side-view battle camera. Use a compact, low posture and a transparent surrounding canvas with clean alpha. Show the character and their own items, with no frame, background, text or glow.
+
+수녀는 짧은 베일과 상아색 어깨천, 꺼진 등불과 둥근 방패를 사용했다. 간수는 붉은 포니테일과 검보라 제복, 사각 방패와 진압봉을 사용했다. 개화 수감자는 은발과 자두색 스카프, 붕대와 끊어진 사슬을 사용했다.
+
+### 적
+
+> Create a new terminal corpse sprite for this original gothic industrial prison dungeon game, using the provided image as the identity, equipment, and hand-painted style reference. Draw the aftermath of a devastating fantasy-game finishing blow, with an inert body that has fully collapsed and crumpled all the way down into a broad low irregular heap lying flat against the ground. The torso is horizontal, head at ground level, limbs slack and folded low with no propping on hands or knees, no sitting or rising. Make the silhouette read as a crushed dead body, with visibly crushed armor/fabric and a few scattered fragments of their own gear. Irregular black-burgundy staining and a small dark red smear beneath and to the side break up the edge of the heap. Keep the body itself recognizable as this specific enemy from costume, face or helmet, and signature prop. Use a side-on three-quarter camera perspective aligned to a 2D side-view battlefield, a wide low landscape composition, and actual transparent alpha around the body and debris. Keep the whole figure in frame with no scenery, extra figures, symbols or text.
+
+탈옥한 죄수는 방독면과 황토색 앞치마, 녹슨 파이프를 사용했다. 기어오는 탈옥수는 헝클어진 머리와 적갈색 수감복을 사용했다. 의무실의 탈옥수는 고글과 흰 코트, 가죽 의료 가방을 사용했다. 방패 든 탈옥수는 좁은 눈구멍의 투구와 노란 사선 방패를 사용했다. 승강기실의 탈옥수는 철창 투구와 두꺼운 건틀릿, 붉은 수감복과 가슴의 철제 고리를 사용했다.

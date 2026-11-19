@@ -5,9 +5,11 @@ import {engine} from "./helpers/game-engine.mjs";
 import {inspectRgbaPng} from "./helpers/png.mjs";
 
 test("party cutouts have real alpha, matching canvases, safe margins and registered feet",()=>{
+  const run=engine();
   const feet=[];
-  for(const name of ["nun","guard","awakened"]){
-    const png=inspectRgbaPng(readFileSync(new URL(`../art/characters/${name}-sd.png`,import.meta.url)));
+  for(const name of ["player","guard","awakened","archer","shaman"]){
+    const src=run(`partyArt['${name}'].src`);
+    const png=inspectRgbaPng(readFileSync(new URL(`../${src}`,import.meta.url)));
     assert.equal(png.width,1024);
     assert.equal(png.height,1536);
     assert.ok(png.transparent/(png.width*png.height)>.4,`${name}: insufficient transparent background`);
@@ -25,28 +27,36 @@ test("the nun uses the new portrait and each party portrait has six normalized b
   assert.equal(run("bodyPanel('player',battleIntent(),'healthy').includes('art/characters/nun-sd.png')"),true);
   assert.equal(run("bodyPanel('player',battleIntent(),'healthy').includes('sd-actor')"),true);
   assert.equal(run("bodyPanel('player',battleIntent(),'healthy').includes('var(--art-player)')"),false);
-  for(const key of ["player","guard","awakened"]){
+  for(const key of ["player","guard","awakened","archer","shaman"]){
     assert.equal(run(`bodyAnchors['${key}'].length`),6);
     assert.equal(run(`bodyAnchors['${key}'].every(point=>point.length===2 && point.every(n=>Number.isFinite(n) && n>0 && n<100))`),true);
     const src=run(`partyArt['${key}'].src`);
     assert.ok(readFileSync(new URL(`../${src}`,import.meta.url)).length>0);
   }
+  for(const id of ["snapShot","mending","unseal"]){
+    assert.match(run(`skillArtSrc('${id}')`),/-v5\.webp$/);
+    assert.ok(readFileSync(new URL(`../${run(`skillArtSrc('${id}')`)}`,import.meta.url)).length>0);
+  }
 });
 
-test("recruitment, replacement and death show exactly the current companion's portrait",()=>{
+test("both recruited companions appear and only the fallen companion leaves the field",()=>{
   const run=engine();
-  assert.equal(run("companionPanel([], 'healthy')"),"");
-  run("game.enemy.hp=0; settleTurn(); chooseReward(null);");
+  const field=()=>run("layoutCombatHud=()=>{}; renderScreen(); document.querySelector('#stage').innerHTML");
+  assert.doesNotMatch(field(),/class="panel actor-companion/);
+  run("game.enemy.hp=0; finishCombat(); chooseReward(null);");
   assert.equal(run("companionEncounterPanel().includes('art/characters/guard-sd.png')"),true);
-  run("recruitCompanion('guard'); moveTo('infirmary');");
-  assert.equal(run("companionPanel(battleIntent(),'healthy').includes('art/characters/guard-sd.png')"),true);
-  run("game.enemy.hp=0; settleTurn(); chooseReward(null);");
+  run("recruitCompanion('guard'); moveTo('infirmary'); beginCombat();");
+  assert.match(field(),/art\/characters\/guard-sd\.png/);
+  run("game.enemy.hp=0; finishCombat(); chooseReward(null);");
   assert.equal(run("companionEncounterPanel().includes('art/characters/awakened-sd.png')"),true);
-  run("recruitCompanion('awakened'); moveTo('lift');");
-  assert.equal(run("companionPanel(battleIntent(),'healthy').includes('art/characters/awakened-sd.png')"),true);
-  assert.equal(run("companionPanel(battleIntent(),'healthy').includes('art/characters/guard-sd.png')"),false);
+  run("recruitCompanion('awakened'); declineCompanion(); moveTo('lift'); beginCombat();");
+  assert.match(field(),/--combat-columns:4/);
+  assert.match(field(),/art\/characters\/awakened-sd\.png/);
+  assert.match(field(),/art\/characters\/guard-sd\.png/);
   run("hit(game.enemy,game.companion,'head',99,{id:'heavy'},game);");
-  assert.equal(run("companionPanel([], 'healthy')"),"");
+  assert.match(field(),/--combat-columns:3/);
+  assert.match(field(),/art\/characters\/awakened-sd\.png/);
+  assert.doesNotMatch(field(),/art\/characters\/guard-sd\.png/);
 });
 
 test("combat renders the ally on the field and retains expanded body readouts across actions",()=>{
@@ -54,7 +64,7 @@ test("combat renders the ally on the field and retains expanded body readouts ac
   run("layoutCombatHud=()=>{}; renderScreen();");
   assert.equal(run("document.querySelector('#stage').innerHTML.includes('party-combat')"),false);
   run(`
-    game.enemy.hp=0; settleTurn(); chooseReward(null); recruitCompanion('guard'); moveTo('duct');
+    game.enemy.hp=0; finishCombat(); chooseReward(null); recruitCompanion('guard'); moveTo('duct'); beginCombat();
     globalThis.readouts=['player','companion','enemy'].map(side=>({dataset:{side},open:false}));
     document.querySelector('#stage').querySelectorAll=selector=>selector==='.actor-body-status[open]'?[readouts[1]]:selector==='.actor-body-status'?readouts:[];
     renderScreen();

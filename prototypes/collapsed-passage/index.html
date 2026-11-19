@@ -6,7 +6,7 @@
 <link rel="preload" as="image" href="art/characters/nun-sd.png">
 <link rel="preload" as="image" href="art/characters/guard-sd.png">
 <link rel="preload" as="image" href="art/characters/awakened-sd.png">
-<title>붕괴 통로 · 자동 전투 덱빌딩</title>
+<title>붕괴 통로 · 기술 자동 전투</title>
 <style>
   :root{color-scheme:dark;--bg:#101713;--plate:#17211b;--well:#111a15;--edge:#334137;--ink:#f1ead9;--soft:#bdc9b9;--lime:#d4ec94;--rust:#ffc09f;--blue:#a6d9f0;--warn:#f2aa73;--loss:#ff9d91}
   *{box-sizing:border-box}
@@ -96,8 +96,13 @@
   .map-lines line.traveling{stroke:#f6d693;stroke-width:3px}
   .map-node{grid-column:var(--col);grid-row:var(--row);margin:3px 7px;padding:5px 5px 4px;min-height:47px;display:grid;align-content:center;justify-items:center;text-align:center;line-height:1.3;background:#19251d;border:1px solid #47594a;border-radius:6px}
   .map-node b{font-size:12px}.map-node span{font-size:10px;color:var(--soft)}.map-node .fight-label{color:var(--rust)}
-  .map-node.current{border-color:var(--lime);background:#34452b}.map-node.current b{color:var(--lime)}
-  .map-node.next{border-color:#98c9ab;background:#22382e;padding:7px 5px;gap:2px}.map-node.visited{border-style:dashed}
+  .map-node:not(.current,.next){border-color:#303c32;background:#171e17}
+  .map-node:not(.current,.next)>*{opacity:.5}
+  .map-node.current{border-color:#f5d58d;background:#392f20;box-shadow:0 0 0 1px #f5d58d80,0 0 14px #e4b95838}
+  .map-node.current b{color:#ffe5ae}
+  .map-node.next{border-color:#98c9ab;background:#22382e;padding:7px 5px;gap:2px}
+  .map-node.next:is(:hover,:focus-visible){border-color:var(--lime);background:#2e4839}
+  .map-node.visited{border-style:dashed}
   .map-node.next b,.map-node .map-margin{color:var(--lime)}
   .map-node .map-margin,.map-node .map-threat{font-size:11px}
   .map-node .map-threat{color:var(--rust)}
@@ -130,10 +135,14 @@
     .body-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.part{padding:3px 4px}.part-top{font-size:12px}.part-top small,.part-stats{font-size:9px}
     .intent,.panel-note{font-size:10px;min-height:30px;padding:4px;margin-top:3px}.hand{padding:8px}.hand-head{margin-bottom:5px}
     .hand-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.card{min-height:96px}.lower{grid-template-columns:1fr}
-    .routes{padding:10px}.map-head{gap:5px;flex-wrap:wrap}.map-layout{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(var(--map-stages,5),minmax(49px,auto))}
+    .routes{padding:10px}.map-head{gap:5px;flex-wrap:wrap}.map-layout{--map-choice-scale:1.03;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(var(--map-stages,5),minmax(49px,auto))}
     .map-node{grid-column:var(--row);grid-row:var(--col);margin:3px 2px;padding:4px 2px}
   }
-  @media(prefers-reduced-motion:no-preference){.part,.card,.btn,.map-node{transition:filter .12s,background .12s,border-color .12s}}
+  @media(prefers-reduced-motion:no-preference){
+    .part,.card,.btn,.map-node{transition:filter .12s,background .12s,border-color .12s}
+    .map-layout:not(:has(.map-node.traveling)) .map-node.next:not(:hover,:focus-visible){animation:map-choice-pulse 2.4s ease-in-out infinite}
+    @keyframes map-choice-pulse{0%,100%{transform:scale(1)}50%{transform:scale(var(--map-choice-scale,1.04))}}
+  }
 
   /* Victory spoils use the same worn paper as the hand, laid flat for comparison. */
   .reward-panel{padding:clamp(16px,3vw,30px);border:1px solid #8e7755;border-radius:6px;background:#211f18}
@@ -199,7 +208,7 @@
   .foe-health .health-bar,.foe-health .hp-value{grid-area:1/1}
   .foe-health .health-bar{height:17px;min-width:0;margin:0;background:#2e2923}
   .foe-health .health-bar i{background:#4b9278}
-  .actor-companion .health-bar i{background:#8062a1}
+  .companion-actor .health-bar i{background:#8062a1}
   .actor-enemy .health-bar i{background:#a95843}
   .foe-health .hp-value{position:relative;font-size:12px;text-shadow:0 1px 2px #000}
   @media(min-width:581px){.status:not(:has(.health)){grid-template-columns:1.25fr 1fr}}
@@ -231,7 +240,7 @@
   .companion-parts .part-top,.companion-parts .part-stats{font-size:11px}
   .companion-parts .part.threat{border-color:var(--rust)}
   .companion-parts .part.guarded:not(.threat):not(.available){border-color:var(--blue)}
-  .actor-companion .impact-copy{left:0;top:-28px;transform:translateX(-50%)}
+  .companion-actor .impact-copy{left:0;top:-28px;transform:translateX(-50%)}
   .party-notice{margin-top:8px;padding:7px 9px;background:#272119;border:1px solid #77604b;border-radius:5px;font-size:13px;color:#f0c09d}
   .treatment-group{display:grid;gap:4px}
   .treatment-group strong{font-size:13px}
@@ -250,7 +259,7 @@
   .intent-chip svg{flex:none;width:14px;height:14px;color:#ffc69f}
   .intent-chip .intent-target{display:inline-flex;gap:2px;padding-left:3px;border-left:1px solid #c9ac8d54}
   .intent-chip .intent-target.player svg{color:var(--lime)}
-  .intent-chip .intent-target.companion svg{color:#d6b0f1}
+  .intent-chip .intent-target.ally svg{color:#d6b0f1}
   .intent-chip.defense{background:#182c33;border-color:#4f788a;color:#d9eff8}.intent-chip.defense svg{color:#a8def0}
   .intent-chip.skill{background:#243024;border-color:#637d60;color:#ddf1d7}.intent-chip.skill svg{color:#b8e2b7}
   .intent-chip.executing{outline:2px solid #fbe5c8;outline-offset:0}
@@ -295,23 +304,12 @@
   .event-illustration small{font-size:11px;color:var(--ink)}
   .event-illustration.healing{--event-color:#b6f5ca}
   .treatment .event-illustration{width:min(100%,215px);min-height:78px}
-  .combat-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .target-hint{text-align:center;font-size:12px;margin-top:9px;min-height:17px}
   .routes,.journal,details{border-radius:5px}
   .intent-arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;color:#ffad83}
   .intent-arrows path.intent-line{fill:none;stroke:currentColor;stroke-width:2.5;filter:drop-shadow(0 1px 2px #160c06);stroke-linecap:round}
   .intent-arrows marker path,.intent-arrows .intent-origin{fill:currentColor}
   .intent-arrows .intent-origin{stroke:#382119;stroke-width:1}
-  .card-preview{padding:9px 12px 11px;border:1px solid var(--edge);background:var(--plate);border-radius:5px;margin-top:6px}
-  .card-preview h3{font-size:13px;color:var(--lime);margin-bottom:6px}
-  .preview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0}
-  .preview-part{padding:5px 7px;background:var(--well);border:1px solid var(--edge);border-radius:4px;line-height:1.35}
-  .preview-part dt{font-size:12px;font-weight:750;color:var(--ink)}
-  .preview-part dd{margin:2px 0 0;font-size:12px;color:var(--soft);overflow-wrap:anywhere}
-  .preview-part dd span{white-space:nowrap}
-  .preview-part .preview-change{color:var(--warn)}
-  @media(min-width:1050px){.preview-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
-  @media(max-width:580px){.preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:360px){
     .stage-combat .actor-enemy h2{font-size:12px;white-space:nowrap}
   }
@@ -357,10 +355,11 @@
   }
   /* V5 party portraits share one registered 2:3 canvas and stand on the same floor. */
   .combat{--combat-height:clamp(330px,45vh,430px);height:var(--combat-height)}
-  .combat.party-combat{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .party-combat .actor-enemy{grid-column:3}
-  .actor-companion{grid-column:2;grid-row:1;--accent:#d6b0f1}
+  .combat{grid-template-columns:repeat(var(--combat-columns,2),minmax(0,1fr))}
+  .combat>.panel{grid-column:auto;grid-row:1}
+  .companion-actor{--accent:#d6b0f1}
   .combat .actor-caption{flex-direction:column;align-items:flex-start;gap:2px}
+  .combat .actor-caption small{font-size:11px;color:var(--accent)}
   .combat .actor-enemy .actor-caption{align-items:flex-end}
   .party-combat .actor-caption h2{font-size:clamp(12px,1.8vw,20px)}
   .combat .sd-actor .actor-figure{top:auto;bottom:53px;left:50%;width:min(96%,calc((var(--combat-height) - 108px)*2/3));height:auto;aspect-ratio:2/3}
@@ -380,7 +379,14 @@
   .map-node[data-room-type=elite] .room-icon{color:var(--rust)}
   .map-node[data-room-type=rest] .room-icon{color:var(--blue)}
   .map-node[data-room-type=shop] .room-icon{color:var(--warn)}
+  .map-node[data-room-type=mystery] .room-icon{color:#d8c6f4}
+  .mystery-options{margin-top:10px}
+  .mystery-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .mystery-room h2{color:#d8c6f4}
+  .mystery-options .btn.primary,.companion-encounter .btn.primary{color:#252015}
   .map-node .room-state{font-size:10px;color:var(--lime)}
+  .map-node.current .room-icon,.map-node.current .room-state{color:#ffe5ae;background:#2b2218}
+  .map-node.current .room-state{padding:1px 6px;border-radius:4px;font-weight:700}
   .combat .hotspots .part.injured{background:#b87939;border-color:#ffcf8c}
   .combat .hotspots .part.lost{background:#913e48;border-color:#ffacac}
   .combat .hotspots .part.threat{border:2px solid var(--rust);box-shadow:0 0 8px #e67648}
@@ -390,7 +396,171 @@
   .actor-body-status .body-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;margin-top:5px}
   .actor-body-status .part{padding:3px;min-height:36px}
   .actor-body-status .part-top{font-size:10px}.actor-body-status .part-stats,.actor-body-status .part-top small{font-size:9px}
-  .combat .actor-companion .impact-copy{left:28px;top:0;transform:translateY(-50%)}
+  .body-readout .part{min-height:39px;padding-left:31px}
+  .body-readout .part-drawing{position:absolute;left:4px;top:5px;width:23px;height:23px;border-radius:3px}
+  .body-readout .part-stats{flex-wrap:wrap;gap:0 4px}
+  .body-readout .part.injured{border-color:#c08d58}
+  .body-readout .part.lost{border-color:#df918a}
+  .combat-wounds{display:grid;grid-template-columns:repeat(var(--combat-columns,2),minmax(0,1fr));padding:2px 0 4px;background:#181719ec}
+  .combat-wounds[hidden]{display:none}
+  .combat-wounds>div{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:4px;padding:0 3px}
+  .wound-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:2px 7px 2px 2px;border:1px solid #e0ae6e;border-radius:4px;background:#402c19;color:#ffe6bd;font-size:13px;line-height:1.15}
+  .wound-chip.lost{border-color:#f1a196;background:#51292a;color:#ffe0d9}
+  .wound-chip .part-drawing{flex:none;width:31px;height:31px;border-radius:3px;object-fit:cover}
+  .wound-chip small{font-size:11px;font-weight:700;white-space:nowrap}
+  .wound-chip-copy{display:grid;gap:2px}
+  .wound-chip-copy>b{white-space:nowrap}
+  .wound-durability{font-size:11px;font-variant-numeric:tabular-nums}
+  .prep-wounds{display:flex;flex-wrap:wrap;gap:6px 15px}
+  .prep-wounds .wound-group{display:flex;flex-wrap:wrap;align-items:center;gap:5px;color:var(--soft);font-size:12px}
+  .prep-vitals{padding:7px 9px;background:#181a17;font-size:12px}
+  .prep-vitals .body-readout{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin-top:7px}
+  .combat .companion-actor .impact-copy{left:28px;top:0;transform:translateY(-50%)}
+  .pursuit-announcement,.combat-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .stage-combat.is-pursued{border-color:#9b5847}
+  .pursuit-warning{display:flex;align-items:center;gap:8px;min-height:32px;padding:4px 12px;border-bottom:1px solid #965540;background:linear-gradient(90deg,#49261f,#231a17 75%);color:#ffdfc8;font-size:12px}
+  .pursuit-warning svg{flex:none;width:18px;height:18px;color:var(--loss)}
+  .pursuit-warning b{font-size:13px}
+  .pursuit-warning span{margin-left:auto;white-space:nowrap}
+  .stage-combat{background:#19161a}
+  .combat-field{background:linear-gradient(180deg,#15121c33,transparent 38%,#13101820),url("art/arena/prison-backdrop.webp") 14% center/cover no-repeat,var(--art-arena) center/cover}
+  .pursuit-shadow{position:absolute;z-index:0;inset:0;pointer-events:none}
+  .pursuit-shadow img{position:absolute;left:1.5%;bottom:25%;width:auto;height:43%;opacity:.24;filter:brightness(.6) saturate(.68);object-fit:contain;transform-origin:bottom center}
+  .pursuit-shadow[data-depth="approaching"] img{left:2%;height:48%;opacity:.47;filter:brightness(.68) saturate(.72)}
+  .pursuit-shadow[data-depth="close"]{background:radial-gradient(ellipse at 12% 49%,#943b363b,transparent 34%)}
+  .pursuit-shadow[data-depth="close"] img{left:3%;bottom:22%;height:56%;opacity:.8;filter:brightness(.78) saturate(.8)}
+  .pursuit-shadow[data-depth="imminent"]{background:radial-gradient(ellipse at 14% 55%,#a7433052,transparent 37%)}
+  .pursuit-shadow[data-depth="imminent"] img{left:4%;bottom:20%;height:65%;opacity:.94;filter:brightness(.89) saturate(.82)}
+  .leg-status{position:absolute;z-index:3;left:50%;bottom:52px;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:0 5px;width:max-content;max-width:calc(100% - 12px);padding:3px 6px;border:1px solid #b6845a;border-radius:4px;background:#291e18f5;color:#ffe0b6;font-size:11px;line-height:1.35;pointer-events:none}
+  .leg-status[hidden]{display:none}
+  .leg-status span{white-space:nowrap}
+  .leg-status.lost{color:#ffd7c9;border-color:#b96d59}
+  .skill-loadout{padding:12px 14px;border:1px solid var(--edge);border-top:0;border-radius:0 0 5px 5px;background:#1c211a}
+  .skill-loadout h2{margin:0 0 9px;font-size:16px}
+  .skill-groups{display:grid;grid-template-columns:repeat(var(--party-size),minmax(0,1fr));gap:8px}
+  .skill-group h3{margin:0 0 6px;font-size:12px;color:var(--soft)}
+  .skill-groups .skill-slots{grid-template-columns:minmax(0,1fr)}
+  .skill-slots{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:0}
+  .skill-slot{--skill-color:var(--rust);min-width:0;display:grid;gap:6px;padding:8px 10px;border:1px solid #635244;border-radius:5px;background:#251f19}
+  .skill-slot.defense{--skill-color:var(--blue);border-color:#42616a;background:#1a262a}
+  .skill-slot[data-ready="true"]{border-color:var(--skill-color)}
+  .skill-slot[data-blocked="true"]{border-style:dashed;opacity:.72}
+  .skill-slot-name{display:flex;align-items:center;gap:5px;font-size:13px;word-break:keep-all}
+  .skill-slot-name svg{width:15px;height:15px;flex:none;color:var(--skill-color)}
+  .skill-meter{display:block;width:100%;height:7px;accent-color:var(--skill-color);appearance:none}
+  .skill-meter::-webkit-progress-bar{border-radius:5px;background:#101410}
+  .skill-meter::-webkit-progress-value{border-radius:5px;background:var(--skill-color)}
+  .skill-meter::-moz-progress-bar{border-radius:5px;background:var(--skill-color)}
+  .skill-timing{display:flex;justify-content:space-between;gap:3px 8px;flex-wrap:wrap;color:var(--soft);font-size:11px}
+  .skill-remaining{color:var(--skill-color);font-variant-numeric:tabular-nums}
+  .intent-time{color:var(--rust);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .prep-panel{display:grid;gap:16px}
+  .prep-heading{display:flex;align-items:end;min-height:130px;padding:15px;border-radius:4px;background:linear-gradient(90deg,#12121bee,transparent 80%),url("art/arena/prison-backdrop.webp") center 55%/cover}
+  .prep-heading p{color:var(--soft);font-size:12px;margin-top:4px}
+  .formation{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .formation-slot{display:grid;align-content:start;gap:6px;min-width:0;padding:8px;border:1px solid var(--edge);border-radius:5px;background:#181a17}
+  .formation-slot.is-selected{border-color:var(--lime);background:#202c21}
+  .formation-slot>.btn{font-size:13px;white-space:normal;word-break:keep-all}
+  .formation-slot select{width:100%;min-width:0;padding:4px;border:1px solid var(--edge);border-radius:4px;background:#191e19;color:var(--ink);font:inherit;font-size:12px}
+  .formation-rank{color:var(--soft);font-size:12px}
+  .formation-skills{display:grid;gap:3px;margin:0;padding:0;list-style:none;color:var(--ink);font-size:12px}
+  .formation-skills li{overflow-wrap:anywhere}
+  .formation-skills .rank-limited{color:var(--warn)}
+  .trait-list{display:flex;flex-wrap:wrap;align-items:center;gap:4px 7px}
+  .trait-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--soft);line-height:1.4}
+  .trait-chip svg{width:13px;height:13px;flex:none}
+  .trait-chip.active{padding:2px 6px;border:1px solid #58715a;border-radius:4px;background:#243227;color:#bbebbe}
+  .trait-preview{display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;font-size:12px;color:var(--soft);margin:5px 0}
+  .reserve-list{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+  .reserve-list>small{color:var(--soft)}
+  .reserve-entry{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:4px 6px;border:1px solid var(--edge);border-radius:4px;background:#181a17}
+  .reserve-entry .btn,.reserve-entry select{font-size:12px}
+  .reserve-entry select{max-width:100%;padding:4px;border:1px solid var(--edge);border-radius:4px;background:#191e19;color:var(--ink);font-family:inherit}
+  .prep-picker{display:grid;gap:8px}
+  .prep-picker-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .prep-picker-head h3{font-size:15px}
+  .prep-count{color:var(--warn);font-size:13px;font-variant-numeric:tabular-nums}
+  .prep-choices{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(max(170px,22%),1fr));gap:8px;margin:0;padding:0}
+  .skill-class-card{--class-color:#e5c38a;--class-surface:#2b2219;--class-edge:#8b6d45}
+  .skill-class-card[data-skill-class="guard"]{--class-color:#a8dfd9;--class-surface:#182b2d;--class-edge:#487e7f}
+  .skill-class-card[data-skill-class="awakened"]{--class-color:#d7bbf4;--class-surface:#281f34;--class-edge:#795e9a}
+  .skill-class-card[data-skill-class="nun"]{--class-color:#f2ced4;--class-surface:#38262d;--class-edge:#87616e}
+  .skill-class-card[data-skill-class="bow"]{--class-color:#cfdfad;--class-surface:#26311c;--class-edge:#6d8157}
+  .skill-class-card[data-skill-class="archer"]{--class-color:#e3d49c;--class-surface:#29281c;--class-edge:#84804d}
+  .skill-class-card[data-skill-class="shaman"]{--class-color:#f0b7d5;--class-surface:#351e2c;--class-edge:#92627c}
+  .prep-choice.btn{--choice-accent:#ffc3a1;--choice-tint:#403028;width:100%;height:100%;display:grid;align-content:start;gap:6px;padding:10px;text-align:left;white-space:normal;background:var(--class-surface);border-color:var(--class-edge);color:var(--ink)}
+  .prep-choice.btn.defense{--choice-accent:#b9e5f3;--choice-tint:#263a43}
+  .prep-choice.btn.skill{--choice-accent:#bce7aa;--choice-tint:#293e2a}
+  .prep-choice.btn[aria-pressed=true]{border-color:#a4e7b3;background:color-mix(in srgb,var(--class-surface) 80%,#395044);box-shadow:inset 3px 0 #a4e7b3}
+  .prep-choice.btn[aria-pressed=false]:hover{border-color:var(--class-color)}
+  .prep-choice-top,.prep-choice-name{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .prep-choice-icon{display:grid;place-items:center;width:32px;height:32px;flex:none;border-radius:5px;background:var(--choice-tint);color:var(--choice-accent)}
+  .prep-choice-icon svg{width:20px;height:20px}
+  .prep-choice-time{color:var(--choice-accent);font-size:16px;font-variant-numeric:tabular-nums}
+  .prep-choice-name strong{min-width:0;font-size:14px;word-break:keep-all}
+  .prep-choice-state{flex:none;padding:2px 5px;border:1px solid #50574b;border-radius:4px;color:#c6cbbb;font-size:11px;font-weight:700;white-space:nowrap}
+  .prep-choice[aria-pressed=true] .prep-choice-state{border-color:#a4e7b3;background:#a4e7b3;color:#102217}
+  .skill-card-art{display:block;width:100%;height:auto;aspect-ratio:12/5;object-fit:cover;border:1px solid var(--class-edge);border-radius:4px;background:#171719}
+  .combat-skill-emote{position:absolute;z-index:5;inset-inline:0;bottom:calc(100% - 8px);width:min(96%,132px);margin-inline:auto;pointer-events:none}
+  .combat-skill-emote .skill-card-art{position:relative;z-index:1;border-color:var(--accent);border-radius:7px;box-shadow:0 3px 12px #000b}
+  .combat-skill-emote::after{content:"";position:absolute;left:50%;bottom:-3px;width:8px;height:8px;background:#1b1723;border-right:1px solid var(--accent);border-bottom:1px solid var(--accent);transform:translateX(-50%) rotate(45deg)}
+  .skill-owner{display:inline-flex;align-items:center;gap:4px;justify-self:start;padding:1px 4px;border-radius:3px;background:var(--class-surface);color:var(--class-color);font-size:11px;font-weight:800}
+  .skill-owner svg{width:15px;height:15px;flex:none}
+  .skill-effects{display:grid;gap:3px;color:var(--soft);font-size:12px;line-height:1.35}
+  .skill-effect{display:block}
+  .skill-effect.is-blocked{color:var(--loss)}
+  .skill-term{color:var(--ink);font-weight:800;text-decoration:underline;text-underline-offset:2px;cursor:help}
+  .prep-choice-meta,.prep-hint{color:var(--soft);font-size:11px}
+  .prep-choice-meta{color:var(--choice-accent)}
+  .prep-hint{min-height:1.4em}
+  #auto-pause:disabled{opacity:.4;cursor:default}
+  .prep-footer{display:flex;justify-content:flex-end}
+  .prep-footer .btn:disabled{opacity:.45;cursor:default}
+  .skill-rewards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+  .skill-reward.btn{display:grid;align-content:start;gap:7px;text-align:left;padding:12px;color:var(--ink);white-space:normal;background:var(--class-surface);border-color:var(--class-edge)}
+  .skill-reward.btn:hover{border-color:var(--class-color)}
+  .reward-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .reward-kind{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid #728963;border-radius:4px;color:#c7ecb0;background:#253323;font-size:11px;font-weight:800}
+  .reward-kind.upgrade{border-color:#a7844b;color:#ffe0a2;background:#3d2f1b}
+  .reward-kind svg{width:14px;height:14px}
+  @media(max-width:580px){
+    .skill-rewards{grid-template-columns:1fr}
+    .prep-choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .prep-choice.btn{gap:4px;padding:8px}
+    .prep-choice-name strong{font-size:13px}
+    .skill-effects{font-size:11px}
+    .prep-footer .btn{width:100%}
+  }
+  .combat .panel{--attack-step:clamp(16px,7vw,104px)}
+  .combat .companion-actor{--attack-step:clamp(14px,5vw,76px)}
+  .combat .actor-enemy{--attack-step:clamp(-104px,-7vw,-16px)}
+  .combat .panel[data-lunge]{z-index:2}
+  .actor-sprite[data-pose="defeat"]{object-position:center bottom;background-position:center bottom}
+  .sd-actor .actor-sprite[data-pose="defeat"]{height:94%}
+  .actor-sprite[data-defeated]{filter:saturate(.68) drop-shadow(0 5px 4px #0c0e0bd9)}
+  .impact.is-critical .damage{color:#fff2be;border-color:#fbd484;background:#573218;font-size:clamp(22px,3.1vw,36px)}
+  .impact.is-finisher .damage{color:#fff0df;border-color:#ffc1a9;background:#632822;font-size:clamp(22px,3.1vw,36px)}
+  .combat-action.is-critical{background:#342719;border-top-color:#d7aa61}
+  .combat-action.is-finisher{background:#391e1b;border-top-color:#de947a}
+  .combat-action-mark{color:#ffe1a0;font-size:12px;font-weight:800}
+  .combat-action-trait{display:inline-flex;align-items:center;gap:3px;color:#bce7bd;font-size:11px}
+  .combat-action-trait svg{width:13px;height:13px}
+  .is-finisher .combat-action-mark{color:#ffc2a9}
+  .stage-combat[data-impact] .combat-field::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 0 65px #de9b353b}
+  .stage-combat[data-impact="finisher"] .combat-field::after{box-shadow:inset 0 0 78px #e05f4654}
+  @media(prefers-reduced-motion:no-preference){
+    .pursuit-entering .pursuit-shadow{animation:pursuit-enter .42s ease-out both}
+    .pursuit-advancing .pursuit-shadow img{animation:pursuit-step .46s ease-out both}
+    .leg-status.just-injured{animation:leg-status-in .2s ease-out both}
+    .combat-skill-emote{transform-origin:50% 100%;animation:skill-emote-pop .16s ease-out both}
+    .combat .actor-sprite{transform-origin:50% 90%;transition:transform var(--lunge-out,150ms) ease-out}
+    .combat .panel[data-lunge] .actor-sprite{transform:translateX(var(--attack-step)) scale(1.13);transition-duration:var(--lunge-in,105ms);transition-timing-function:cubic-bezier(.2,.65,.35,1)}
+    .combat .panel[data-lunge="strong"] .actor-sprite{transform:translateX(calc(var(--attack-step) * 1.18)) scale(1.23)}
+    @keyframes pursuit-enter{from{opacity:0;translate:-10px 0}}
+    @keyframes pursuit-step{from{transform:translate(-8px,-2px) scale(.9)}}
+    @keyframes leg-status-in{from{opacity:.85;translate:0 3px}}
+    @keyframes skill-emote-pop{from{scale:.83;translate:0 3px}65%{scale:1.04}}
+  }
   .companion-encounter{grid-template-columns:100px minmax(0,1fr);align-items:center}
   .encounter-portrait{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:contain;filter:drop-shadow(0 5px 4px #0007)}
   .companion-encounter .treatment-options{margin-top:8px}
@@ -399,8 +569,20 @@
     .combat .actor-caption{left:4px;right:4px;top:5px}.combat .actor-caption .tag{font-size:9px}
     .foe-health .hp-value{font-size:11px}
     .combat .hotspots .part{width:10px;height:10px}
+    .pursuit-warning{padding-inline:8px}
+    .combat-field{background-position:0 0,10% center,center}
+    .pursuit-shadow img,.pursuit-shadow[data-depth] img{left:-4%}
+    .prep-heading{min-height:95px}
+    .leg-status{max-width:calc(100% - 6px);font-size:10px}
+    .skill-loadout{padding:8px 6px}.skill-slots{gap:4px}.skill-slot{padding:6px 5px}
+    .skill-slot-name{font-size:11px;gap:3px}.skill-slot-name svg{width:12px;height:12px}
     .actor-body-status{left:2px;right:2px;padding:3px}.actor-body-status summary{font-size:9px}
     .actor-body-status .part-top{font-size:9px}.actor-body-status .part-stats,.actor-body-status .part-top small{font-size:8px}
+    .party-combat .actor-body-status .body-readout{grid-template-columns:1fr}
+    .wound-chip{gap:3px;font-size:11px;padding-right:4px}
+    .wound-chip .part-drawing{width:24px;height:24px}
+    .wound-chip small{font-size:10px}
+    .prep-vitals .body-readout{grid-template-columns:repeat(2,minmax(0,1fr))}
     .companion-encounter{grid-template-columns:72px minmax(0,1fr);gap:8px}
   }
 </style>
@@ -418,6 +600,7 @@
       <label>상점<input name="shops" type="number" min="0" max="12" value="1" required></label>
       <label>휴게소<input name="rests" type="number" min="0" max="12" value="1" required></label>
       <label>엘리트<input name="elites" type="number" min="0" max="12" value="1" required></label>
+      <label>? 방<input name="mysteries" type="number" min="0" max="12" value="1" required></label>
       <button type="submit" class="btn primary">시드로 시작</button>
       <button type="button" class="btn" data-action="classic-map">기본 지도</button>
     </form><p id="map-error" role="alert"></p>
@@ -429,22 +612,16 @@
     <button type="button" class="btn" data-action="qa" data-value="heal" aria-keyshortcuts="H">아군 완전 회복 (H)</button>
     <button type="button" class="btn" data-action="qa" data-value="margin" aria-keyshortcuts="J">도망 여유 +5 (J)</button>
   </section>
+  <p class="pursuit-announcement" id="pursuit-announcement" role="status"></p>
   <p class="combat-announcement" id="combat-announcement" role="status"></p>
   <section id="stage" aria-label="현재 구역"></section>
-  <details class="run-deck" id="run-deck"><summary id="deck-summary">이번 탈출의 덱</summary>
-    <p>전투가 끝나도 덱 구성은 유지돼요. 카드 보상은 건너뛰어 덱을 작게 유지할 수도 있어요. 새로 시작하면 기본 덱으로 돌아가요.</p>
-    <div class="deck-list" id="deck-list"></div>
-  </details>
   <div class="lower">
     <section class="journal"><h2>행동 기록</h2><ol id="log" aria-live="polite" aria-relevant="additions"></ol></section>
-    <details id="help"><summary>전투 규칙과 전체 카드</summary>
-      <p>전투에 들어가면 손패 사용·부위 선택·회복·방어·턴 종료가 자동으로 진행돼요. 전투 사이에 덱 보상, 동료, 경로와 치료를 골라주세요. ‘전투 일시정지’ 또는 Space로 현재 행동 뒤 멈추고, 배속은 1·2·4배로 바꿀 수 있어요.</p>
-      <p>자동 전투는 마무리 공격과 생존을 우선하고, 보이는 적의 예고와 부상을 살펴 행동해요. 눈이 다쳐 예고를 읽지 못하면 가려진 행동을 미리 알 수 없어요. 방패 숫자는 현재 가드, +숫자는 적이 이번 턴에 올릴 가드예요.</p>
-      <p>기도를 받았던 사형수가 뒤에서 쫓아와요. 일반 전투에서는 주로 폭동으로 풀려난 죄수들이 길을 막아요. 길에서 만난 간수나 개화한 수감자와 동행할 수 있어요. 동료는 수녀와 스태미너를 공유하고, 동료가 바뀌면 전용 카드도 바뀌어요. 쓰러진 동료의 전용 카드는 덱에서 빠져요.</p>
-      <p>출구 앞 마지막 전투를 제외하고, 승리하면 카드 3장 중 1장을 골라 이번 탈출의 덱에 넣어요. 보상 선택에는 도망 여유가 들지 않아요. 1–3으로 고르거나 ‘보상 건너뛰기’를 누르세요. 추가한 카드는 다음 전투부터 섞여 나와요.</p>
-      <p>부위 내구도가 절반 이하면 부상, 0이면 결손이에요. 정상 부위로 카드를 쓰면 보너스를 받고, 결손 부위를 쓰는 카드는 손패에서 잠겨요. 내 턴 종료 후 남은 손패는 버려요. 가드는 상대 행동 단계가 끝나면 사라져요.</p>
-      <p>가드를 뚫고 부위에 들어간 피해만큼 전체 HP도 줄어요. 전체 HP가 0이 되거나 머리가 결손되면 쓰러져요. 응급처치는 부위에 실제로 회복된 만큼 전체 HP도 채워요.</p>
-      <div class="reference" id="reference"></div>
+    <details id="help"><summary>전투 규칙</summary>
+      <p>전투 전에 기술 아이콘을 눌러 3개를 장착하세요. 충전된 기술은 자동으로 발동해요. 동료 기술도 장착할 수 있어요.</p>
+      <p>전투 시간 3초마다 도망 여유가 1 줄어요. 일시정지와 행동 연출 중에는 충전과 추격이 멈춰요.</p>
+      <p>보상은 1–3으로 고르고 0으로 건너뛰어요. 새 기술은 전투 준비에서 장착하고, 강화하면 쿨타임이 줄어요.</p>
+      <p>결손된 부위를 쓰는 기술은 잠겨요. 가드는 상대의 다음 공격까지 유지돼요.</p>
     </details>
   </div>
 </main>
@@ -453,6 +630,7 @@
 
 const parts = {head:"머리", eyes:"눈", arms:"팔", chest:"가슴", belly:"배", legs:"다리"};
 const labels = {healthy:"정상", injured:"부상", lost:"결손"};
+const pursuitWarningDistance=2;
 const categories = {attack:"공격", defense:"방어", skill:"스킬"};
 const icons = {
   attack:'<path d="m5 19 5-5m-1-3 4 4m-2-3L19 4l1 1-8 8M4 20l3-3"/>',
@@ -466,9 +644,17 @@ const icons = {
   belly:'<path d="M7 5l-1 6-2 7 3 2h10l3-2-2-7-1-6"/><circle cx="12" cy="14" r="1"/>',
   legs:'<path d="M8 3h8l-1 9 2 8h-4l-2-7-1 7H6l1-8Z"/>',
   redraw:'<rect x="7" y="5" width="12" height="15" rx="2"/><path d="M4 16V7l2-3m4 8 2 2 4-4"/>',
+  clock:'<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+  learnSkill:'<path d="M12 5v14M3 5h4a5 5 0 0 1 5 2 5 5 0 0 1 5-2h4v12h-4a5 5 0 0 0-5 2 5 5 0 0 0-5-2H3Z"/><path d="M16 8v6m-3-3h6"/>',
+  upgradeSkill:'<path d="m5 12 7-7 7 7m-14 6 7-7 7 7"/>',
+  nunLantern:'<path d="M9 6a3 3 0 0 1 6 0m-6 0-3 3h12l-3-3M7 9l1 10h8l1-10M6 20h12"/><path d="M10 15c0-1 2-2 2-4 1 2 2 3 2 4a2 2 0 0 1-4 0Z"/>',
+  guardCrest:'<path d="M6 3h12v13l-6 5-6-5V3Z"/><path d="M12 6v10M9 10h6"/>',
+  traitBow:'<path d="M5 5c9-1 15 5 14 14L5 5Zm1 13L18 6m-5 0h5v5M4 17h3v3"/>',
+  brokenShackle:'<path d="M11 5a5 5 0 1 0 4 8l-3-3m4-6 2-2m1 7 3-1m-8 10 3 3m-8-3-2 3"/>',
   routeBattle:'<path d="m4 3 9 9-2 2-9-9 2-2Zm16 0-9 9 2 2 9-9-2-2ZM4 16l4 4m-6 2 5-5m13-1-4 4m6 2-5-5"/>',
   routeRest:'<path d="M9 4h6v5h5v6h-5v5H9v-5H4V9h5V4Z"/>',
   routeShop:'<path d="M5 8h14l2 12H3L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>',
+  routeMystery:'<path d="M9 8a3.2 3.2 0 0 1 6.4 0c0 2.6-3.4 3-3.4 5.5"/><circle cx="12" cy="18" r=".5"/>',
   routeElite:'<path d="m4 7 4 3 4-7 4 7 4-3-2 12H6L4 7Zm3 9h10"/>',
   routeBoss:'<path d="M5 10a7 7 0 1114 0c0 3-2 4-3 5v4H8v-4c-1-1-3-2-3-5Zm5 6v3m4-3v3"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/>',
   routeExit:'<path d="M5 21V3h13v18M9 21V7h9M12 14h1M2 21h20"/>',
@@ -482,6 +668,8 @@ const bodyAnchors = {
   player:[[50,11],[62,23],[25,43],[49,44],[50,58],[58,80]],
   guard:[[52,12],[60,24],[28,57],[52,42],[50,56],[56,80]],
   awakened:[[52,12],[61,22],[29,58],[53,42],[50,54],[60,80]],
+  archer:[[49,12],[55,22],[28,52],[52,41],[51,51],[47,76]],
+  shaman:[[45,9],[54,22],[30,54],[51,42],[50,51],[46,76]],
   janitor:[[33,11],[57,20],[73,43],[48,37],[56,60],[51,83]],
   crawler:[[28,26],[51,23],[63,50],[45,43],[72,65],[53,85]],
   medic:[[36,12],[58,22],[68,47],[46,39],[57,61],[49,84]],
@@ -491,28 +679,32 @@ const bodyAnchors = {
 const partyArt = {
   player:{src:"art/characters/nun-sd.png",kind:"nun"},
   guard:{src:"art/characters/guard-sd.png",kind:"guard"},
-  awakened:{src:"art/characters/awakened-sd.png",kind:"awakened"}
+  awakened:{src:"art/characters/awakened-sd.png",kind:"awakened"},
+  archer:{src:"art/characters/archer-sd-v5.png",kind:"archer"},
+  shaman:{src:"art/characters/shaman-sd-v5.png",kind:"shaman"}
 };
 const motionArt=Object.fromEntries(["nun","guard","awakened","janitor","crawler","medic","sentinel","warden"].map(id=>[
-  id,Object.fromEntries(["attack","hit"].map(pose=>[pose,`art/characters/motion/${id}-${pose}.png`]))
+  id,{attack:`art/characters/motion/${id}-attack.png`,hit:`art/characters/motion/${id}-hit.png`,defeat:`art/characters/motion/${id}-defeat.webp`}
 ]));
-const poseCache=new Map();
-function warmCombatPoses(){
+const combatArtCache=new Map();
+function warmCombatArt(){
   if(typeof Image==="undefined") return;
-  for(const key of ["nun",livingCompanion()?.kind,areas[game.area].foe].filter(Boolean)){
-    for(const src of Object.values(motionArt[key])){
-      if(poseCache.has(src)) continue;
-      const image=new Image();
-      poseCache.set(src,image);
-      image.src=src;
-    }
+  const sides=partySides();
+  const actors=[...sides.map(side=>game[side].kind),areas[game.area].foe];
+  const poses=actors.flatMap(id=>Object.values(motionArt[id] || {}));
+  const emotes=sides.flatMap(side=>sideLoadout(side)).filter(Boolean).map(skillArtSrc);
+  for(const src of [...poses,...emotes]){
+    if(combatArtCache.has(src)) continue;
+    const image=new Image();
+    combatArtCache.set(src,image);
+    image.src=src;
   }
 }
 const effects = {
   head:"결손 시 사망",
   eyes:"부상 시 행동 예고가 가려짐 · 결손 시 내 가드도 가려짐",
-  arms:"부상 시 팔 카드의 정상 보너스가 사라짐 · 결손 시 팔 카드 사용 불가",
-  chest:"다음 턴 스태미너가 부상 시 2, 결손 시 1",
+  arms:"부상 시 팔 기술의 위력 감소 · 결손 시 사용 불가",
+  chest:"가슴 결손 시 철문 방패 사용 불가",
   belly:"부상 시 받는 회복량 절반 · 결손 시 전투 중 회복 불가",
   legs:"이동 시 얻는 도망 여유가 부상 시 +1, 결손 시 +0"
 };
@@ -533,15 +725,23 @@ const cards = {
     text:p=>`가드 1 · 해당 부위 피격 시 적 가슴에 피해 ${p}`},
   aid:{name:"응급처치", type:"skill", cost:1, copies:2, target:"heal", power:2,
     text:()=>"한 부위 최대 2 회복 · 대상의 배 상태 적용"},
-  rethink:{name:"재정비", type:"skill", part:"belly", cost:0, target:"discard", power:1, bonus:1,
-    text:p=>`손패 1장 버리고 ${p}장 뽑기 · 턴당 한 번`},
-  irons:{name:"족쇄 강타", owner:"companion", effect:"heavy", art:"heavy", type:"attack", part:"arms", cost:2, target:"enemy", power:4, bonus:2,
-    companion:"awakened", text:p=>`한 부위에 피해 ${p}`},
-  hook:{name:"쇠사슬 걸기", owner:"companion", effect:"break", art:"break", type:"attack", part:"arms", cost:1, target:"enemy", power:3, bonus:1,
-    companion:"awakened", text:p=>`가드 ${p} 제거 후 피해 1`},
-  baton:{name:"진압봉 타격", owner:"companion", companion:"guard", effect:"heavy", art:"heavy", type:"attack", part:"arms", cost:2, target:"enemy", power:4, bonus:2,
+  prayer:{name:"회복 기도", character:"nun", effect:"aid", art:"aid", type:"skill", target:"heal", power:3,
+    text:()=>"한 부위 최대 3 회복"},
+  aimedShot:{name:"조준 사격", weapon:"bow", ranks:[2], effect:"aim", art:"aim", type:"attack", part:"arms", target:"enemy", power:2, bonus:1,
+    text:p=>`피해 2 · 가드 ${p} 무시`},
+  snapShot:{name:"속사", character:"archer", weapon:"bow", ranks:[1,2], effect:"heavy", art:"aim", type:"attack", part:"arms", target:"enemy", power:2, bonus:1,
     text:p=>`한 부위에 피해 ${p}`},
-  escort:{name:"호위 방패", owner:"companion", companion:"guard", effect:"guard", art:"guard", type:"defense", part:"arms", cost:1, target:"self", power:3, bonus:1,
+  mending:{name:"치유 주문", character:"shaman", effect:"aid", art:"aid", type:"skill", target:"heal", power:2,
+    text:()=>"한 부위 최대 2 회복"},
+  unseal:{name:"봉인 해제", character:"shaman", effect:"break", art:"break", type:"attack", target:"enemy", power:3,
+    text:p=>`가드 ${p} 제거 후 피해 1`},
+  irons:{name:"족쇄 강타", character:"awakened", ranks:[0,1], effect:"heavy", art:"heavy", type:"attack", part:"arms", cost:2, target:"enemy", power:4, bonus:2,
+    text:p=>`한 부위에 피해 ${p}`},
+  hook:{name:"쇠사슬 걸기", character:"awakened", effect:"break", art:"break", type:"attack", part:"arms", cost:1, target:"enemy", power:3, bonus:1,
+    text:p=>`가드 ${p} 제거 후 피해 1`},
+  baton:{name:"진압봉 타격", character:"guard", ranks:[0,1], effect:"heavy", art:"heavy", type:"attack", part:"arms", cost:2, target:"enemy", power:4, bonus:2,
+    text:p=>`한 부위에 피해 ${p}`},
+  escort:{name:"호위 방패", character:"guard", effect:"guard", art:"guard", type:"defense", part:"arms", cost:1, target:"self", power:3, bonus:1,
     text:p=>`아군 한 부위에 가드 ${p}`},
   force:{name:"틈새 강습", reward:true, effect:"heavy", art:"heavy", type:"attack", part:"arms", cost:1, target:"enemy", power:3, bonus:1,
     text:p=>`한 부위에 피해 ${p}`},
@@ -556,32 +756,55 @@ const cards = {
   dressing:{name:"의무실 붕대", reward:true, effect:"aid", art:"aid", type:"skill", cost:1, target:"heal", power:4,
     text:()=>"한 부위 최대 4 회복 · 대상의 배 부상 시 2, 결손 시 회복 불가"}
 };
-const starterDeck = Object.entries(cards).filter(([,card])=>!card.owner && !card.reward).flatMap(([id,card])=>Array(card.copies || 1).fill(id));
 const rewardPool = Object.keys(cards).filter(id=>cards[id].reward);
+const starterSkills=["guard","heavy","strike"];
+const formationRanks=["전위","중위","후위"];
+const companionSides=["companion","companion2","companion3","companion4"];
+const companionSkillSlots=2;
+const skillCharge={guard:3000,heavy:6000,strike:2000,force:3500,pierce:3000,crush:6500,shelter:4000,cover:3500,dressing:5000,baton:4000,escort:3000,irons:4000,hook:2000,prayer:5000,aimedShot:4000,snapShot:3000,mending:4300,unseal:3500};
+const maxSkillLevel=3;
+const traits={
+  nun:{name:"수녀",icon:"nunLantern"},
+  guard:{name:"간수",icon:"guardCrest",effect:"맨 앞 대원에게 처음 주는 가드 +2",bonus:2},
+  prisoner:{name:"수감자",icon:"brokenShackle",effect:"수감자가 처음 가드를 깎으면 같은 부위에 피해 +1",bonus:1},
+  neutral:{name:"중립",icon:"routeMystery"},
+  warrior:{name:"전사",icon:"attack",effect:"전사마다 첫 부상 부위 적중 시 피해 +1",bonus:1},
+  mage:{name:"마법사",icon:"skill",effect:"마법사의 첫 회복량 +1",bonus:1},
+  archer:{name:"궁수",icon:"traitBow"}
+};
+const traitThreshold=2;
+const nunTraits={factions:["nun"],jobs:["mage"]};
 const companionTypes = {
-  guard:{name:"탈출 중인 간수", health:[8,5,7,7,6,7], vitality:20, hurtArm:3,
-    introduction:"폭동을 피해 달아나던 간수가 철문 앞에서 손을 내밀어요.", role:"진압봉으로 공격하고 호위 방패로 아군을 보호해요."},
-  awakened:{name:"개화한 수감자", health:[8,5,7,6,6,7], vitality:18, hurtArm:3,
-    introduction:"상층에서 내려온 개화한 수감자가 의무실을 벗어나 함께 가자고 해요.", role:"족쇄 강타와 쇠사슬 걸기로 적의 방어를 무너뜨려요."}
+  guard:{name:"탈출 중인 간수", factions:["guard"],jobs:["warrior"],weapon:"baton", health:[8,5,7,7,6,7], vitality:20, hurtArm:3,
+    introduction:"폭동을 피해 달아나던 간수가 철문 앞에서 손을 내밀어요."},
+  awakened:{name:"개화한 수감자", factions:["prisoner"],jobs:["warrior"],weapon:"chains", health:[8,5,7,6,6,7], vitality:18, hurtArm:3,
+    introduction:"상층에서 내려온 개화한 수감자가 의무실을 벗어나 함께 가자고 해요."},
+  archer:{name:"감시탑 궁수", factions:["guard"],jobs:["archer"],weapon:"bow",health:[7,5,6,6,5,7],vitality:16,
+    introduction:"감시탑에서 내려온 궁수가 출구를 묻는다.", preferredRank:2},
+  shaman:{name:"탈옥한 주술사", factions:["prisoner"],jobs:["mage"],weapon:"staff",health:[7,5,6,6,6,6],vitality:16,
+    introduction:"부서진 족쇄를 끈 주술사가 함께 나가자고 한다."}
 };
 
-function companionCardIds(actor=livingCompanion()){
-  return actor?Object.keys(cards).filter(id=>cards[id].companion===actor.kind):[];
+function companionStarterSkills(kind){
+  const {weapon}=companionTypes[kind];
+  return Object.keys(cards).filter(id=>cards[id].character===kind || (cards[id].weapon && cards[id].weapon===weapon))
+    .slice(0,companionSkillSlots);
 }
 
-function cardOwnerName(card){
-  return card.owner?companionTypes[card.companion].name:"수녀";
-}
 const standardAreas = {
   threshold:{name:"격리문", foe:"janitor", companion:"guard", col:1, row:2, next:["duct","infirmary","corridor"]},
-  duct:{name:"환기 통로", foe:"crawler", col:2, row:1, detail:"기어오는 탈옥수가 팔을 노려요.", next:["lift"]},
-  infirmary:{name:"의무실", foe:"medic", companion:"awakened", col:2, row:2, detail:"붕대를 감은 탈옥수는 부상 부위를 치료해요.", next:["lift"]},
+  duct:{name:"환기 통로", foe:"crawler", companion:"archer", col:2, row:1, detail:"기어오는 탈옥수가 팔을 노려요.", next:["lift"]},
+  infirmary:{name:"의무실", foe:"medic", companions:["awakened","shaman"], col:2, row:2, detail:"붕대를 감은 탈옥수는 부상 부위를 치료해요.", next:["lift"]},
   corridor:{name:"정비 계단", type:"rest", col:2, row:3, detail:"전투 없이 들어가 한 부위를 치료할 수 있어요.", next:["landing"]},
-  landing:{name:"계단참", foe:"sentinel", col:3, row:3, detail:"방패를 든 탈옥수가 머리를 단단히 지켜요.", next:["lift"]},
+  landing:{name:"계단참", foe:"sentinel", companion:"archer", col:3, row:3, detail:"방패를 든 탈옥수가 머리를 단단히 지켜요.", next:["lift"]},
   lift:{name:"승강기실", foe:"warden", col:4, row:2, detail:"출구 앞 마지막 전투예요.", next:["exit"]},
   exit:{name:"지상 출구", col:5, row:2, detail:"던전 밖으로 나가요."}
 };
 let areas=standardAreas;
+const mysteryEvents={
+  cache:{name:"잠긴 물자함",description:"안에서 동전 소리가 난다.",action:"자물쇠 열기",effect:"도망 여유 −1 · 동전 +2",distance:-1,coins:2},
+  drain:{name:"배수로 입구",description:"대가를 내면 지름길을 알려주겠다고 한다.",action:"길 묻기",effect:"동전 −1 · 도망 여유 +3",distance:3,coins:-1}
+};
 
 function mapRandom(seed){
   let state=2166136261;
@@ -594,17 +817,17 @@ function mapRandom(seed){
   };
 }
 
-function generateMap({seed,widths,shops,rests,elites}){
+function generateMap({seed,widths,shops,rests,elites,mysteries=0}){
   const random=mapRandom(seed);
   const total=widths.reduce((sum,width)=>sum+width,0);
   const pool=shuffle([
     ...Array(shops).fill("shop"),...Array(rests).fill("rest"),...Array(elites).fill("elite"),
-    ...Array(total-shops-rests-elites).fill("battle")
+    ...Array(mysteries).fill("mystery"),...Array(total-shops-rests-elites-mysteries).fill("battle")
   ],random);
   const map={threshold:{...standardAreas.threshold,next:[]}};
   const battleRooms=[{name:"환기 통로",foe:"crawler"},{name:"의무실",foe:"medic"},{name:"계단참",foe:"sentinel"}];
-  const specialRooms={shop:{name:"암시장"},rest:{name:"휴게소"},elite:{name:"독방",foe:"sentinel"}};
-  let medicEncounter=false;
+  const specialRooms={shop:{name:"암시장"},rest:{name:"휴게소"},elite:{name:"독방",foe:"sentinel"},mystery:{name:"?"}};
+  const eventIds=Object.keys(mysteryEvents);
   const stages=[["threshold"],...widths.map((width,stage)=>{
     const rows=width===1?[2]:shuffle([1,2,3],random).slice(0,width).sort((a,b)=>a-b);
     return rows.map(row=>{
@@ -612,10 +835,9 @@ function generateMap({seed,widths,shops,rests,elites}){
       const room=type==="battle"?battleRooms[Math.floor(random()*battleRooms.length)]:specialRooms[type];
       const id=`room-${stage+1}-${row}`;
       map[id]={...room,type,col:stage+2,row,next:[]};
-      if(room.foe==="medic" && !medicEncounter){
-        map[id].companion="awakened";
-        medicEncounter=true;
-      }
+      if(type==="mystery") map[id].event=eventIds[Math.floor(random()*eventIds.length)];
+      if(room.foe==="medic") map[id].companions=standardAreas.infirmary.companions;
+      if(room.foe==="crawler" || room.foe==="sentinel") map[id].companion="archer";
       return id;
     });
   }),["lift"],["exit"]];
@@ -642,17 +864,21 @@ const foes = {
     patterns:[ [["heavy","legs"],["guard","chest"]], [["aim","arms"],["guard","head"]], [["heavy","chest"],["counter","head"]] ]},
   crawler:{name:"기어오는 탈옥수", hp:[7,4,4,5,4,4], vitality:10, armor:{head:1},
     patterns:[ [["aim","arms"],["guard","eyes"]], [["heavy","legs"]], [["split","head","arms"],["strike","eyes"]] ]},
-  medic:{name:"붕대를 감은 탈옥수", hp:[7,4,4,6,4,4], vitality:11, armor:{head:1}, heals:true,
-    reserve:[["guard","head"],["guard","belly"],["strike","legs"],["aim","eyes"]],
-    patterns:[ [["break","chest"],["strike","belly"]], [["rethink"],["aim","chest"],["guard","head"]], [["heavy","arms"]] ]},
+  medic:{name:"붕대를 감은 탈옥수", hp:[7,4,4,6,4,4], vitality:11, armor:{head:1},
+    patterns:[ [["break","chest"],["strike","belly"]], [["aid"],["aim","chest"],["guard","head"]], [["heavy","arms"]] ]},
   sentinel:{name:"방패를 든 탈옥수", hp:[9,5,5,6,4,5], vitality:12, armor:{head:3},
     patterns:[ [["guard","head"],["aim","eyes"]], [["heavy","chest"]], [["split","head","eyes"],["strike","arms"]] ]},
   warden:{name:"승강기를 점거한 탈옥수", hp:[9,5,5,7,5,5], vitality:13, armor:{head:2},
     patterns:[ [["heavy","legs"],["guard","head"]], [["split","head","arms"],["strike","chest"]], [["aim","eyes"],["break","chest"]] ]}
 };
 
+const battleTiming={
+  tick:100,
+  pursuit:3000,
+  enemyInterval:3500
+};
+
 let game;
-let lastRender=null;
 let lastPursuit=null;
 let combatPresentation=null;
 let routeTravel=null;
@@ -674,17 +900,49 @@ function isDown(actor){
   return !actor.hp || !actor.body.head.hp;
 }
 
-function livingCompanion(state=game){
-  return state.companion && !isDown(state.companion)?state.companion:null;
+function partySides(state=game){
+  return state.formation.filter(side=>side && state[side] && !isDown(state[side]));
 }
 
-function partySides(){
-  return livingCompanion()?["player","companion"]:["player"];
+function livingRoster(state=game){
+  return ["player",...companionSides].filter(side=>state[side] && !isDown(state[side]));
+}
+
+function reserveSides(){
+  return livingRoster().filter(side=>!game.formation.includes(side));
 }
 
 function sideOf(actor,state){
   if(actor===state.player) return "player";
-  return actor===state.companion?"companion":"enemy";
+  return companionSides.find(side=>state[side]===actor) || "enemy";
+}
+
+function placePartyMember(side,rank){
+  if(game.phase!=="prep" || !livingRoster().includes(side) || !formationRanks[rank]) return false;
+  const current=game.formation.indexOf(side);
+  if(current<0 && game.formation[rank]==="player") return false;
+  if(current>=0) game.formation[current]=game.formation[rank];
+  game.formation[rank]=side;
+  return true;
+}
+
+function actorTraits(actor){
+  return new Set([...actor.factions,...actor.jobs]);
+}
+
+function countTraits(actors){
+  const counts=new Map();
+  for(const actor of actors){
+    for(const id of actorTraits(actor)) counts.set(id,(counts.get(id) || 0)+1);
+  }
+  return counts;
+}
+
+function useTrait(id,state,key=id){
+  const battle=state.cooldownBattle;
+  if(!battle?.traits?.has(id) || battle.usedTraits.has(key)) return 0;
+  battle.usedTraits.add(key);
+  return traits[id].bonus;
 }
 
 function condition(fighter, id){
@@ -693,12 +951,8 @@ function condition(fighter, id){
   return hp * 2 <= max ? "injured" : "healthy";
 }
 
-function energy(fighter){
-  return {healthy:3, injured:2, lost:1}[condition(fighter,"chest")];
-}
-
-function travelGain(){
-  return {healthy:2, injured:1, lost:0}[condition(game.player,"legs")];
+function travelGain(legs=condition(game.player,"legs")){
+  return {healthy:2, injured:1, lost:0}[legs];
 }
 
 function power(card, actor){
@@ -739,17 +993,6 @@ function shuffle(items,random=Math.random){
   return result;
 }
 
-function draw(count){
-  for(let i=0;i<count;i++){
-    if(!game.draw.length){
-      game.draw = shuffle(game.discard);
-      game.discard = [];
-    }
-    if(!game.draw.length) break;
-    game.hand.push(game.draw.shift());
-  }
-}
-
 function start(mapConfig=game?.mapConfig){
   cancelAutoBattleTimer();
   cancelCombatPresentation();
@@ -760,11 +1003,17 @@ function start(mapConfig=game?.mapConfig){
     document.querySelector("#stage").inert=false;
   }
   areas=mapConfig?generateMap(mapConfig):standardAreas;
-  game = {phase:"combat", area:"threshold", trail:["threshold"], distance:5, steps:0, turns:0, mapConfig, coins:0,
-    player:fighter("수녀",[9,5,7,7,6,7],28), companion:null, pendingCompanion:null, deadCompanions:[], deck:[...starterDeck], rewards:[], acquired:[], log:[], feedback:[], enemy:null, enemyAction:null, stairTreatment:null, qaUses:0};
+  game = {phase:"prep", area:"threshold", trail:["threshold"], distance:5, steps:0, combatTime:0, mapConfig, coins:0,
+    player:{...fighter("수녀",[9,5,7,7,6,7],28),kind:"nun",weapon:"mace",...nunTraits},
+    ...Object.fromEntries(companionSides.map(side=>[side,null])),
+    pendingCompanion:null, recruitQueue:[], metCompanions:new Set(), deadCompanions:[],
+    synergiesEnabled:true,
+    formation:["player",null,null], prepSide:"player",
+    skillLevels:Object.fromEntries(starterSkills.map(id=>[id,1])), loadout:[...starterSkills], rewards:[], log:[], feedback:[],
+    enemy:null, enemyAction:null, stairTreatment:null, qaUses:0};
   record("사형수를 위한 기도를 마치자 폭동 경보가 울렸어요. 기도를 받았던 사형수가 뒤에서 쫓아와요.");
   record("폭동으로 풀려난 죄수들이 통로를 막고 있어요. 지상 출구로 가야 해요.");
-  enterArea("threshold",true);
+  enterArea("threshold");
   render();
 }
 
@@ -773,39 +1022,94 @@ function clearDefense(actor){
   actor.counter=null;
 }
 
-function enterArea(id, opening=false){
+function enterArea(id){
   game.area=id;
   game.shopBought=false;
+  game.cooldownBattle=null;
   const area=areas[id];
+  game.pendingMystery=area.event || null;
   if(!area.foe){
     game.phase = id==="exit" ? "won" : "route";
     return;
   }
+  game.prepSide="player";
   const foe=foes[area.foe];
   game.foe=foe;
   game.enemy=fighter(foe.name,foe.hp,foe.vitality+(area.type==="elite"?2:0));
-  const [held,...reserve]=foe.reserve || [];
-  game.enemyHand=held?[held]:[];
-  game.enemyDraw=reserve;
   for(const [part, amount] of Object.entries(foe.armor)) game.enemy.body[part].guard=amount;
-  clearDefense(game.player);
-  if(livingCompanion()) clearDefense(game.companion);
+  game.phase="prep";
+  warmCombatArt();
+}
+
+function availableSkills(side="player",state=game){
+  if(!livingRoster(state).includes(side)) return [];
+  const actor=state[side];
+  return Object.entries(cards).filter(([id,card])=>{
+    if(card.character && card.character!==actor.kind) return false;
+    if(card.weapon && card.weapon!==actor.weapon) return false;
+    return state.skillLevels[id] || card.character || card.weapon;
+  }).map(([id])=>id);
+}
+
+function sideLoadout(side,state=game){
+  return side==="player"?state.loadout:state[side].loadout;
+}
+
+function equippedBy(id){
+  return livingRoster().find(side=>sideLoadout(side).includes(id));
+}
+
+function loadoutsReady(){
+  return partySides().every(side=>!sideLoadout(side).includes(null));
+}
+
+function skillLevel(id){
+  return game.skillLevels[id] || 1;
+}
+
+function skillCooldown(id,level=skillLevel(id)){
+  return skillCharge[id]-(level-1)*400;
+}
+
+function toggleEquippedSkill(id,side="player"){
+  if(game.phase!=="prep" || !availableSkills(side).includes(id)) return false;
+  const loadout=sideLoadout(side);
+  const equipped=loadout.indexOf(id);
+  if(equipped>=0){
+    loadout[equipped]=null;
+    return true;
+  }
+  const empty=loadout.indexOf(null);
+  if(empty<0 || equippedBy(id)) return false;
+  loadout[empty]=id;
+  return true;
+}
+
+function beginCombat(){
+  if(game.phase!=="prep" || !loadoutsReady()) return false;
+  const sides=partySides();
+  for(const side of sides) clearDefense(game[side]);
+  autoPaused=false;
   game.phase="combat";
-  game.round=0;
-  game.hand=[];
-  game.discard=[];
-  const companion=livingCompanion();
-  game.draw=shuffle(companion && !companion.cardsDealt?game.deck.filter(id=>!cards[id].owner):game.deck);
-  if(companion && !companion.cardsDealt){
-    game.draw.unshift(...companionCardIds(companion));
-    companion.cardsDealt=true;
+  const skills=sides.flatMap(side=>sideLoadout(side).map(id=>{
+    const cooldown=skillCooldown(id);
+    return {id,side,cooldown,readyAt:cooldown};
+  }));
+  const counts=countTraits(sides.map(side=>game[side]));
+  const activeTraits=game.synergiesEnabled?[...counts].filter(([id,count])=>traits[id].effect && count>=traitThreshold).map(([id])=>id):[];
+  game.cooldownBattle={elapsed:0,skills,traits:new Set(activeTraits),usedTraits:new Set(),
+    enemySkills:game.foe.patterns.flat(),enemyIndex:0,enemyReadyAt:battleTiming.enemyInterval};
+  return true;
+}
+
+function timedEnemyPlan(){
+  const battle=game.cooldownBattle;
+  const [id,target,second]=battle.enemySkills[battle.enemyIndex];
+  if(id==="aid"){
+    const wound=healValue(game.enemy)?weakest(game.enemy,woundedParts(game.enemy).map(([part])=>part)):null;
+    return wound?{id:"aid",targets:[wound]}:{id:"guard",targets:["head"]};
   }
-  if(opening){
-    const openingDraw=["strike","heavy","guard","aim","strike"];
-    for(const card of openingDraw) game.draw.splice(game.draw.indexOf(card),1);
-    game.draw.unshift(...openingDraw);
-  }
-  beginTurn();
+  return {id,side:enemyAttackSide(id),targets:second?[target,second]:[target]};
 }
 
 function weakest(actor, permitted){
@@ -824,44 +1128,14 @@ function intactParts(actor){
   return Object.keys(parts).filter(id=>actor.body[id].hp>0);
 }
 
-function enemyAttackSide(id){
-  return id==="aim" && livingCompanion()?"companion":"player";
-}
-
-function buildPlan(){
-  const actor=game.enemy;
-  const eyes=condition(actor,"eyes");
-  const pattern=game.foe.patterns[(game.round-1)%game.foe.patterns.length];
-  const reorganizing=pattern.some(([id])=>id==="rethink") && condition(actor,"belly")!=="lost" && game.enemyHand.length && game.enemyDraw.length;
-  const held=(!reorganizing && game.round>2)?game.enemyHand[0]:null;
-  const options=held?[held,...pattern]:pattern;
-  let plan=options.map(entry=>{
-    let [id,target,second]=entry;
-    const side=enemyAttackSide(id);
-    if(id==="aim" && eyes==="healthy" && game.round>1) target=weakest(game[side],intactParts(game[side]));
-    return {id,side,targets:second?[target,second]:target?[target]:[],fromHand:entry===held};
-  });
-  if(game.foe.heals && healValue(actor)){
-    const hurt=Object.keys(parts).filter(id=>condition(actor,id)==="injured");
-    if(hurt.length) plan=[{id:"aid",targets:[weakest(actor,hurt)]},...plan];
-  }
-
-  let budget=energy(actor);
-  const actions=[];
-  for(const action of plan){
-    const available=resolveIntent(action);
-    if(!available || cards[available.id].cost>budget) continue;
-    budget-=cards[available.id].cost;
-    actions.push(available);
-    if(action.fromHand) game.enemyHand.shift();
-  }
-  return actions.length ? actions : [resolveIntent({id:"strike",targets:["chest"]})];
+function enemyAttackSide(id,state=game){
+  const sides=partySides(state);
+  return (id==="aim"?sides.at(-1):sides[0]) || "player";
 }
 
 function resolveIntent(action,state=game){
   const card=cards[action.id];
   const actor=state.enemy;
-  if(action.id==="rethink" && (!state.enemyHand.length || !state.enemyDraw.length)) return null;
   if(action.id==="aid"){
     const {hp,max}=actor.body[action.targets[0]];
     if(!healValue(actor) || !hp || hp===max) return null;
@@ -879,56 +1153,57 @@ function resolveIntent(action,state=game){
     if(!targets.length) return null;
   }
   if(cards[id].type==="attack"){
-    const side=action.side==="companion" && livingCompanion(state)?"companion":"player";
+    const side=partySides(state).includes(action.side)?action.side:enemyAttackSide(id,state);
     return {id,side,targets:[attackTarget(targets[0],intactParts(state[side]))]};
   }
   return {id,targets};
-}
-
-function beginTurn(){
-  game.round++;
-  game.stamina=energy(game.player);
-  game.enemyStamina=energy(game.enemy);
-  game.rethought=false;
-  game.selected=null;
-  game.targets=[];
-  game.pairSide=null;
-  draw(4);
-  game.plan=buildPlan();
 }
 
 function queueFeedback(event,state){
   state.feedback.push({...event,intent:state.enemyAction});
 }
 
-function hit(attacker, defender, target, damage, {id,pierce=0,removed=0},state){
+function hit(attacker, defender, target, damage, {id,pierce=0,removed=0,bonusDamage=0},state){
   const part=defender.body[target];
   if(!part.hp || isDown(defender)) return;
   const before=condition(defender,target);
-  const blocked=Math.min(damage,Math.max(0,part.guard-pierce));
+  const effectiveGuard=Math.max(0,part.guard-pierce);
+  const from=sideOf(attacker,state);
+  const prisoner=removed && attacker.factions?.includes("prisoner")?useTrait("prisoner",state):0;
+  const warrior=before==="injured" && cards[id].type==="attack" && damage+prisoner>=effectiveGuard &&
+    attacker.jobs?.includes("warrior")?useTrait("warrior",state,`warrior:${from}`):0;
+  damage+=prisoner+warrior;
+  const blocked=Math.min(damage,effectiveGuard);
   part.guard-=blocked;
   const dealt=Math.min(part.hp,damage-blocked);
+  const critical=bonusDamage>0?dealt-Math.min(part.hp,Math.max(0,damage-bonusDamage-effectiveGuard)):0;
   part.hp-=dealt;
   defender.hp=Math.max(0,defender.hp-dealt);
   const side=sideOf(defender,state);
   const defeated=isDown(defender);
-  const fallen=side==="companion" && defeated;
+  const fallen=companionSides.includes(side) && defeated;
   const after=condition(defender,target);
-  const event={type:"hit",card:id,from:sideOf(attacker,state),side,targets:[target],dealt,hp:defender.hp,blocked,removed,defeated,fallen};
-  if(before!==after) event.injury=after;
+  const event={type:"hit",card:id,from,side,targets:[target],dealt,blocked,removed,critical,defeated,hp:defender.hp};
+  if(prisoner || warrior) event.synergies=[prisoner?"prisoner":null,warrior?"warrior":null].filter(Boolean);
+  if(before!==after){
+    event.injury=after;
+    event.bodyStatus=bodyStatus(defender);
+  }
+    if(dealt && after!=="healthy") event.wounds=bodyWounds(defender);
+  if(side==="player" && target==="legs" && before!==after) event.legChange={before,after};
   queueFeedback(event,state);
   record(`${attacker.name} → ${defender.name} ${parts[target]} · 피해 ${dealt}${blocked?` · 가드 ${blocked}`:""}`,state);
   if(after!==before) record(`${defender.name}의 ${parts[target]} ${labels[after]}`,state);
   if(after==="lost") part.guard=0;
   if(fallen){
-    for(const pile of ["deck","hand","draw","discard"]) state[pile]=state[pile].filter(card=>cards[card].owner!=="companion");
     state.deadCompanions=[...state.deadCompanions,defender.kind];
-    record(`${defender.name}이(가) 쓰러졌어요. 전용 카드가 덱에서 빠졌어요.`,state);
+    state.formation[state.formation.indexOf(side)]=null;
+    record(`${defender.name}이(가) 쓰러졌어요.`,state);
   }
   if(defender.counter?.target===target && !isDown(defender)){
     const counter=defender.counter;
     defender.counter=null;
-    hit(defender,attacker,"chest",counter.damage,{id:"counter"},state);
+    hit(defender,attacker,"chest",counter.damage,{id:"counter",bonusDamage:counter.damage-cards.counter.power},state);
   }
 }
 
@@ -937,7 +1212,7 @@ function applyCard(id, actor, opponent, targets,state=game,recipient=actor){
   const [target]=targets;
   switch(card.effect || id){
     case "strike":
-    case "heavy": hit(actor,opponent,target,amount,{id},state); break;
+    case "heavy": hit(actor,opponent,target,amount,{id,bonusDamage:amount-card.power},state); break;
     case "aim": hit(actor,opponent,target,2,{id,pierce:amount},state); break;
     case "break":{
       const part=opponent.body[target];
@@ -949,96 +1224,33 @@ function applyCard(id, actor, opponent, targets,state=game,recipient=actor){
     case "guard":
     case "split":
     case "counter":{
-      const added=guardAmount(id,actor);
+      const bonus=state.enemy!==actor && state[partySides(state)[0]]===recipient?useTrait("guard",state):0;
+      const added=guardAmount(id,actor)+bonus;
       for(const key of targets) recipient.body[key].guard+=added;
-      queueFeedback({type:"guard",card:id,side:sideOf(recipient,state),targets:[...targets],added},state);
+      const event={type:"guard",card:id,from:sideOf(actor,state),side:sideOf(recipient,state),targets:[...targets],added};
+      if(bonus) event.synergies=["guard"];
+      queueFeedback(event,state);
       if(id==="counter") recipient.counter={target,damage:amount};
       record(`${recipient.name} · ${targets.map(key=>parts[key]).join("·")}에 ${card.name}`,state);
       break;
     }
     case "aid":{
       const before=condition(recipient,target);
-      const recovered=healPart(recipient,target,healValue(recipient,amount));
-      const restored=before!==condition(recipient,target);
-      queueFeedback({type:"heal",card:id,side:sideOf(recipient,state),targets:[target],recovered,restored,hp:recipient.hp},state);
+      const healing=healValue(recipient,amount);
+      const part=recipient.body[target];
+      const bonus=healing && part.hp>0 && part.hp<part.max && actor.jobs?.includes("mage")?useTrait("mage",state):0;
+      const recovered=healPart(recipient,target,healing+bonus);
+      const after=condition(recipient,target);
+      const restored=before!==after;
+      const event={type:"heal",card:id,from:sideOf(actor,state),side:sideOf(recipient,state),targets:[target],recovered,restored,hp:recipient.hp};
+      if(bonus) event.synergies=["mage"];
+      if(restored) event.bodyStatus=bodyStatus(recipient);
+      if(restored || (recovered && after!=="healthy")) event.wounds=bodyWounds(recipient);
+      queueFeedback(event,state);
       record(`${recipient.name} · ${parts[target]} 내구도 +${recovered}${restored?" · 정상 회복":""}`,state);
       break;
     }
-    case "rethink":{
-      state.enemyHand.shift();
-      const drawn=state.enemyDraw.splice(0,amount);
-      state.enemyHand.push(...drawn);
-      queueFeedback({type:"rethink",card:id,side:"enemy",targets:[],drawn:drawn.length},state);
-      record(`${actor.name} · 재정비로 다음 턴에 쓸 카드 ${drawn.length}장 확보`,state);
-      break;
-    }
   }
-}
-
-function cardBlocked(id){
-  const card=cards[id], actor=game[card.owner || "player"];
-  if(card.owner && !livingCompanion()) return "동료 없음";
-  if(card.owner && card.companion!==game.companion.kind) return "현재 동료의 카드가 아님";
-  if(card.part && condition(actor,card.part)==="lost") return `${parts[card.part]} 결손`;
-  if(card.cost>game.stamina) return "스태미너 부족";
-  if(id==="rethink" && (game.rethought || game.hand.length<2)) return game.rethought?"이번 턴 사용 완료":"버릴 카드 필요";
-  if(card.target==="heal" && !quickHealTarget()){
-    return partySides().some(side=>healValue(game[side]))?"회복할 부위 없음":"배 결손 · 회복 불가";
-  }
-  return "";
-}
-
-function chooseCard(index){
-  if(game.phase!=="combat" || !game.hand[index]) return;
-  if(game.selected!==null && game.hand[game.selected]==="rethink" && index!==game.selected){
-    const id=game.hand[game.selected];
-    const discarded=game.hand[index];
-    const amount=power(cards[id],game.player);
-    game.hand=game.hand.filter((_,i)=>i!==index && i!==game.selected);
-    game.discard.push(discarded);
-    const remaining=game.hand.length;
-    draw(amount);
-    queueFeedback({type:"rethink",card:id,side:"player",targets:[],discarded,drawn:game.hand.length-remaining},game);
-    game.discard.push(id);
-    game.rethought=true;
-    game.selected=null;
-    record(`재정비 · ${cards[discarded].name} 버림 · ${amount}장 드로우 시도`);
-    return;
-  }
-  if(cardBlocked(game.hand[index])) return;
-  game.selected=game.selected===index?null:index;
-  game.targets=[];
-  game.pairSide=null;
-}
-
-function validTarget(side, target){
-  if(game.selected===null) return false;
-  const card=cards[game.hand[game.selected]];
-  if(card.target==="discard" || (card.target==="enemy"?side!=="enemy":!partySides().includes(side))) return false;
-  if(side==="companion" && card===cards.counter) return false;
-  if(game.pairSide && game.pairSide!==side) return false;
-  const actor=game[side], part=actor.body[target];
-  if(!part.hp || game.targets.includes(target)) return false;
-  return card.target!=="heal" || (part.hp<part.max && healValue(actor)>0);
-}
-
-function chooseTarget(side,target){
-  if(game.phase!=="combat" || !validTarget(side,target)) return;
-  const id=game.hand[game.selected], card=cards[id];
-  game.targets.push(target);
-  if(card.target==="pair" && game.targets.length<2){
-    game.pairSide=side;
-    return;
-  }
-  game.stamina-=card.cost;
-  game.hand.splice(game.selected,1);
-  game.discard.push(id);
-  const actor=game[card.owner || "player"];
-  applyCard(id,actor,game.enemy,game.targets,game,game[side]);
-  game.selected=null;
-  game.targets=[];
-  game.pairSide=null;
-  if(isDown(game.player) || isDown(game.enemy)) settleTurn();
 }
 
 function quickHealTarget(){
@@ -1054,88 +1266,96 @@ function quickHealTarget(){
   return best;
 }
 
-function autoFighterValue(actor){
-  if(!actor || isDown(actor)) return 0;
-  const weights={head:2,eyes:.25,arms:.4,chest:.8,belly:.4,legs:.7};
-  return actor.hp*2+energy(actor)*3+Object.entries(actor.body).reduce((sum,[id,part])=>sum+part.hp*weights[id],0);
+function skillBlocked({id,side}){
+  const {part,ranks}=cards[id];
+  const actor=game[side];
+  if(!actor || isDown(actor)) return "동료 이탈";
+  const rank=game.formation.indexOf(side);
+  if(ranks && rank>=0 && !ranks.includes(rank)) return "위치 제한";
+  return part && condition(actor,part)==="lost"?`${parts[part]} 결손`:"";
 }
 
-function autoPartyValue(state){
-  return (isDown(state.player)?-10000:autoFighterValue(state.player))+autoFighterValue(livingCompanion(state))*.7;
+function readyTimedSkill(battle){
+  const ready=battle.skills.filter(skill=>skill.readyAt<=battle.elapsed && !skillBlocked(skill) &&
+    (cards[skill.id].target!=="heal" || quickHealTarget()));
+  // Slot position only controls display. Resolve simultaneous skills by role and cooldown.
+  return ready.sort((a,b)=>a.readyAt-b.readyAt ||
+    Number(cards[a.id].type==="attack")-Number(cards[b.id].type==="attack") ||
+    b.cooldown-a.cooldown || a.id.localeCompare(b.id))[0];
 }
 
-function autoStateValue(state){
-  if(isDown(state.player)) return -100000;
-  if(isDown(state.enemy)) return 100000;
-  return autoPartyValue(state)-autoFighterValue(state.enemy)-Object.values(state.enemy.body).reduce((sum,part)=>sum+part.guard*.2,0);
+function timedAttackTarget(id,actor){
+  const {enemy}=game, skill=cards[id], effect=skill.effect || id;
+  const amount=power(skill,actor);
+  const damage=effect==="aim"?2:effect==="break"?1:amount;
+  const pierce=effect==="aim" || effect==="break"?amount:0;
+  const targets=intactParts(enemy);
+  const dealt=target=>Math.max(0,Math.min(enemy.body[target].hp,damage-Math.max(0,enemy.body[target].guard-pierce)));
+  if(dealt("head")>=enemy.body.head.hp) return "head";
+  const prefer=target=>effect==="break"?Math.min(amount,enemy.body[target].guard):
+    Number(Boolean(actor.jobs?.includes("warrior")) && condition(enemy,target)==="injured");
+  return targets.reduce((best,target)=>{
+    const order=dealt(target)-dealt(best) || prefer(target)-prefer(best);
+    return order>0?target:best;
+  },targets.includes("chest")?"chest":targets[0]);
 }
 
-function autoIncomingRisk(state){
-  // Hidden intents stay hidden from the automatic player as well.
-  if(condition(state.player,"eyes")!=="healthy" || isDown(state.enemy)) return 0;
-  const forecast=structuredClone(state);
-  forecast.log=[];
-  forecast.feedback=[];
-  clearDefense(forecast.enemy);
-  for(const planned of forecast.plan){
-    const action=resolveIntent(planned,forecast);
-    if(!action) continue;
-    applyCard(action.id,forecast.enemy,forecast[action.side || "player"],action.targets,forecast);
-    if(isDown(forecast.player) || isDown(forecast.enemy)) break;
+function executePartySkill({id,side}){
+  const skill=cards[id], actor=game[side];
+  if(skill.type==="attack"){
+    applyCard(id,actor,game.enemy,[timedAttackTarget(id,actor)]);
+    clearDefense(game.enemy);
+  }else if(skill.target==="heal"){
+    const {side,target}=quickHealTarget();
+    applyCard(id,actor,game.enemy,[target],game,game[side]);
+  }else{
+    const intent=condition(game.player,"eyes")==="healthy"?battleIntent()[0]:null;
+    const recipient=intent?.side?game[intent.side]:actor;
+    const target=intent?.side?intent.targets[0]:"head";
+    const second=skill.target==="pair"?intactParts(recipient).find(part=>part!==target):null;
+    const targets=second?[target,second]:[target];
+    const previous=targets.map(key=>recipient.body[key].guard);
+    clearDefense(recipient);
+    applyCard(id,actor,game.enemy,targets,game,recipient);
+    targets.forEach((key,index)=>{recipient.body[key].guard=Math.max(previous[index],recipient.body[key].guard);});
   }
-  return Math.max(0,autoPartyValue(state)-autoPartyValue(forecast));
-}
-
-function chooseAutoAction(){
-  if(game.phase!=="combat") return null;
-  const before=autoStateValue(game), risk=autoIncomingRisk(game);
-  const blind=condition(game.player,"eyes")!=="healthy";
-  let best=null;
-  for(const [index,id] of game.hand.entries()){
-    const card=cards[id];
-    if(cardBlocked(id) || card.target==="discard") continue;
-    const sides=card.target==="enemy"?["enemy"]:card===cards.counter?["player"]:partySides();
-    for(const side of sides){
-      const targets=intactParts(game[side]).filter(target=>card.target!=="heal" ||
-        (game[side].body[target].hp<game[side].body[target].max && healValue(game[side])>0));
-      const groups=card.target==="pair"?targets.flatMap((target,i)=>targets.slice(i+1).map(second=>[target,second])):targets.map(target=>[target]);
-      for(const group of groups){
-        const forecast=structuredClone(game);
-        forecast.log=[];
-        forecast.feedback=[];
-        forecast.enemyAction=null;
-        applyCard(id,forecast[card.owner || "player"],forecast.enemy,group,forecast,forecast[side]);
-        const guarded=blind && card.type==="defense"?group.reduce((sum,target)=>
-          sum+Math.min(3,forecast[side].body[target].guard-game[side].body[target].guard)*.25,0):0;
-        const score=autoStateValue(forecast)-before+(blind?0:risk-autoIncomingRisk(forecast))*.9+guarded-card.cost*.25;
-        if(score>.01 && (!best || score>best.score)) best={index,id,side,targets:group,score};
-      }
-    }
-  }
-  if(best) return best;
-  const rethink=game.hand.findIndex(id=>id==="rethink" && !cardBlocked(id));
-  if(rethink>=0){
-    const discards=game.hand.map((id,index)=>({id,index,blocked:cardBlocked(id)})).filter(card=>card.index!==rethink);
-    discards.sort((a,b)=>Number(Boolean(b.blocked))-Number(Boolean(a.blocked)) || cards[b.id].cost-cards[a.id].cost);
-    if(discards.length) return {index:rethink,id:"rethink",discardIndex:discards[0].index};
-  }
-  return null;
 }
 
 function advanceAutoBattle(){
   if(game.phase!=="combat") return null;
-  game.selected=null;
-  game.targets=[];
-  game.pairSide=null;
-  const action=chooseAutoAction();
-  if(!action){
-    endTurn();
-    return {endedTurn:true};
+  const battle=game.cooldownBattle;
+  let skill=readyTimedSkill(battle);
+  if(!skill && battle.elapsed<battle.enemyReadyAt){
+    battle.elapsed+=battleTiming.tick;
+    game.combatTime+=battleTiming.tick;
+    if(battle.elapsed%battleTiming.pursuit===0){
+      game.distance--;
+      record("전투 시간 경과 · 도망 여유 −1");
+      finishCombat();
+      return {clockOnly:true};
+    }
+    skill=readyTimedSkill(battle);
   }
-  chooseCard(action.index);
-  if(action.discardIndex!==undefined) chooseCard(action.discardIndex);
-  else for(const part of action.targets) chooseTarget(action.side,part);
-  return {...action,endedTurn:false};
+  if(skill){
+    skill.readyAt=battle.elapsed+skill.cooldown;
+    executePartySkill(skill);
+    finishCombat();
+    return {id:skill.id,actor:skill.side};
+  }
+  if(battle.elapsed>=battle.enemyReadyAt){
+    const action=battleIntent()[0];
+    const defender=game[action.side || "player"];
+    game.enemyAction=0;
+    if(cards[action.id].type==="defense") clearDefense(game.enemy);
+    applyCard(action.id,game.enemy,defender,action.targets);
+    if(cards[action.id].type==="attack") clearDefense(defender);
+    game.enemyAction=null;
+    battle.enemyIndex=(battle.enemyIndex+1)%battle.enemySkills.length;
+    battle.enemyReadyAt+=battleTiming.enemyInterval;
+    finishCombat();
+    return {id:action.id,actor:"enemy",keepIntent:true};
+  }
+  return {clockOnly:true};
 }
 
 function cancelAutoBattleTimer(){
@@ -1145,15 +1365,24 @@ function cancelAutoBattleTimer(){
 
 function scheduleAutoBattle(){
   cancelAutoBattleTimer();
-  if(!game || game.phase!=="combat" || autoPaused || document.hidden || combatPresentation || routeTravel || drag) return;
+  if(!game || game.phase!=="combat" || autoPaused || document.hidden || combatPresentation || routeTravel) return;
   const current=game, enemy=game.enemy;
+  const battle=game.cooldownBattle;
+  const delay=readyTimedSkill(battle) || battle.elapsed>=battle.enemyReadyAt?0:battleTiming.tick;
   const timer=setTimeout(()=>{
     if(autoTimer!==timer) return;
     autoTimer=null;
-    if(game!==current || game.enemy!==enemy || game.phase!=="combat" || autoPaused || document.hidden || combatPresentation || routeTravel || drag) return;
+    if(game!==current || game.enemy!==enemy || game.phase!=="combat" || autoPaused || document.hidden || combatPresentation || routeTravel) return;
+    const distance=game.distance;
     const action=advanceAutoBattle();
-    if(action) playCombatFeedback(undefined,action.endedTurn);
-  },550/autoSpeed);
+    if(action?.clockOnly){
+      if(game.distance!==distance || game.phase!=="combat") render();
+      else {
+        updateCooldownReadout();
+        scheduleAutoBattle();
+      }
+    }else if(action) playCombatFeedback(undefined,action.keepIntent);
+  },delay/autoSpeed);
   autoTimer=timer;
 }
 
@@ -1188,101 +1417,126 @@ function lose(reason){
   record(reason);
 }
 
-function settleTurn(){
-  game.distance--;
-  game.turns++;
-  record("전투 턴 소모 · 도망 여유 −1");
+function finishCombat(){
+  if(game.phase!=="combat") return true;
   if(isDown(game.player)){
     lose(!game.player.body.head.hp?"머리가 결손되어 쓰러졌어요.":"전체 HP가 0이 되어 쓰러졌어요.");
   }else if(isDown(game.enemy)){
     game.phase="route";
-    clearDefense(game.player);
-    if(livingCompanion()) clearDefense(game.companion);
+    for(const side of partySides()) clearDefense(game[side]);
     record(`${game.enemy.name} 격파 · 다음 길을 선택하세요.`);
-    game.pendingCompanion=areas[game.area].companion || null;
+    const area=areas[game.area];
+    game.recruitQueue=(area.companions || [area.companion]).filter(kind=>canRecruit(kind) && !game.metCompanions.has(kind));
+    nextCompanionOffer();
     if(game.mapConfig) game.coins++;
     if(hasUpcomingBattle(game.area)){
-      game.rewards=shuffle(rewardPool).slice(0,3);
-      game.phase="reward";
-      game.selected=null;
-      game.targets=[];
-      game.pairSide=null;
+      game.rewards=skillRewardOptions();
+      if(game.rewards.length) game.phase="reward";
     }
   }else if(game.distance<=0){
     lose("기도를 받았던 사형수에게 따라잡혔어요.");
-  }else{
-    beginTurn();
   }
+  return game.phase!=="combat";
 }
 
 function hasUpcomingBattle(id){
   return (areas[id].next || []).some(next=>areas[next].foe || hasUpcomingBattle(next));
 }
 
+function skillRewardOptions(){
+  const newSkills=shuffle(rewardPool.filter(id=>!game.skillLevels[id]));
+  const upgrades=shuffle(Object.keys(game.skillLevels).filter(id=>skillLevel(id)<maxSkillLevel));
+  return [newSkills[0],upgrades[0],...shuffle([...newSkills.slice(1),...upgrades.slice(1)])].filter(Boolean).slice(0,3);
+}
+
 function chooseReward(id){
   if(game.phase!=="reward" || (id!==null && !game.rewards.includes(id))) return false;
   if(id!==null){
-    game.deck.push(id);
-    game.acquired.push(id);
-    record(`전투 보상 · ${cards[id].name}을(를) 덱에 추가 · 총 ${game.deck.length}장`);
-  }else record("전투 보상을 건너뛰었어요. 덱 구성을 유지해요.");
+    const previous=game.skillLevels[id] || 0;
+    if(previous>=maxSkillLevel) return false;
+    game.skillLevels[id]=previous+1;
+    record(previous?`${cards[id].name} 강화 · Lv.${previous+1}`:`기술 습득 · ${cards[id].name}`);
+  }else record("전투 보상을 건너뛰었어요.");
   game.rewards=[];
   game.phase="route";
   return true;
 }
 
+function canRecruit(kind){
+  return Object.hasOwn(companionTypes,kind) && !game.deadCompanions.includes(kind) &&
+    livingRoster().every(side=>game[side].kind!==kind);
+}
+
+function nextCompanionOffer(){
+  game.pendingCompanion=game.recruitQueue.shift() ?? null;
+  if(game.pendingCompanion) game.metCompanions.add(game.pendingCompanion);
+}
+
 function recruitCompanion(kind){
-  if(game.phase!=="route" || game.pendingCompanion!==kind || !companionTypes[kind] || game.deadCompanions.includes(kind)) return false;
-  const previous=livingCompanion();
-  if(previous) record(`${previous.name}와(과)의 동행을 마쳤어요.`);
-  for(const pile of ["deck","hand","draw","discard"]) game[pile]=game[pile].filter(id=>!cards[id].owner);
+  if(game.phase!=="route" || game.pendingCompanion!==kind || !canRecruit(kind)) return false;
+  const sides=partySides();
+  const side=companionSides.find(key=>!game[key] || isDown(game[key]));
   const type=companionTypes[kind];
-  game.companion={...fighter(type.name,type.health,type.vitality),kind,cardsDealt:false};
-  game.companion.body.arms.hp=type.hurtArm;
-  game.companion.hp-=type.health[2]-type.hurtArm;
-  const additions=companionCardIds();
-  game.deck.push(...additions);
-  game.pendingCompanion=null;
-  record(`${type.name} 합류 · ${additions.map(id=>cards[id].name).join(" · ")}을(를) 얻었어요.`);
+  const starters=companionStarterSkills(kind);
+  const loadout=Array.from({length:companionSkillSlots},(_,slot)=>starters[slot] ?? null);
+  const actor={...fighter(type.name,type.health,type.vitality),kind,weapon:type.weapon,factions:type.factions,jobs:type.jobs,loadout};
+  if(type.hurtArm){
+    actor.body.arms.hp=type.hurtArm;
+    actor.hp-=type.health[2]-type.hurtArm;
+  }
+  game[side]=actor;
+  if(sides.length===1 && game.formation[0]==="player") game.formation=[null,null,"player"];
+  const empty=game.formation.indexOf(null);
+  if(empty>=0){
+    const rank=type.preferredRank ?? empty;
+    game.formation[empty]=game.formation[rank];
+    game.formation[rank]=side;
+  }
+  nextCompanionOffer();
+  record(`${type.name} 합류${starters.length?` · ${starters.map(id=>cards[id].name).join(" · ")}`:""}`);
   return true;
 }
 
 function declineCompanion(){
   if(game.phase!=="route" || !game.pendingCompanion) return false;
   record(`${companionTypes[game.pendingCompanion].name}와(과) 동행하지 않고 길을 이어가요.`);
-  game.pendingCompanion=null;
+  nextCompanionOffer();
   return true;
 }
 
-function endTurn(){
-  if(game.phase!=="combat") return;
-  clearDefense(game.enemy);
-  for(const [index,planned] of game.plan.entries()){
-    const action=resolveIntent(planned);
-    if(!action) continue;
-    game.enemyAction=index;
-    applyCard(action.id,game.enemy,game[action.side || "player"],action.targets);
-    if(isDown(game.player) || isDown(game.enemy)) break;
-  }
-  game.enemyAction=null;
-  clearDefense(game.player);
-  if(livingCompanion()) clearDefense(game.companion);
-  game.discard.push(...game.hand);
-  game.hand=[];
-  settleTurn();
+function canMoveTo(id){
+  return game.phase==="route" && !game.pendingCompanion && !game.pendingMystery && areas[game.area].next.includes(id);
 }
 
 function moveTo(id){
-  if(game.phase!=="route" || !areas[game.area].next.includes(id)) return;
-  if(game.pendingCompanion) declineCompanion();
+  if(!canMoveTo(id)) return;
   const gain=travelGain();
   game.distance+=gain;
   game.steps++;
   game.trail.push(id);
   game.area=id;
-  record(`${areas[id].name}(으)로 한 칸 이동 · 도망 여유 +${gain}`);
+  const destination=areas[id].type==="mystery"?"? 방":areas[id].name;
+  record(`${destination} 도착 · 도망 여유 +${gain}`);
   if(game.distance<=0) lose("이동 후에도 도망 여유가 없어 사형수에게 따라잡혔어요.");
   else enterArea(id);
+}
+
+function canTakeMystery(event){
+  return game.distance+event.distance>0 && game.coins+event.coins>=0;
+}
+
+function resolveMystery(choice){
+  const event=mysteryEvents[game.pendingMystery];
+  if(game.phase!=="route" || !event) return false;
+  if(choice==="take"){
+    if(!canTakeMystery(event)) return false;
+    game.distance+=event.distance;
+    game.coins+=event.coins;
+    record(`${event.name} · ${event.effect}`);
+  }else if(choice==="skip") record(`${event.name} · 지나침`);
+  else return false;
+  game.pendingMystery=null;
+  return true;
 }
 
 function treatAtStairs(target,side="player"){
@@ -1309,78 +1563,47 @@ function pursuerPosition(distance){
   return Math.max(5,88-Math.max(0,distance)*5);
 }
 
+function combatSeconds(milliseconds){
+  return `${(milliseconds/1000).toFixed(1)}초`;
+}
+
+function pursuitCountdown(){
+  return battleTiming.pursuit-game.cooldownBattle.elapsed%battleTiming.pursuit;
+}
+
+function combatReport(){
+  return combatSeconds(game.combatTime);
+}
+
 function gauges(){
   const combat=game.phase==="combat";
+  const timed=combat && game.cooldownBattle;
   const distance=Math.max(0,game.distance);
-  return `<div class="status-box pursuit ${distance<=2?"urgent":""}"><strong>${distance}</strong><div><p>사형수 추격 · 도망 여유</p>
-    <small>전투 턴 −1 · 다음 이동 +${travelGain()}</small></div>
+  const pursuit=timed?`<span id="pursuit-countdown">${combatSeconds(pursuitCountdown())}</span> 뒤 −1`:"";
+  const activity=timed?`<div class="status-box"><strong id="combat-elapsed">${combatSeconds(timed.elapsed)}</strong><div><p>전투 경과</p></div></div>`:
+    `<div class="status-box"><strong>${game.steps}</strong><div><p>이동한 칸</p><small>전투 소모 ${combatReport()}</small></div></div>`;
+  return `<div class="status-box pursuit ${distance<=pursuitWarningDistance?"urgent":""}"><strong>${distance}</strong><div><p>사형수 추격 · 도망 여유</p>
+    <small>${pursuit?`${pursuit} · `:""}다음 이동 +${travelGain()}</small></div>
     <div class="pursuit-track" role="img" aria-label="기도를 받았던 사형수가 뒤쫓는 중 · 남은 도망 여유 ${distance}">
       <span class="pursuer" style="--near:${pursuerPosition(distance)}%">${icon("pursuer")}</span>
       <span class="runner">${icon("runner")}</span>
     </div></div>
-    <div class="status-box"><strong>${combat?game.stamina:game.steps}</strong><div><p>${combat?(livingCompanion()?"공용 스태미너":"스태미너"):"이동한 칸"}</p>
-    <small>${combat?`이 전투 ${game.round}턴 · 사용 가능 최대 ${energy(game.player)} / 턴`:`전투에서 쓴 턴 ${game.turns}`}</small></div></div>
-    ${combat?"":`<div class="status-box health ${game.player.hp<=7?"urgent":""}"><strong>${game.player.hp}/${game.player.maxHp}</strong><div><p>체력</p></div>${healthBar(game.player)}</div>`}`;
+    ${activity}${combat?"":`<div class="status-box health ${game.player.hp<=7?"urgent":""}"><strong>${game.player.hp}/${game.player.maxHp}</strong><div><p>체력</p></div>${healthBar(game.player)}</div>`}`;
 }
 
 function intentLabel(action,state=game){
   const {id,targets}=action, card=cards[id];
   const amount=power(card,state.enemy);
   const target=targets.map(key=>parts[key]).join("·");
-  const detail=id==="aid"?healValue(state.enemy):id==="rethink"?`카드 ${Math.min(amount,state.enemyDraw.length)}장 확보`:
+  const detail=id==="aid"?healValue(state.enemy):
     ["aim","break","counter"].includes(id)?card.text(amount):amount;
   return `${target?`${target} `:""}${card.name} ${detail}`;
 }
 
-function previewTarget(id,side,target){
-  const before=game[side];
-  // Use the live resolver on copies so reactions and capped damage match execution.
-  const state={...game,player:structuredClone(game.player),enemy:structuredClone(game.enemy),feedback:[],log:[]};
-  applyCard(id,state.player,state.enemy,[...game.targets,target],state);
-  const after=state[side];
-  const oldPart=before.body[target], newPart=after.body[target];
-  const results=[], changes=[];
-  const attack=state.feedback.find(event=>event.type==="hit" && event.side==="enemy");
-  if(attack) results.push(`피해 ${attack.dealt}`,`내구도 ${oldPart.hp} → ${newPart.hp}`);
-  if(newPart.guard>oldPart.guard) results.push(`가드 +${newPart.guard-oldPart.guard}`);
-  if(newPart.guard<oldPart.guard) results.push(`가드 −${oldPart.guard-newPart.guard}`);
-  if(newPart.hp>oldPart.hp) results.push(`회복 +${newPart.hp-oldPart.hp}`,`내구도 ${oldPart.hp} → ${newPart.hp}`);
-  const status=condition(after,target);
-  if(status!==condition(before,target)) changes.push(labels[status]);
-  if(energy(after)!==energy(before)) changes.push(`다음 턴 스태미너 ${energy(before)} → ${energy(after)}`);
-  if(id==="counter") changes.push(`피격 시 반격 ${power(cards[id],game.player)}`);
-  if(id==="split" && game.targets.length) changes.push(`${parts[game.targets[0]]}에도 가드 +${power(cards[id],game.player)}`);
-  const retaliation=state.feedback.find(event=>event.type==="hit" && event.side==="player");
-  if(retaliation) changes.push(`적 반격 · 내 가슴 피해 ${retaliation.dealt}`);
-  if(isDown(state.player)) changes.push("생존자 쓰러짐");
-  else if(isDown(state.enemy)) changes.push(`${state.enemy.name} 격파`);
-  else if(condition(game.player,"eyes")==="healthy" && condition(state.player,"eyes")==="healthy"){
-    for(const action of game.plan){
-      const previous=resolveIntent(action), next=resolveIntent(action,state);
-      if(!previous) continue;
-      const label=intentLabel(previous);
-      const nextLabel=next?intentLabel(next,state):"취소";
-      if(label!==nextLabel) changes.push(`${label} → ${nextLabel}`);
-    }
-  }
-  return `<div class="preview-part"><dt>${parts[target]}</dt><dd>${results.map(result=>`<span>${result}</span>`).join(" · ")}</dd>${changes.length?`<dd class="preview-change">${changes.join(" · ")}</dd>`:""}</div>`;
-}
-
-function cardPreview(){
-  if(game.area!=="threshold" || game.selected===null) return "";
-  const id=game.hand[game.selected], card=cards[id];
-  if(card.target==="discard") return "";
-  const side=card.target==="enemy"?"enemy":"player";
-  const targets=Object.keys(parts).filter(target=>validTarget(side,target));
-  const subject=side==="enemy"?game.enemy.name:"내 부위";
-  return `<section class="card-preview" aria-label="부위별 카드 미리보기"><h3>미리보기 · ${card.name} · ${subject}${card.target==="pair" && !game.targets.length?" 중 두 곳 선택":""}</h3><dl class="preview-grid">${targets.map(target=>previewTarget(id,side,target)).join("")}</dl></section>`;
-}
-
 function battleIntent(){
-  return game.plan.flatMap((planned,planIndex)=>{
-    const action=resolveIntent(planned);
-    return action?[{...action,planIndex}]:[];
-  });
+  if(!game.cooldownBattle) return [];
+  const action=resolveIntent(timedEnemyPlan()) || resolveIntent({id:"strike",targets:["chest"]});
+  return [{...action,planIndex:0}];
 }
 
 function layoutCombatHud(scene){
@@ -1395,10 +1618,8 @@ function layoutCombatHud(scene){
 const combatHudResize=new ResizeObserver(([entry])=>layoutCombatHud(entry.target));
 
 function intentPanel(intents, eyes){
-  const changes=intents.length!==game.plan.length || intents.some(action=>{
-    const planned=game.plan[action.planIndex];
-    return action.id!==planned.id || (planned.side && action.side!==planned.side);
-  });
+  const planned=timedEnemyPlan();
+  const changes=intents.some(action=>action.id!==planned.id || (action.side && planned.side!==action.side));
   const heading=changes&&eyes==="healthy"?"변경된 예고":"적 행동 예고";
   const chips=eyes!=="healthy"
     ? `<span class="intent-chip" title="눈 부상으로 예고가 가려짐" role="img" aria-label="눈 부상으로 예고가 가려짐">${icon("hiddenIntent")}<strong>?</strong></span>`
@@ -1406,117 +1627,277 @@ function intentPanel(intents, eyes){
       const {id}=action;
       const card=cards[id],type=card.type,amount=power(card,game.enemy);
       const value=id==="aim"?2:id==="break"?1:id==="aid"?`+${healValue(game.enemy)}`:
-        id==="rethink"?Math.min(amount,game.enemyDraw.length):type==="defense"?`+${guardAmount(id,game.enemy)}`:amount;
+        type==="defense"?`+${guardAmount(id,game.enemy)}`:amount;
       const attackLink=type==="attack"?` data-attack-side="${action.side}" data-attack-target="${action.targets[0]}" data-attack-source="${cards[action.id].part || "chest"}"`:"";
-      const targetName=type==="attack" && livingCompanion()?`${game[action.side].name} `:"";
+      const targetName=type==="attack" && partySides().length>1?`${game[action.side].name} `:"";
       const label=`${targetName}${intentLabel(action)}`;
-      const targets=action.targets.length?`<span class="intent-target ${action.side || "enemy"}">${action.targets.map(icon).join("")}</span>`:"";
-      return `<span class="intent-chip ${type}" data-intent="${action.planIndex}"${attackLink} role="img" title="${label}" aria-label="${label}">${icon(id==="rethink"?"redraw":type)}<strong>${value}</strong>${targets}</span>`;
+      const targets=action.targets.length?`<span class="intent-target ${companionSides.includes(action.side)?"ally":action.side || "enemy"}">${action.targets.map(icon).join("")}</span>`:"";
+      return `<span class="intent-chip ${type}" data-intent="${action.planIndex}"${attackLink} role="img" title="${label}" aria-label="${label}">${icon(type)}<strong>${value}</strong>${targets}</span>`;
     }).join("") || '<span aria-label="행동 없음">—</span>';
-  return `<div class="intent-rail"><div class="intent" role="group" aria-label="${heading}">${chips}</div></div>`;
+  const timer=game.cooldownBattle && eyes==="healthy"?`<span class="intent-chip intent-time" title="다음 적 행동까지">${icon("clock")}<strong id="enemy-cooldown">${combatSeconds(game.cooldownBattle.enemyReadyAt-game.cooldownBattle.elapsed)}</strong></span>`:"";
+  return `<div class="intent-rail"><div class="intent" role="group" aria-label="${heading}">${chips}${timer}</div></div>`;
 }
 
 function bodyTiles(side,intents,eyes,anchors){
   const actor=game[side];
   const enemy=side==="enemy";
+  const inCombat=game.phase==="combat";
   const threats=new Set(intents.filter(action=>cards[action.id].type==="attack" && action.side===side).flatMap(action=>action.targets));
   const guardIntents=enemy && eyes==="healthy"?intents.filter(action=>cards[action.id].type==="defense"):[];
   return Object.entries(actor.body).map(([id,part],index)=>{
     const level=condition(actor,id);
-    const available=validTarget(side,id);
-    const marked=game.pairSide===side && game.targets.includes(id);
     const threat=!enemy && eyes==="healthy" && threats.has(id);
     const guard=!enemy && eyes==="lost"?"?":part.guard;
     const guarded=guard>0;
     const upcoming=guardIntents.reduce((total,action)=>total+(action.targets.includes(id)?guardAmount(action.id,actor):0),0);
-    const guardReadout=guarded || upcoming?`<span class="part-guard">${icon("defense")}${guarded?`<b>${guard}</b>`:""}${upcoming?`<b class="guard-upcoming">+${upcoming}</b>`:""}</span>`:`<span>가드 ${guard}</span>`;
+    const guardReadout=!inCombat?"":guarded || upcoming?`<span class="part-guard">${icon("defense")}${guarded?`<b>${guard}</b>`:""}${upcoming?`<b class="guard-upcoming">+${upcoming}</b>`:""}</span>`:`<span>가드 ${guard}</span>`;
     const position=anchors?`style="--x:${anchors[index][0]}%;--y:${anchors[index][1]}%"`:"";
-    return `<button type="button" data-action="target" data-side="${side}" data-value="${id}" ${available?"":"disabled"}
-      class="part ${level} ${available?"available":""} ${marked?"marked":""} ${threat?"threat":""} ${guarded?"guarded":""} ${upcoming?"guard-intent":""}"
+    return `<div data-side="${side}" data-value="${id}"
+      class="part ${level} ${threat?"threat":""} ${guarded?"guarded":""} ${upcoming?"guard-intent":""}"
       ${position}
-      title="${side==="player"?effects[id]:side==="companion" && id==="arms"?"팔 부상 시 전용 카드가 약해지고, 결손 시 사용할 수 없어요.":""}" aria-label="${actor.name} ${parts[id]} ${labels[level]} 내구도 ${part.hp}/${part.max} 가드 ${guard}${upcoming?` · 가드 +${upcoming} 예정`:""}">
+      title="${side==="player"?effects[id]:!enemy && id==="arms"?"팔 결손 시 팔 기술 사용 불가":""}" aria-label="${actor.name} ${parts[id]} ${labels[level]} 내구도 ${part.hp}/${part.max}${inCombat?` 가드 ${guard}`:""}${upcoming?` · 가드 +${upcoming} 예정`:""}">
+      ${anchors?"":partDrawing(id)}
       <span class="part-top"><b>${parts[id]}</b><small>${labels[level]}</small></span>
       <span class="bar" style="--life:${part.hp/part.max*100}%"><i></i></span>
-      <span class="part-stats"><span>${part.hp}/${part.max}</span>${guardReadout}</span></button>`;
+      <span class="part-stats"><span>${part.hp}/${part.max}</span>${guardReadout}</span></div>`;
   }).join("");
+}
+
+function legStatusLabel(legs, previous){
+  if(legs==="healthy") return "";
+  const change=previous?`+${travelGain(previous)} → `:"";
+  return `<b>다리 ${labels[legs]}</b><span>다음 이동 ${change}+${travelGain(legs)}</span>`;
+}
+
+function bodyStatus(actor){
+  const lost=Object.values(actor.body).filter(part=>part.hp===0).length;
+  const injured=Object.values(actor.body).filter(part=>part.hp>0 && part.hp*2<=part.max).length;
+  return lost?`결손 ${lost}`:injured?`부상 ${injured}`:"정상";
+}
+
+function partDrawing(id){
+  return `<img class="part-drawing" src="art/body-parts/${id}.webp" width="96" height="96" alt="" draggable="false">`;
+}
+
+function bodyWounds(actor){
+  return Object.entries(actor.body).map(([id,{hp,max}])=>({id,hp,max,level:condition(actor,id)})).filter(part=>part.level!=="healthy");
+}
+
+function woundChips(wounds){
+  return wounds.map(({id,level,hp,max})=>`<span class="wound-chip ${level}">${partDrawing(id)}<span class="wound-chip-copy">
+    <b>${parts[id]} <small>${labels[level]}</small></b><span class="wound-durability" title="남은 내구도">${hp}/${max}</span></span></span>`).join("");
+}
+
+function combatWoundPanel(sides){
+  const reports=sides.map(side=>({side,wounds:bodyWounds(game[side])}));
+  return `<div class="combat-wounds" ${reports.some(report=>report.wounds.length)?"":"hidden"}>
+    ${reports.map(({side,wounds})=>`<div data-wounds-side="${side}" role="group" aria-label="${game[side].name} 부상 부위">${woundChips(wounds)}</div>`).join("")}</div>`;
+}
+
+function prepWoundPanel(){
+  const groups=partySides().map(side=>{
+    const actor=game[side], wounds=bodyWounds(actor);
+    return wounds.length?`<div class="wound-group"><b>${actor.name}</b>${woundChips(wounds)}</div>`:"";
+  }).join("");
+  return groups?`<div class="prep-wounds" role="group" aria-label="아군 부상 부위">${groups}</div>`:"";
 }
 
 function bodyPanel(side, intents, eyes){
   const actor=game[side], enemy=side==="enemy";
-  const sprite=enemy?areas[game.area].foe:side==="companion"?actor.kind:"player";
+  const sprite=enemy?areas[game.area].foe:side==="player"?"player":actor.kind;
+  const companion=companionSides.includes(side);
   const art=partyArt[sprite];
   const tiles=bodyTiles(side,intents,eyes,bodyAnchors[sprite]);
-  const lost=Object.values(actor.body).filter(part=>part.hp===0).length;
-  const injured=Object.values(actor.body).filter(part=>part.hp>0 && part.hp*2<=part.max).length;
-  const status=lost?`결손 ${lost}`:injured?`부상 ${injured}`:"정상";
   const portrait=art?`<img class="actor-sprite" src="${art.src}" width="1024" height="1536" alt="" aria-hidden="true" draggable="false">`:
     `<div class="actor-sprite" aria-hidden="true" style="--portrait:var(--art-${sprite})"></div>`;
-  return `<section class="panel actor-${side} ${art?"sd-actor":""}" data-portrait="${art?.kind || sprite}" aria-label="${side==="companion"?"동료 ":""}${actor.name}"><div class="actor-caption"><h2>${actor.name}</h2></div>
+  const legs=condition(actor,"legs");
+  const legStatus=side==="player"?`<div class="leg-status ${legs}" ${legs==="healthy"?"hidden":""}>${legStatusLabel(legs)}</div>`:"";
+  return `<section class="panel actor-${side} ${companion?"companion-actor":""} ${art?"sd-actor":""}" data-portrait="${art?.kind || sprite}" aria-label="${actor.name}"><div class="actor-caption"><h2>${actor.name}</h2>${!enemy && partySides().length>1?`<small>${formationRanks[game.formation.indexOf(side)]}</small>`:""}</div>
     <div class="actor-figure">${portrait}<div class="body-grid hotspots" aria-hidden="true">${tiles}</div></div>
-    <div class="foe-health">${actorHealth(actor)}</div>
-    <details class="actor-body-status" data-side="${side}"><summary>부위 상태 · ${status}</summary><div class="body-grid body-readout">${bodyTiles(side,intents,eyes)}</div></details></section>`;
+    <div class="foe-health">${actorHealth(actor)}</div>${legStatus}
+    <details class="actor-body-status" data-side="${side}"><summary>부위 상태 · ${bodyStatus(actor)}</summary><div class="body-grid body-readout">${bodyTiles(side,intents,eyes)}</div></details></section>`;
 }
 
-function companionPanel(intents,eyes){
-  const actor=livingCompanion();
-  if(!actor) return "";
-  return bodyPanel("companion",intents,eyes);
+function traitChip(id,count){
+  const {name,icon:mark,effect}=traits[id];
+  return `<span class="trait-chip${count?" active":""}"${count?` title="${effect}" aria-label="${name} ${count} · ${effect}"`:""}>${icon(mark)}${name}${count?` <b>${count}</b>`:""}</span>`;
 }
 
-function cardRules(card){
-  const bonus=card.part?` · ${parts[card.part]} 정상: ${card.text(card.power+card.bonus)}`:"";
-  return card.text(card.power)+bonus;
+function traitTags(actor){
+  return `<div class="trait-list">${[...actorTraits(actor)].map(id=>traitChip(id)).join("")}</div>`;
+}
+
+function activeTraitChips(){
+  const counts=countTraits(partySides().map(side=>game[side]));
+  const chips=[...counts].filter(([id,count])=>traits[id].effect && count>=traitThreshold)
+    .map(([id,count])=>traitChip(id,`${count}/${traitThreshold}`));
+  return chips.length?`<div class="trait-list" aria-label="활성 시너지">${chips.join("")}</div>`:"";
+}
+
+function reservePanel(){
+  const reserves=reserveSides();
+  if(!reserves.length) return "";
+  const ranks=game.formation.map((side,index)=>side==="player"?"":`<option value="${index}">${formationRanks[index]}${side?` · ${game[side].name}`:""}</option>`).join("");
+  return `<div class="reserve-list" aria-label="대기 동료"><small>대기</small>${reserves.map(side=>`<div class="reserve-entry">
+    <button class="btn" type="button" data-action="prep-member" data-side="${side}" aria-current="${game.prepSide===side}">${game[side].name}</button>
+    ${traitTags(game[side])}
+    <select data-formation-side="${side}" aria-label="${game[side].name} 출전"><option value="" selected disabled>출전</option>${ranks}</select>
+    </div>`).join("")}</div>`;
+}
+
+function formationPanel(){
+  const slots=game.formation.map((side,rank)=>{
+    if(!side) return `<div class="formation-slot"><b class="formation-rank">${formationRanks[rank]}</b><small>빈자리</small></div>`;
+    const actor=game[side], selected=side===game.prepSide;
+    const ranks=formationRanks.map((name,index)=>`<option value="${index}" ${index===rank?"selected":""}>${name}</option>`).join("");
+    const loadout=sideLoadout(side).map(id=>{
+      const restricted=cards[id]?.ranks && !cards[id].ranks.includes(rank);
+      return `<li${restricted?' class="rank-limited"':""}>${id?cards[id].name:"—"}${restricted?" · 위치 제한":""}</li>`;
+    }).join("");
+    return `<div class="formation-slot ${selected?"is-selected":""}">
+      <select data-formation-side="${side}" aria-label="${actor.name} 위치">${ranks}</select>
+      <button class="btn" type="button" data-action="prep-member" data-side="${side}" aria-current="${selected}">${actor.name}</button>
+      ${traitTags(actor)}
+      <ul class="formation-skills">${loadout}</ul></div>`;
+  }).join("");
+  return `<div class="formation" role="group" aria-label="대열">${slots}</div>`;
+}
+
+function skillReadout(skill,elapsed){
+  const remaining=Math.max(0,skill.readyAt-elapsed);
+  const blocked=skillBlocked(skill);
+  const waiting=!remaining && cards[skill.id].target==="heal" && !quickHealTarget();
+  return {blocked:Boolean(blocked),ready:!remaining && !blocked && !waiting,
+    value:blocked?0:skill.cooldown-remaining,label:blocked || (remaining?combatSeconds(remaining):waiting?"회복 대기":"준비 완료")};
+}
+
+const skillClassNames={common:"공용",nun:"수녀 전용",guard:"간수 전용",awakened:"개화 수감자 전용",archer:"감시탑 궁수 전용",shaman:"주술사 전용",bow:"활 전용"};
+const skillClassIcons={nun:"nunLantern",guard:"guardCrest",awakened:"brokenShackle",archer:"traitBow",shaman:"skill",bow:"traitBow"};
+const skillTermTips={
+  "가드":"해당 부위에 들어오는 다음 공격의 피해를 수치만큼 막아요.",
+  "부상":"부위 내구도가 1부터 최대치의 절반까지 남은 상태예요. 관련 기술이 약해질 수 있어요.",
+  "결손":"부위 내구도가 0인 상태예요. 그 부위의 기술을 쓸 수 없어요."
+};
+
+function skillTerm(term){
+  return `<strong class="skill-term" title="${skillTermTips[term]}">${term}</strong>`;
+}
+
+function skillEffectLines(id,actor=game.player){
+  const skill=cards[id];
+  const amount=power(skill,actor);
+  switch(skill.effect || id){
+    case "aim": return ["한 부위 피해 2",`${skillTerm("가드")} ${amount} 무시`];
+    case "break": return [`${skillTerm("가드")} ${amount} 제거`,"한 부위 피해 1"];
+    case "guard": return [`한 부위 ${skillTerm("가드")} +${amount}`];
+    case "split": return [`두 부위에 각각 ${skillTerm("가드")} +${amount}`];
+    case "aid": return [`한 부위 내구도 최대 ${amount} 회복`,
+      `대상의 배 ${skillTerm("부상")} 시 회복량 절반`,
+      `${skillTerm("결손")} 부위는 회복 불가`];
+    default: return [`한 부위 피해 ${amount}`];
+  }
+}
+
+function skillEffects(lines){
+  return `<span class="skill-effects">${lines.map(line=>`<span class="skill-effect">${line}</span>`).join("")}</span>`;
+}
+
+const revisedSkillArt=new Set(["snapShot","mending","unseal"]);
+
+function skillArtSrc(id){
+  return `art/skills/${id}${revisedSkillArt.has(id)?"-v5":""}.webp`;
+}
+
+function skillCardArt(id){
+  return `<img class="skill-card-art" src="${skillArtSrc(id)}" width="240" height="100" alt="" draggable="false">`;
+}
+
+function skillOwnerMark(skillClass){
+  const mark=skillClassIcons[skillClass];
+  return `<span class="skill-owner">${mark?icon(mark):""}${skillClassNames[skillClass]}</span>`;
+}
+
+function prepPanel(vitalsOpen=false){
+  const side=game.prepSide, actor=game[side], loadout=sideLoadout(side);
+  const equipped=loadout.filter(Boolean).length;
+  const ready=loadoutsReady();
+  const choices=availableSkills(side).map(id=>{
+    const skill=cards[id], selected=loadout.includes(id), level=skillLevel(id);
+    const skillClass=skill.character || skill.weapon || "common";
+    const type=skill.type==="skill"?"회복":categories[skill.type];
+    const other=!selected && equippedBy(id);
+    const blocked=skillBlocked({id,side});
+    const ranks=skill.ranks?.map(rank=>formationRanks[rank]).join("·");
+    return `<li><button class="btn prep-choice skill-class-card ${skill.type}" data-skill-class="${skillClass}" type="button" data-action="toggle-skill" data-value="${id}" aria-pressed="${selected}" ${other?`disabled title="${game[other].name} 장착"`:""}>
+      <span class="prep-choice-top"><span class="prep-choice-icon">${icon(skill.type)}</span><b class="prep-choice-time">${combatSeconds(skillCooldown(id))}</b></span>
+      ${skillCardArt(id)}
+      <span class="prep-choice-name"><strong>${skill.name}</strong><span class="prep-choice-state">${selected?"✓ 장착":other?"사용 중":"미장착"}</span></span>
+      <span class="prep-choice-meta">${skillOwnerMark(skillClass)} · ${type}${ranks?` · ${ranks}`:""}${level>1?` · Lv.${level}`:""}</span>
+      ${blocked?`<span class="skill-effects"><span class="skill-effect is-blocked">${blocked}</span></span>`:""}
+      ${skillEffects(skillEffectLines(id,actor))}
+    </button></li>`;
+  }).join("");
+  return `<section class="routes prep-panel"><div class="prep-heading"><div><h2>전투 준비</h2>
+    <p>${game.enemy.name} · 체력 ${game.enemy.hp}</p></div></div>
+    ${formationPanel()}
+    ${activeTraitChips()}
+    ${reservePanel()}
+    ${prepWoundPanel()}
+    <details class="prep-vitals" ${vitalsOpen?"open":""}><summary>수녀 부위별 내구도</summary>
+      <div class="body-grid body-readout">${bodyTiles("player",[],condition(game.player,"eyes"))}</div></details>
+    <div class="prep-picker"><div class="prep-picker-head"><h3>${actor.name} 기술</h3><b class="prep-count">장착 ${equipped}/${loadout.length}</b></div>
+    <ul class="prep-choices">${choices}</ul><p class="prep-hint" id="prep-skill-hint" role="status">${ready?"":"빈 기술 칸을 채워야 합니다."}</p></div>
+    <div class="prep-footer"><button class="btn primary" type="button" data-action="begin-combat" ${ready?"":"disabled"}>전투 시작</button></div></section>`;
 }
 
 function rewardPanel(){
   const options=game.rewards.map((id,index)=>{
-    const card=cards[id];
-    const note=card.part?`${parts[card.part]} 정상: ${card.text(card.power+card.bonus)} · 결손 시 사용 불가`:"수녀와 동료 모두 치료 가능";
-    const owned=game.deck.filter(held=>held===id).length;
-    return `<button type="button" class="card ${card.type}" data-action="reward" data-value="${id}"
-      style="--illustration:var(--art-${card.art || id})" aria-keyshortcuts="${index+1}" aria-label="${card.name} 덱에 추가 · ${card.cost} 스태미너 · ${cardRules(card)}">
-      <span class="card-head"><span><kbd class="card-key" aria-hidden="true">${index+1}</kbd>${categories[card.type]}</span><b class="cost">${card.cost}</b></span>
-      <span class="card-art" aria-hidden="true"></span><strong>${card.name}</strong><p>${card.text(card.power)}</p>
-      <p class="card-note">${note}${owned?` · 현재 ${owned}장 보유`:""}</p><span class="reward-pick">덱에 추가</span></button>`;
+    const skill=cards[id], level=game.skillLevels[id];
+    const skillClass=skill.character || skill.weapon || "common", currentTime=combatSeconds(skillCooldown(id));
+    const changes=level?[`레벨 ${level} → ${level+1}`,`쿨타임 ${currentTime} → ${combatSeconds(skillCooldown(id,level+1))}`]:[`쿨타임 ${currentTime}`];
+    return `<button class="btn skill-reward skill-class-card" type="button" data-action="reward" data-value="${id}" data-skill-class="${skillClass}" aria-keyshortcuts="${index+1}">
+      <span class="reward-top"><span class="reward-kind ${level?"upgrade":"learn"}">${icon(level?"upgradeSkill":"learnSkill")}${level?"강화":"새 기술"}</span><kbd>${index+1}</kbd></span>
+      ${skillCardArt(id)}<strong>${skill.name}</strong>${skillOwnerMark(skillClass)}
+      ${skillEffects([...changes,...skillEffectLines(id)])}</button>`;
   }).join("");
-  return `<section class="reward-panel" aria-labelledby="reward-title">
-    <div class="reward-heading"><div><p class="reward-kicker">${game.enemy.name} 격파 · 전투 보상</p>
-      <h2 id="reward-title">탈출에 쓸 카드 한 장을 고르세요</h2><p>추가한 카드는 다음 전투부터 덱에 섞여 나와요. 선택에는 도망 여유가 들지 않아요.</p></div></div>
-    ${partyNotice()}<div class="reward-grid">${options}</div>
-    <div class="reward-footer"><div><strong>현재 덱 ${game.deck.length}장</strong><p>필요한 카드가 없다면 덱을 작게 유지하세요.</p></div>
-      <button type="button" class="btn" data-action="skip-reward" aria-keyshortcuts="0">보상 건너뛰기 (0)</button></div></section>`;
+  return `<section class="routes" aria-label="기술 보상"><h2>기술 보상</h2><div class="skill-rewards">${options}</div>
+    <button class="btn" type="button" data-action="skip-reward" aria-keyshortcuts="0">건너뛰기 (0)</button></section>`;
 }
 
-function renderDeck(){
-  document.querySelector("#deck-summary").textContent=`이번 탈출의 덱 · ${game.deck.length}장 · 보상으로 추가 ${game.acquired.length}장`;
-  const counts=new Map();
-  for(const id of game.deck) counts.set(id,(counts.get(id)||0)+1);
-  document.querySelector("#deck-list").innerHTML=[...counts].map(([id,count])=>{
-    const card=cards[id];
-    return `<div class="deck-entry ${card.type} ${card.reward?"acquired":""}"><span class="deck-count">×${count}</span><strong>${card.name}</strong>
-      <small>${categories[card.type]} · ${card.cost} 스태미너${card.owner?` · ${cardOwnerName(card)} 전용`:card.reward?" · 전투 보상":""}</small><small>${cardRules(card)}</small></div>`;
+function skillPanel(){
+  const {skills,elapsed}=game.cooldownBattle;
+  const sides=partySides();
+  const slots=side=>skills.filter(skill=>skill.side===side).map(skill=>{
+    const card=cards[skill.id], state=skillReadout(skill,elapsed);
+    return `<li class="skill-slot ${card.type}" data-skill="${skill.id}" data-ready="${state.ready}" data-blocked="${state.blocked}">
+      <div class="skill-slot-name">${icon(card.type)}<strong>${card.name}</strong>${skillLevel(skill.id)>1?`<small>Lv.${skillLevel(skill.id)}</small>`:""}</div>
+      <progress class="skill-meter" aria-label="${card.name} 충전" value="${state.value}" max="${skill.cooldown}"></progress>
+      <small class="skill-timing"><span>${combatSeconds(skill.cooldown)} 충전</span><b class="skill-remaining">${state.label}</b></small>
+    </li>`;
   }).join("");
+  const content=sides.length===1?`<ul class="skill-slots">${slots(sides[0])}</ul>`:
+    `<div class="skill-groups" style="--party-size:${sides.length}">${sides.map(side=>`<div class="skill-group"><h3>${game[side].name}</h3><ul class="skill-slots">${slots(side)}</ul></div>`).join("")}</div>`;
+  return `<section class="skill-loadout" aria-label="자동 발동 기술"><h2>자동 기술</h2>${content}</section>`;
 }
 
-function handPanel(dealt){
-  const hand=game.hand.map((id,index)=>{
-    const card=cards[id], blocked=cardBlocked(id);
-    const actor=game[card.owner || "player"];
-    const note=blocked || (card.part?`${parts[card.part]} · ${condition(actor,card.part)==="healthy"?"보너스":"부상"}`:"");
-    const label=card.name+`${card.owner?` · ${actor.name}`:""} · ${card.cost} 스태미너 · ${note}`;
-    const description=id==="aid" && !livingCompanion()?`한 부위 회복 ${healValue(actor)}`:card.text(power(card,actor));
-    const fan=index-(game.hand.length-1)/2;
-    return `<button type="button" class="card ${card.type} ${card.owner?"companion-card":""} ${blocked?"unavailable":""}" data-card="${id}"
-      style="--tilt:${fan*4}deg;--arc:${Math.abs(fan)*3}px;--delay:${index*30}ms;--illustration:var(--art-${card.art || id})"
-      aria-label="${label}" disabled>
-      <span class="card-head"><span>${card.owner?actor.name:categories[card.type]}</span><b class="cost">${card.cost}</b></span>
-      <span class="card-art" aria-hidden="true"></span>
-      <strong>${card.name}</strong><p>${description}</p><p class="card-note">${note}</p></button>`;
-  }).join("");
-  const hint=autoPaused?'<p class="target-hint">Space 또는 ‘전투 계속’으로 다시 관전해요.</p>':"";
-  return `<section class="hand watch-only ${dealt?"dealt":""}"><div class="hand-head"><div><h2>자동 전투 손패</h2><small>덱 ${game.draw.length} · 버림 ${game.discard.length}</small></div>
-    <span class="auto-badge">${autoPaused?"일시정지":"자동 전투 진행 중"}</span></div>
-    <div class="hand-grid">${hand||"<p class='muted'>다음 행동을 준비해요.</p>"}</div>${hint}</section>`;
+function updateCooldownReadout(){
+  const stage=document.querySelector("#stage");
+  const panel=stage.querySelector(".skill-loadout");
+  if(!panel) return;
+  const {skills,elapsed,enemyReadyAt}=game.cooldownBattle;
+  for(const skill of skills){
+    const node=panel.querySelector(`[data-skill="${skill.id}"]`);
+    if(!node) continue;
+    const state=skillReadout(skill,elapsed);
+    node.dataset.ready=state.ready;
+    node.dataset.blocked=state.blocked;
+    node.querySelector("progress").value=state.value;
+    node.querySelector(".skill-remaining").textContent=state.label;
+  }
+  document.querySelector("#combat-elapsed").textContent=combatSeconds(elapsed);
+  document.querySelector("#pursuit-countdown").textContent=combatSeconds(pursuitCountdown());
+  const enemyCountdown=stage.querySelector("#enemy-cooldown");
+  if(enemyCountdown) enemyCountdown.textContent=combatSeconds(enemyReadyAt-elapsed);
 }
 
 function routeType(id){
@@ -1526,7 +1907,7 @@ function routeType(id){
 function mapPanel(){
   const next=areas[game.area].next;
   const gain=travelGain();
-  const types={battle:{icon:"routeBattle",label:"전투"},rest:{icon:"routeRest",label:"휴식·치료"},shop:{icon:"routeShop",label:"상점"},elite:{icon:"routeElite",label:"강적"},boss:{icon:"routeBoss",label:"보스"},exit:{icon:"routeExit",label:"출구"}};
+  const types={battle:{icon:"routeBattle",label:"전투"},rest:{icon:"routeRest",label:"휴식·치료"},shop:{icon:"routeShop",label:"상점"},mystery:{icon:"routeMystery",label:"사건"},elite:{icon:"routeElite",label:"강적"},boss:{icon:"routeBoss",label:"보스"},exit:{icon:"routeExit",label:"출구"}};
   const roomTypes=new Set(Object.keys(areas).map(routeType));
   const columns=Math.max(...Object.values(areas).map(area=>area.col));
   const traveled=new Set(game.trail.slice(1).map((id,i)=>`${game.trail[i]}-${id}`));
@@ -1535,12 +1916,12 @@ function mapPanel(){
     const visited=game.trail.includes(id);
     const reachable=next.includes(id);
     const kind=routeType(id), type=types[kind];
-    const state=current?"현재":visited?"완료":reachable?"이동 가능":"";
+    const state=current?"현재 위치":visited?"완료":reachable?"이동 가능":"";
     const tag=reachable?"button":"div";
     return `<${tag} class="map-node ${current?"current":visited?"visited":reachable?"next":""}" data-room="${id}" data-room-type="${kind}" aria-label="${area.name} · ${type.label}${state?` · ${state}`:""}" ${current?'aria-current="location"':""}
       ${reachable?`type="button" data-action="move" data-value="${id}"`:""}
       style="--col:${area.col};--row:${area.row}"><span class="room-icon">${icon(type.icon)}</span><b>${area.name}</b>
-      ${current || visited?`<span class="room-state">${state}</span>`:""}</${tag}>`;
+      ${state?`<span class="room-state">${state}</span>`:""}</${tag}>`;
   }).join("");
   const lines=Object.entries(areas).flatMap(([id,area])=>(area.next||[]).map(dest=>{
     const edge=`${id}-${dest}`;
@@ -1602,22 +1983,46 @@ function shopPanel(){
 }
 
 function partyNotice(){
-  const actor=livingCompanion();
-  if(actor && game.phase==="route") return `<p class="party-notice">동행 · ${actor.name} · ${companionTypes[actor.kind].role}</p>`;
-  return game.companion && !actor?`<p class="party-notice">${game.companion.name} 사망 · 전용 카드 이탈</p>`:"";
+  const companions=partySides().filter(side=>side!=="player").map(side=>game[side].name);
+  const reserves=reserveSides().map(side=>game[side].name);
+  const fallen=game.deadCompanions.map(kind=>companionTypes[kind].name);
+  return [game.phase==="route" && companions.length?`동행 · ${companions.join(" · ")}`:"",
+    game.phase==="route" && reserves.length?`대기 · ${reserves.join(" · ")}`:"",
+    fallen.length?`사망 · ${fallen.join(" · ")}`:""].filter(Boolean).map(label=>`<p class="party-notice">${label}</p>`).join("");
+}
+
+function recruitmentTraitPreview(candidate){
+  const sides=partySides();
+  const before=countTraits(sides.map(side=>game[side]));
+  const full=sides.length===formationRanks.length;
+  const swaps=full?sides.filter(side=>side!=="player"):[null];
+  return swaps.map(outgoing=>{
+    const actors=sides.filter(side=>side!==outgoing).map(side=>game[side]);
+    const after=countTraits([...actors,candidate]);
+    const gains=[...after].filter(([id,count])=>traits[id].effect && count>=traitThreshold && (before.get(id) || 0)<traitThreshold);
+    if(!gains.length) return "";
+    const label=outgoing?`${game[outgoing].name} 교대`:"시너지";
+    return `<div class="trait-preview"><span>${label}</span>${gains.map(([id,count])=>traitChip(id,`${before.get(id) || 0}→${count}`)).join("")}</div>`;
+  }).join("");
 }
 
 function companionEncounterPanel(){
   const kind=game.pendingCompanion, type=companionTypes[kind];
-  if(!type || game.deadCompanions.includes(kind)) return "";
-  const current=livingCompanion();
-  const options=Object.values(cards).filter(card=>card.companion===kind).map(card=>card.name).join(" · ");
-  return `<section class="treatment companion-encounter" aria-label="동료와의 만남"><img class="encounter-portrait" src="${partyArt[kind].src}" width="1024" height="1536" alt="${type.name}"><div><h3>길에서 만난 ${type.name}</h3>
-    <p>${type.introduction}</p><p>${type.role} 전용 카드: ${options}.</p>
-    <p>${current?`함께 가면 ${current.name}와(과) 헤어지고 전용 카드 두 장을 교체해요.`:"함께 가면 전용 카드 두 장이 덱에 추가돼요."} 동행을 고르는 데 도망 여유는 들지 않아요.</p>
-    <div class="treatment-options"><button type="button" class="btn primary" data-action="recruit" data-value="${kind}">${current?"동료 교체":"함께 가기"}</button>
-      <button type="button" class="btn" data-action="decline-companion">${current?"지금 동료와 계속 가기":"혼자 가기"}</button></div>
-    <p>다음 방으로 이동하면 이 만남을 지나쳐요.</p></div></section>`;
+  if(!canRecruit(kind)) return "";
+  const options=companionStarterSkills(kind).map(id=>cards[id].name).join(" · ");
+  return `<section class="treatment companion-encounter" aria-label="동료와의 만남"><img class="encounter-portrait" src="${partyArt[kind].src}" width="1024" height="1536" alt="${type.name}"><div><h3>${type.name}</h3>
+    ${traitTags(type)}<p>${type.introduction}</p><p>${options}</p>
+    ${recruitmentTraitPreview(type)}
+    <div class="treatment-options"><button type="button" class="btn primary" data-action="recruit" data-value="${kind}">${partySides().length===formationRanks.length?"영입 · 대기":"함께 가기"}</button>
+      <button type="button" class="btn" data-action="decline-companion">지나가기</button></div></div></section>`;
+}
+
+function mysteryPanel(){
+  const event=mysteryEvents[game.pendingMystery];
+  if(!event) return "";
+  return `<section class="routes mystery-room" aria-label="사건"><div class="mystery-heading"><h2>${event.name}</h2><small>동전 ${game.coins}</small></div><p>${event.description}</p>
+    <div class="treatment-options mystery-options"><button type="button" class="btn primary" data-action="mystery" data-value="take" ${canTakeMystery(event)?"":"disabled"}>${event.action} · ${event.effect}</button>
+      <button type="button" class="btn" data-action="mystery" data-value="skip">지나치기</button></div></section>`;
 }
 
 function routePanel(){
@@ -1625,17 +2030,22 @@ function routePanel(){
   const gain=travelGain();
   const heading=next.length>1?"갈림길에서 방향을 고르세요":"다음 칸으로 이동하세요";
   return `<section class="routes"><h2>${heading}</h2>${game.distance+gain<=0?'<p class="danger">이동해도 도망 여유가 0이라 따라잡혀요.</p>':""}
-    ${partyNotice()}${companionEncounterPanel()}${treatmentPanel()}${shopPanel()}${mapPanel()}</section>`;
+    ${partyNotice()}${treatmentPanel()}${shopPanel()}${mapPanel()}</section>`;
 }
 
 
 function render(){
-  document.querySelector("#location").textContent=areas[game.area].name+(game.mapConfig?` · ${game.mapConfig.seed}`:"");
+  const area=areas[game.area];
+  document.querySelector("#location").textContent=(area.type==="mystery"?"? 방":area.name)+(game.mapConfig?` · ${game.mapConfig.seed}`:"");
   document.querySelector("#status").innerHTML=gauges();
   renderQaTools();
   renderAutoControls();
-  renderDeck();
-  if(lastPursuit?.player===game.player && lastPursuit.distance!==game.distance && !matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const inCombat=game.phase==="combat";
+  const pursuitWarning=inCombat && game.distance<=pursuitWarningDistance;
+  const sameRun=lastPursuit?.player===game.player;
+  const pursuitEntering=pursuitWarning && (!sameRun || !lastPursuit.warning);
+  const pursuitAdvancing=inCombat && sameRun && game.distance<lastPursuit.distance;
+  if(sameRun && lastPursuit.distance!==game.distance && !matchMedia("(prefers-reduced-motion: reduce)").matches){
     const pursuer=document.querySelector(".pursuit-track .pursuer");
     const old=pursuerPosition(lastPursuit.distance);
     const end=pursuerPosition(game.distance);
@@ -1645,35 +2055,46 @@ function render(){
       {left:`${end}%`,translate:"0 0"}
     ],{duration:410,easing:"ease-out"});
   }
-  lastPursuit={player:game.player,distance:game.distance};
+  lastPursuit={player:game.player,distance:game.distance,warning:pursuitWarning};
+  const announcement=document.querySelector("#pursuit-announcement");
+  const pursuitMessage=pursuitWarning?`사형수 접근 · 도망 여유 ${game.distance}`:"";
+  if(announcement.textContent!==pursuitMessage) announcement.textContent=pursuitMessage;
   const stage=document.querySelector("#stage");
   const expandedBodies=new Set(Array.from(stage.querySelectorAll(".actor-body-status[open]"),node=>node.dataset.side));
   combatHudResize.disconnect();
   mapResize.disconnect();
-  if(game.phase==="combat"){
-    warmCombatPoses();
+  if(inCombat){
+    warmCombatArt();
     const eyes=condition(game.player,"eyes"), intents=battleIntent();
-    const sameBattle=lastRender?.enemy===game.enemy;
-    const dealt=!sameBattle || lastRender.round!==game.round;
-    stage.innerHTML=`<div class="stage-combat"><div class="combat-field">${intentPanel(intents,eyes)}<div class="combat ${livingCompanion()?"party-combat":""}">${bodyPanel("player",intents,eyes)}${companionPanel(intents,eyes)}${bodyPanel("enemy",intents,eyes)}</div></div>
-      <div class="combat-action" aria-hidden="true"></div></div>${handPanel(dealt)}${partyNotice()}${cardPreview()}`;
+    const sides=[...partySides().reverse(),"enemy"];
+    const warning=pursuitWarning?`<div class="pursuit-warning">${icon("pursuer")}<b>사형수가 가까워졌어요</b><span>도망 여유 ${game.distance}</span></div>`:"";
+    const depth={1:"imminent",2:"close",3:"approaching",4:"distant"}[game.distance];
+    const shadow=depth?`<span class="pursuit-shadow" data-depth="${depth}" aria-hidden="true"><img src="art/arena/prison-pursuer.webp" alt="" width="480" height="720"></span>`:"";
+    stage.innerHTML=`<div class="stage-combat${pursuitWarning?" is-pursued":""}${pursuitEntering?" pursuit-entering":""}${pursuitAdvancing?" pursuit-advancing":""}">${warning}
+      <div class="combat-field" style="--combat-columns:${sides.length}">${shadow}${intentPanel(intents,eyes)}<div class="combat ${sides.length>2?"party-combat":""}">${sides.map(side=>bodyPanel(side,intents,eyes)).join("")}</div>${combatWoundPanel(sides)}</div>
+      <div class="combat-action" aria-hidden="true"></div></div>${skillPanel()}${partyNotice()}`;
+    if(pursuitEntering) playPursuitSound();
     for(const detail of stage.querySelectorAll(".actor-body-status")) detail.open=expandedBodies.has(detail.dataset.side);
     const scene=stage.querySelector(".stage-combat");
     layoutCombatHud(scene);
     combatHudResize.observe(scene);
-    lastRender={enemy:game.enemy,round:game.round};
+  }else if(game.phase==="prep"){
+    stage.innerHTML=prepPanel(Boolean(stage.querySelector(".prep-vitals[open]")));
   }else if(game.phase==="reward"){
     stage.innerHTML=rewardPanel();
   }else if(game.phase==="route"){
-    stage.innerHTML=routePanel();
-    const layout=stage.querySelector(".map-layout");
-    layoutMapLinks(layout);
-    mapResize.observe(layout);
+    const choice=companionEncounterPanel() || mysteryPanel();
+    stage.innerHTML=choice || routePanel();
+    if(!choice){
+      const layout=stage.querySelector(".map-layout");
+      layoutMapLinks(layout);
+      mapResize.observe(layout);
+    }
   }else{
     const won=game.phase==="won";
     stage.innerHTML=`<section class="routes"><div class="trail">${game.trail.map(id=>areas[id].name).join(" → ")}</div>
-      <h2>${won?"지상으로 탈출했어요":"탈출 실패"}</h2><p class="muted">${won?`${game.steps}칸을 이동했고 전투에 ${game.turns}턴을 썼어요.`:game.reason}</p>
-      <p class="muted">이번 탈출의 덱 ${game.deck.length}장 · 보상으로 추가한 카드 ${game.acquired.length}장</p>
+      <h2>${won?"지상으로 탈출했어요":"탈출 실패"}</h2><p class="muted">${won?`${game.steps}칸 이동 · 전투 소모 ${combatReport()}`:game.reason}</p>
+      <p class="muted">습득한 기술 ${Object.keys(game.skillLevels).length}개</p>
       ${game.qaUses?`<p class="qa-summary">QA ${won?"클리어":"테스트"} · 치트 ${game.qaUses}회 사용</p>`:""}
       <p><button type="button" class="btn primary" data-action="restart">한 판 더</button></p></section>`;
   }
@@ -1682,7 +2103,8 @@ function render(){
 }
 
 function qaAvailable(action){
-  return action==="win"?game.phase==="combat":["combat","reward","route"].includes(game.phase);
+  return action==="win"?game.phase==="combat" || (game.phase==="prep" && loadoutsReady()):
+    ["prep","combat","reward","route"].includes(game.phase);
 }
 
 function renderQaTools(){
@@ -1692,15 +2114,13 @@ function renderQaTools(){
 }
 
 function runQaAction(action){
-  if(!qaOpen || combatPresentation || routeTravel || drag || !qaAvailable(action)) return;
+  if(!qaOpen || combatPresentation || routeTravel || !qaAvailable(action)) return;
   switch(action){
     case "win":
+      if(game.phase==="prep") beginCombat();
       game.enemy.hp=0;
-      game.selected=null;
-      game.targets=[];
-      game.pairSide=null;
       record("QA · 전투 즉시 승리");
-      settleTurn();
+      finishCombat();
       break;
     case "heal":
       for(const side of partySides()){
@@ -1717,7 +2137,7 @@ function runQaAction(action){
     default: return;
   }
   game.qaUses++;
-  finishBoardAction("qa",action);
+  finishBoardAction();
 }
 
 function unlockCombatAudio(){
@@ -1790,6 +2210,10 @@ function synthesizeImpact(ctx,output,event){
     tone(ctx,output,thudAt,.16,.42,130,51,"sine");
     collisionNoise(ctx,output,thudAt,.1,.39,"lowpass",580);
   }
+  if(event.defeated || event.critical){
+    const [startPitch,endPitch]=event.defeated?[82,36]:[290,162];
+    tone(ctx,output,at,.25,.28,startPitch,endPitch,"triangle");
+  }
 }
 
 function playHealingSound(){
@@ -1799,14 +2223,23 @@ function playHealingSound(){
   tone(audioContext,audioOutput,at+.08,.23,.105,659,784,"sine");
 }
 
+function playPursuitSound(){
+  if(!soundEnabled || audioContext?.state!=="running") return;
+  const at=audioContext.currentTime+.01;
+  collisionNoise(audioContext,audioOutput,at,.22,.17,"bandpass",850);
+  collisionNoise(audioContext,audioOutput,at+.16,.17,.13,"bandpass",1180);
+  tone(audioContext,audioOutput,at+.035,.24,.1,760,680,"triangle");
+  tone(audioContext,audioOutput,at+.17,.18,.08,1220,1120,"sine");
+}
+
 function eventIllustration(card,kind,title,detail){
   return `<div class="event-illustration ${kind}" style="--event-art:var(--art-${cards[card].art || card})"><strong>${title}</strong><small>${detail}</small></div>`;
 }
 
 function showCombatAction(scene,event){
   const card=cards[event.card];
-  const recipient={player:"수녀",companion:"동료",enemy:"적"}[event.side];
-  const targets=event.targets.map(id=>parts[id]).join("·") || "손패";
+  const recipient=event.side==="enemy"?"적":game[event.side]?.name || "동료";
+  const targets=event.targets.map(id=>parts[id]).join("·");
   let result;
   switch(event.type){
     case "hit":{
@@ -1815,7 +2248,6 @@ function showCombatAction(scene,event){
       if(event.blocked) outcomes.push(`${event.blocked} 막음`);
       if(event.removed) outcomes.push(`가드 −${event.removed}`);
       if(event.injury) outcomes.push(labels[event.injury]);
-      if(event.defeated) outcomes.push("쓰러짐");
       result=outcomes.join(" · ");
       break;
     }
@@ -1825,24 +2257,27 @@ function showCombatAction(scene,event){
     case "heal":
       result=`내구도 +${event.recovered}${event.restored?" · 정상 회복":""}`;
       break;
-    case "rethink":
-      result=event.discarded?`${cards[event.discarded].name} 버림 · ${event.drawn}장 뽑음`:`다음 턴 카드 ${event.drawn}장 확보`;
-      break;
   }
-  const badge=card.reward?'<span class="combat-action-reward">보상 카드</span>':"";
+  const badge=card.reward?'<span class="combat-action-reward">보상 기술</span>':"";
+  const synergies=event.synergies || [];
+  const buffs=synergies.map(id=>`<span class="combat-action-trait">${icon(traits[id].icon)}${traits[id].name} +${traits[id].bonus}</span>`).join("");
+  const emphasis=[event.critical?`치명타 +${event.critical}`:"",event.defeated?(event.side==="enemy"?"격파":"쓰러짐"):""].filter(Boolean).join(" · ");
+  const mark=emphasis?`<strong class="combat-action-mark">${emphasis}</strong>`:"";
   const action=scene.querySelector(".combat-action");
-  action.className=`combat-action${card.reward?" is-reward":""}`;
+  action.className=`combat-action${card.reward?" is-reward":""}${event.defeated?" is-finisher":event.critical?" is-critical":""}`;
   action.innerHTML=`<div class="combat-action-content"><span class="combat-action-art" style="--action-art:var(--art-${card.art || event.card})"></span>
-    <div><div class="combat-action-title"><strong>${card.name}</strong>${badge}</div>
-    <div class="combat-action-result"><span>${recipient} ${targets}</span><b>→ ${result}</b></div></div></div>`;
-  document.querySelector("#combat-announcement").textContent=`${card.reward?"보상 카드 · ":""}${card.name} · ${recipient} ${targets} · ${result}`;
+    <div><div class="combat-action-title"><strong>${card.name}</strong>${badge}${buffs}</div>
+    <div class="combat-action-result"><span>${recipient} ${targets}</span><b>→ ${result}</b>${mark}</div></div></div>`;
+  document.querySelector("#combat-announcement").textContent=
+    [card.reward?"보상 기술":"",card.name,`${recipient} ${targets}`,result,emphasis,...synergies.map(id=>`${traits[id].name} +${traits[id].bonus}`)].filter(Boolean).join(" · ");
 }
 
 function cancelCombatPresentation(){
   if(!combatPresentation) return;
   for(const timer of combatPresentation.timers) clearTimeout(timer);
   restoreActorPoses(combatPresentation.scene);
-  combatPresentation.scene.querySelectorAll(".impact").forEach(el=>el.remove());
+  delete combatPresentation.scene.dataset.impact;
+  combatPresentation.scene.querySelectorAll(".impact, .combat-skill-emote").forEach(el=>el.remove());
   const action=combatPresentation.scene.querySelector(".combat-action");
   action.className="combat-action";
   action.innerHTML="";
@@ -1855,7 +2290,7 @@ function setActorPose(scene,side,pose){
   const panel=scene.querySelector(`.actor-${side}`);
   const sprite=panel?.querySelector(".actor-sprite");
   const src=motionArt[panel?.dataset.portrait]?.[pose];
-  const cached=poseCache.get(src);
+  const cached=combatArtCache.get(src);
   if(!sprite || !src || (cached && (!cached.complete || !cached.naturalWidth))) return;
   if(!sprite.dataset.pose){
     if(sprite.tagName==="IMG") sprite.dataset.idleSrc=sprite.getAttribute("src");
@@ -1866,8 +2301,11 @@ function setActorPose(scene,side,pose){
   else sprite.style.backgroundImage=`url("${src}")`;
 }
 
-function restoreActorPoses(scene){
+function restoreActorPoses(scene,keepDefeated=false){
+  scene?.querySelectorAll(".panel[data-lunge]").forEach(panel=>delete panel.dataset.lunge);
+  if(!keepDefeated) scene?.querySelectorAll(".actor-sprite[data-defeated]").forEach(sprite=>delete sprite.dataset.defeated);
   scene?.querySelectorAll(".actor-sprite[data-pose]").forEach(sprite=>{
+    if(keepDefeated && sprite.dataset.pose==="defeat") return;
     if(sprite.tagName==="IMG") sprite.setAttribute("src",sprite.dataset.idleSrc);
     else sprite.style.backgroundImage=sprite.dataset.idleBackground;
     delete sprite.dataset.pose;
@@ -1883,7 +2321,7 @@ function showImpact(scene,event){
     const figure=tile.closest(".actor-figure, .companion-parts");
     const {x,y}=centerInFrame(tile,figure.getBoundingClientRect());
     const impact=document.createElement("span");
-    impact.className=`impact${event.type==="heal"?" is-heal":event.dealt?"":" is-guard"}`;
+    impact.className=`impact${event.type==="heal"?" is-heal":event.defeated?" is-finisher":event.critical?" is-critical":event.dealt?"":" is-guard"}`;
     impact.dataset.part=target;
     impact.setAttribute("aria-hidden","true");
     impact.style.setProperty("--x",`${x}px`);
@@ -1905,6 +2343,36 @@ function showActorHealth(panel,event){
   panel.querySelector(".foe-health").innerHTML=actorHealth({hp:event.hp,maxHp},defeated);
 }
 
+function showWoundOutcome(scene,panel,event){
+  if(!event.wounds) return;
+  if(event.bodyStatus) panel.querySelector(".actor-body-status summary").textContent=`부위 상태 · ${event.bodyStatus}`;
+  const band=scene.querySelector(".combat-wounds");
+  band.querySelector(`[data-wounds-side="${event.side}"]`).innerHTML=woundChips(event.wounds);
+  band.hidden=!band.querySelector(".wound-chip");
+}
+
+function showHitOutcome(scene,event){
+  const panel=scene.querySelector(`.actor-${event.side}`);
+  showActorHealth(panel,event);
+  showWoundOutcome(scene,panel,event);
+  if(event.legChange){
+    const {before,after}=event.legChange;
+    const notice=panel.querySelector(".leg-status");
+    notice.className=`leg-status ${after} just-injured`;
+    notice.innerHTML=legStatusLabel(after,before);
+    notice.hidden=false;
+  }
+  if(event.defeated){
+    setActorPose(scene,event.side,"defeat");
+    panel.querySelector(".actor-sprite").dataset.defeated="";
+  }else if(event.dealt) setActorPose(scene,event.side,"hit");
+}
+
+function showSkillEmote(scene,event){
+  const caster=scene.querySelector(`.actor-${event.from} .actor-figure`);
+  caster?.insertAdjacentHTML("beforeend",`<span class="combat-skill-emote" aria-hidden="true">${skillCardArt(event.card)}</span>`);
+}
+
 function playCombatFeedback(after, endOfTurn=false){
   cancelAutoBattleTimer();
   const pending=game.feedback.splice(0);
@@ -1916,7 +2384,7 @@ function playCombatFeedback(after, endOfTurn=false){
     return;
   }
   // Keep the current intent visible during its animation and the battle visible through a final hit.
-  const deferRender=endOfTurn || game.phase!=="combat" || pending.some(event=>event.fallen);
+  const deferRender=endOfTurn || game.phase!=="combat" || pending.some(event=>event.defeated || event.legChange);
   if(!deferRender) render();
   const scene=stage.querySelector(".stage-combat");
   const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1924,6 +2392,8 @@ function playCombatFeedback(after, endOfTurn=false){
   combatPresentation=playback;
   stage.inert=true;
   const speed=autoSpeed;
+  scene.style.setProperty("--lunge-in",`${105/speed}ms`);
+  scene.style.setProperty("--lunge-out",`${150/speed}ms`);
   const schedule=(fn,delay)=>playback.timers.push(setTimeout(fn,delay/speed));
   let elapsed=0;
 
@@ -1931,37 +2401,47 @@ function playCombatFeedback(after, endOfTurn=false){
     const starts=elapsed;
     let resultAt=starts;
     let poseEnds=starts+400;
+    if(event.from!=="enemy" && skillCharge[event.card]){
+      schedule(()=>showSkillEmote(scene,event),starts);
+      schedule(()=>scene.querySelector(".combat-skill-emote")?.remove(),starts+400*speed);
+    }
     if(event.intent!==null) schedule(()=>{
       scene.querySelector(".intent-chip.executing")?.classList.remove("executing");
       scene.querySelector(`[data-intent="${event.intent}"]`)?.classList.add("executing");
     },starts);
     if(event.type==="hit"){
       const from=event.from;
-      schedule(()=>setActorPose(scene,from,"attack"),starts);
+      schedule(()=>{
+        setActorPose(scene,from,"attack");
+        if(!reduced) scene.querySelector(`.actor-${from}`).dataset.lunge=event.critical || event.defeated?"strong":"normal";
+      },starts);
       resultAt=starts+(reduced?0:105);
       poseEnds=resultAt+470;
       schedule(()=>{
         showImpact(scene,event);
+        if(event.defeated || event.critical) scene.dataset.impact=event.defeated?"finisher":"critical";
+        showHitOutcome(scene,event);
         if(soundEnabled && audioContext?.state==="running") synthesizeImpact(audioContext,audioOutput,event);
-        showActorHealth(scene.querySelector(`.actor-${event.side}`),event);
-        if(event.dealt) setActorPose(scene,event.side,"hit");
       },resultAt);
     }else if(event.type==="guard" || event.recovered){
       schedule(()=>{
         showImpact(scene,event);
         if(event.type==="heal"){
-          showActorHealth(scene.querySelector(`.actor-${event.side}`),event);
+            const panel=scene.querySelector(`.actor-${event.side}`);
+            showActorHealth(panel,event);
+            showWoundOutcome(scene,panel,event);
           playHealingSound();
         }
       },starts);
     }
     schedule(()=>showCombatAction(scene,event),resultAt);
     schedule(()=>{
-      restoreActorPoses(scene);
+      restoreActorPoses(scene,true);
+      delete scene.dataset.impact;
       scene.querySelectorAll(".impact").forEach(el=>el.remove());
     },poseEnds);
-    // Speed scales the poses. Keep the result visible long enough to read it.
-    const readTime=cards[event.card].reward?650:420;
+    // The defeat frame holds for a real second at every battle speed.
+    const readTime=event.defeated?1000:cards[event.card].reward?650:420;
     elapsed=Math.max(poseEnds,resultAt+readTime*speed);
   }
   schedule(()=>{
@@ -1973,99 +2453,18 @@ function playCombatFeedback(after, endOfTurn=false){
   },elapsed);
 }
 
-document.querySelector("#reference").innerHTML=Object.values(cards).map(card=>{
-  const normal=card.part?` · 정상 시 ${card.text(card.power+card.bonus)}`:"";
-  return `<div><b>${card.name}</b>${card.owner?` · ${cardOwnerName(card)} 전용`:card.reward?" · 전투 보상":""} · ${card.cost} 스태미너 · ${parts[card.part]||"자유"}<br><small>${card.text(card.power)}${normal}</small></div>`;
-}).join("");
-
 const board=document.querySelector("main");
-let drag=null;
-let suppressDragClick=false;
-
-board.addEventListener("pointerdown",event=>{
-  unlockCombatAudio();
-  if(!event.isPrimary || event.button!==0 || drag) return;
-  suppressDragClick=false;
-  const source=event.target.closest(".hand .card[data-action=card]");
-  if(!source || source.disabled || game.phase!=="combat") return;
-  const index=Number(source.dataset.value);
-  if(cardBlocked(game.hand[index])) return;
-  drag={pointer:event.pointerId,index,x:event.clientX,y:event.clientY,previous:game.selected,targets:[...game.targets],pairSide:game.pairSide,ghost:null,over:null};
-});
-
-function dropTarget(x,y){
-  const button=document.elementFromPoint(x,y)?.closest("button");
-  if(!button || button.disabled) return null;
-  if(cards[game.hand[drag.index]].target==="discard"){
-    return button.dataset.action==="card" && Number(button.dataset.value)!==drag.index ? button : null;
-  }
-  return button.dataset.action==="target" && validTarget(button.dataset.side,button.dataset.value) ? button : null;
-}
-
-document.addEventListener("pointermove",event=>{
-  if(event.pointerId!==drag?.pointer) return;
-  if(!drag.ghost){
-    if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<8) return;
-    if(game.phase!=="combat" || !game.hand[drag.index]) { drag=null; return; }
-    board.setPointerCapture(event.pointerId);
-    game.selected=drag.index;
-    if(drag.previous!==drag.index){
-      game.targets=[];
-      game.pairSide=null;
-    }
-    render();
-    const source=board.querySelector(`.hand .card[data-value="${drag.index}"]`);
-    const ghost=source.cloneNode(true);
-    ghost.classList.add("drag-card");
-    ghost.setAttribute("aria-hidden","true");
-    ghost.tabIndex=-1;
-    source.classList.add("drag-source");
-    document.body.append(ghost);
-    drag.ghost=ghost;
-  }
-  drag.ghost.style.left=event.clientX+"px";
-  drag.ghost.style.top=event.clientY+"px";
-  const over=dropTarget(event.clientX,event.clientY);
-  if(over!==drag.over){
-    drag.over?.classList.remove("drop-over");
-    over?.classList.add("drop-over");
-    drag.over=over;
-  }
-});
-
-function finishDrag(event){
-  if(event.pointerId!==drag?.pointer) return;
-  if(!drag.ghost){ drag=null; return; }
-  const target=event.type==="pointerup"?dropTarget(event.clientX,event.clientY):null;
-  drag.ghost.remove();
-  suppressDragClick=event.type==="pointerup";
-  if(target?.dataset.action==="target") chooseTarget(target.dataset.side,target.dataset.value);
-  else if(target?.dataset.action==="card") chooseCard(Number(target.dataset.value));
-  else {
-    game.selected=drag.previous;
-    game.targets=drag.targets;
-    game.pairSide=drag.pairSide;
-  }
-  drag=null;
-  playCombatFeedback();
-}
-document.addEventListener("pointerup",finishDrag);
-document.addEventListener("pointercancel",finishDrag);
-
-function finishBoardAction(action,value){
+function finishBoardAction(){
   playCombatFeedback(()=>{
-    const replacement=game.phase==="combat" && game.selected!==null
-      ? document.querySelector(".part.available") || document.querySelector(".card:not(.selected):not(:disabled)")
-      : action==="end" || action==="move" || game.phase!=="combat"
-        ? document.querySelector("#stage button:not(:disabled)")
-        : document.querySelector(`[data-action="${action}"][data-value="${value}"]:not(:disabled)`) || document.querySelector(".card:not(:disabled), [data-action='end']");
+    const replacement=game.phase==="prep"?document.querySelector('[data-action="begin-combat"]'):
+      document.querySelector("#stage button:not(:disabled)");
     replacement?.focus({preventScroll:true});
-  },action==="end");
+  });
 }
 
 async function travelAlongMap(button){
   const id=button.dataset.value;
-  if(routeTravel || game.phase!=="route" || !areas[game.area].next.includes(id)) return;
+  if(routeTravel || !canMoveTo(id)) return;
   if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
     const stage=document.querySelector("#stage");
     const layout=button.closest(".map-layout");
@@ -2099,41 +2498,47 @@ async function travelAlongMap(button){
     }
   }
   moveTo(id);
-  finishBoardAction("move",id);
+  finishBoardAction();
 }
 
 document.querySelector("#map-form").addEventListener("submit",event=>{
   event.preventDefault();
   const fields=event.currentTarget.elements;
   const widths=fields.widths.value.split(",").map(value=>Number(value.trim()));
-  const shops=fields.shops.valueAsNumber,rests=fields.rests.valueAsNumber,elites=fields.elites.valueAsNumber;
+  const shops=fields.shops.valueAsNumber,rests=fields.rests.valueAsNumber,elites=fields.elites.valueAsNumber,mysteries=fields.mysteries.valueAsNumber;
   const message=document.querySelector("#map-error");
   if(widths.length>4 || widths.some(width=>!Number.isInteger(width) || width<1 || width>3)){
     message.textContent="구간 1~4개, 방 1~3개씩 입력하세요. 예: 3,2,3";
     return;
   }
-  if([shops,rests,elites].some(count=>!Number.isInteger(count) || count<0) || shops+rests+elites>widths.reduce((a,b)=>a+b,0)){
-    message.textContent="상점·휴게소·엘리트 합계가 전체 방 수를 넘습니다.";
+  const counts=[shops,rests,elites,mysteries];
+  if(counts.some(count=>!Number.isInteger(count) || count<0) || counts.reduce((a,b)=>a+b,0)>widths.reduce((a,b)=>a+b,0)){
+    message.textContent="특수 방 합계가 전체 방 수를 넘습니다.";
     return;
   }
   const seed=fields.seed.value.trim() || Math.floor(Math.random()*4294967296).toString(36).toUpperCase();
   fields.seed.value=seed;
   message.textContent="";
   document.querySelector("#map-settings").open=false;
-  start({seed,widths,shops,rests,elites});
+  start({seed,widths,shops,rests,elites,mysteries});
+});
+
+board.addEventListener("change",event=>{
+  const side=event.target.dataset.formationSide;
+  if(side && event.target.value!=="" && placePartyMember(side,Number(event.target.value))){
+    game.prepSide=side;
+    render();
+    document.querySelector(`[data-formation-side="${side}"]`)?.focus({preventScroll:true});
+  }
 });
 
 board.addEventListener("click",event=>{
-  if(drag?.ghost || (suppressDragClick && event.detail>0)){
-    suppressDragClick=false;
-    return;
-  }
   const button=event.target.closest("button[data-action]");
   if(!button || button.disabled) return;
   const {action,side,value}=button.dataset;
   if(action==="sound"){toggleCombatAudio();return;}
   if(action==="auto-pause"){unlockCombatAudio();toggleAutoPause();return;}
-  if(action==="auto-speed"){cycleAutoSpeed();return;}
+  if(action==="auto-speed"){unlockCombatAudio();cycleAutoSpeed();return;}
   if(action==="qa"){runQaAction(value);return;}
   unlockCombatAudio();
   if(action==="restart"){start();return;}
@@ -2144,14 +2549,33 @@ board.addEventListener("click",event=>{
     return;
   }
   if(action==="move"){travelAlongMap(button);return;}
+  if(action==="prep-member" && game.phase==="prep"){
+    game.prepSide=side;
+    render();
+    document.querySelector(`[data-action="prep-member"][data-side="${side}"]`)?.focus({preventScroll:true});
+    return;
+  }
+  if(action==="toggle-skill"){
+    if(toggleEquippedSkill(value,game.prepSide)){
+      render();
+      document.querySelector(`[data-action="toggle-skill"][data-value="${value}"]`)?.focus({preventScroll:true});
+    }else if(game.phase==="prep" && availableSkills(game.prepSide).includes(value)){
+      document.querySelector("#prep-skill-hint").textContent="장착한 기술을 먼저 빼세요.";
+    }
+    return;
+  }
+  if(action==="begin-combat"){
+    if(beginCombat()) render();
+    return;
+  }
   if(action==="reward") chooseReward(value);
   if(action==="skip-reward") chooseReward(null);
   if(action==="recruit") recruitCompanion(value);
   if(action==="decline-companion") declineCompanion();
+  if(action==="mystery") resolveMystery(value);
   if(action==="buy-shortcut") buyShortcut();
-  if(["target","card","end"].includes(action)) return;
   if(action==="treat" && treatAtStairs(value,side)) playHealingSound();
-  finishBoardAction(action,value);
+  finishBoardAction();
 });
 
 document.addEventListener("keydown",event=>{
@@ -2160,10 +2584,11 @@ document.addEventListener("keydown",event=>{
      event.target.closest?.("input,textarea,select,[contenteditable]")) return;
   if(game.phase==="combat" && event.code==="Space"){
     event.preventDefault();
+    unlockCombatAudio();
     toggleAutoPause();
     return;
   }
-  if(combatPresentation || routeTravel || drag) return;
+  if(combatPresentation || routeTravel) return;
   if(event.key==="F8"){
     event.preventDefault();
     qaOpen=!qaOpen;

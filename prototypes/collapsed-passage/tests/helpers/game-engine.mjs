@@ -5,7 +5,7 @@ const html=readFileSync(new URL("../../index.html",import.meta.url),"utf8");
 const source=html.match(/<script>([\s\S]*?)<\/script>/)[1].replace(/\nstart\(\);\s*$/, "");
 const compiled=new vm.Script(source);
 
-export function engine(seed=12345){
+export function engine(seed=12345,{prep=false}={}){
   const elements=new Map(), timers=new Map();
   let timerId=0, randomSeed=seed;
   const math=Object.create(Math);
@@ -28,6 +28,7 @@ export function engine(seed=12345){
   });
   compiled.runInContext(context);
   vm.runInContext("globalThis.renderScreen=render; render=()=>{}; start();",context);
+  if(!prep) vm.runInContext("beginCombat();",context);
   const run=code=>vm.runInContext(code,context);
   run.timers=timers;
   run.tick=()=>{
