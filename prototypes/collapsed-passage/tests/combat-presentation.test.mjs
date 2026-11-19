@@ -66,6 +66,7 @@ function presentation({reduced=false,speed=1}={}){
     globalThis.actionReadout={className:'combat-action',innerHTML:''};
     globalThis.sprites=Object.fromEntries(['player','companion','enemy'].map(side=>[side,{
       tagName:side==='enemy'?'DIV':'IMG',dataset:{},style:{backgroundImage:''},src:side+'-idle.png',
+      closest(){return panels[side];},
       getAttribute(name){return this[name];},setAttribute(name,value){this[name]=value;}
     }]));
     globalThis.emotes={};
@@ -75,12 +76,31 @@ function presentation({reduced=false,speed=1}={}){
     globalThis.panels=Object.fromEntries(['player','companion','enemy'].map(side=>[side,{
       dataset:{portrait:{player:'nun',companion:'guard',enemy:'janitor'}[side]},
       health:{textContent:''},
-      querySelector(selector){return selector==='.foe-health'?this.health:sprites[side];}
+      eyeState:{
+        innerHTML:"",eyesLost:false,
+        hasAttribute(){return this.eyesLost;},
+        toggleAttribute(_name,active){this.eyesLost=active;}
+      },
+      armMarker:{hidden:true,style:{setProperty(){}}},
+      summary:{innerHTML:""},
+      toggleAttribute(name,active){
+        const key={"data-legs-lost":"legsLost","data-arms-lost":"armsLost"}[name];
+        if(active) this.dataset[key]="";
+        else delete this.dataset[key];
+      },
+      querySelector(selector){
+        if(selector==='.foe-health') return this.health;
+        if(selector==='.actor-eye-state') return side==='enemy'?null:this.eyeState;
+        if(selector==='.arm-loss-marker') return this.armMarker;
+        if(selector==='.actor-body-status summary') return this.summary;
+        return sprites[side];
+      }
     }]));
     globalThis.scene={
       dataset:{},style:{setProperty(){}},
       querySelector(selector){
         if(selector==='.combat-action') return actionReadout;
+        if(selector==='.combat-wounds') return {querySelector(){return {innerHTML:""};}};
         if(selector==='.combat-skill-emote') return Object.values(emotes)[0]??null;
         if(selector.endsWith(' .actor-figure')) return figures[selector.split(' ')[0].replace('.actor-','')]??null;
         return panels[selector.replace('.actor-','')]??null;
@@ -296,4 +316,44 @@ test("a final blow shows the defeat frame for one real second at 4×",()=>{
   assert.notEqual(run("combatPresentation"),null);
   at(1026.25);assert.equal(run("combatPresentation"),null);
   assert.equal(run("sprites.enemy.style.backgroundImage"),"");
+});
+
+test("eye wrap coordinates cover all available ally frames",()=>{
+  const run=engine();
+  const frames=JSON.parse(run("JSON.stringify([...eyeLossFrames])"));
+  for(const [src,[x,y,tilt,width]] of frames){
+    assert.ok(x>0 && x<100 && y>0 && y<100 && Math.abs(tilt)<=90 && width>0,src);
+    assert.ok(readFileSync(new URL(`../${src}`,import.meta.url)).length,src);
+  }
+  for(const kind of Object.keys(partyBaselines)){
+    const expected=run(`(Object.keys(motionArt['${kind}']).length+1)*2+8`);
+    const matches=frames.filter(([src])=>src.includes(`/${kind}-`));
+    assert.equal(matches.length,expected,kind);
+  }
+});
+
+test("eye loss starts at impact, follows attack and combined loss poses, and clears on repair",()=>{
+  const {run,at}=presentation();
+  run(`sprites.player.src=partyArt.player.src;
+    game.player.body.eyes.hp=0;
+    game.feedback=[{...${JSON.stringify(hit("enemy","player",5))},targets:["eyes"],injury:"lost",bodyStatus:"결손 1",wounds:bodyWounds(game.player)}];
+    playCombatFeedback();`);
+  at(104);
+  assert.equal(run("panels.player.eyeState.innerHTML"),"");
+  at(105);
+  assert.match(run("panels.player.eyeState.innerHTML"),/eye-loss-wrap[^>]*--y:32\.4%/);
+  assert.match(run("panels.player.summary.innerHTML"),/eye-loss-badge/);
+  at(575);
+  assert.match(run("panels.player.eyeState.innerHTML"),/--y:22%/);
+  run(`setActorPose(scene,"player","attack");`);
+  assert.match(run("panels.player.eyeState.innerHTML"),/--y:32\.9%/);
+  run(`game.player.body.arms.hp=0; game.player.body.legs.hp=0;
+    updateActorConditions(panels.player,bodyWounds(game.player)); setActorPose(scene,"player","guard");`);
+  assert.match(run("sprites.player.src"),/nun-guard-arms-lost\.webp/);
+  assert.match(run("panels.player.eyeState.innerHTML"),/--y:40\.7%/);
+  run(`game.player.body.eyes.hp=game.player.body.eyes.max;
+    showWoundOutcome(scene,panels.player,{side:"player",bodyStatus:bodyStatus(game.player),wounds:bodyWounds(game.player)});`);
+  assert.equal(run("panels.player.eyeState.innerHTML"),"");
+  assert.doesNotMatch(run("panels.player.summary.innerHTML"),/eye-loss-badge/);
+  assert.doesNotMatch(run('bodyPanel("player",[],"healthy")'),/eye-loss-(?:badge|wrap)/);
 });
