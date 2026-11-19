@@ -683,7 +683,7 @@ const partyArt = {
   archer:{src:"art/characters/archer-sd-v5.png",kind:"archer"},
   shaman:{src:"art/characters/shaman-sd-v5.png",kind:"shaman"}
 };
-const motionArt=Object.fromEntries(["nun","guard","awakened","janitor","crawler","medic","sentinel","warden"].map(id=>[
+const motionArt=Object.fromEntries(["nun","guard","awakened","archer","shaman","janitor","crawler","medic","sentinel","warden"].map(id=>[
   id,{attack:`art/characters/motion/${id}-attack.png`,hit:`art/characters/motion/${id}-hit.png`,defeat:`art/characters/motion/${id}-defeat.webp`}
 ]));
 const combatArtCache=new Map();

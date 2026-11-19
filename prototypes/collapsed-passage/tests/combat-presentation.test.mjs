@@ -5,14 +5,15 @@ import {engine} from "./helpers/game-engine.mjs";
 import {inspectRgbaPng} from "./helpers/png.mjs";
 
 const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
-const actors=["nun","guard","awakened","janitor","crawler","medic","sentinel","warden"];
+const partyBaselines={nun:1432,guard:1445,awakened:1452,archer:1446,shaman:1452};
+const actors=[...Object.keys(partyBaselines),"janitor","crawler","medic","sentinel","warden"];
 
-test("all eight actors have one attack and one hurt cutout with registered ground and intact margins",()=>{
+test("all actors have attack and hurt cutouts with registered ground and a defeat sprite",()=>{
   const run=engine();
   for(const id of actors){
-    const party=actors.indexOf(id)<3;
+    const party=Object.hasOwn(partyBaselines,id);
     const width=party?1024:360,height=party?1536:["janitor","crawler"].includes(id)?344:376;
-    const baseline={nun:1432,guard:1445,awakened:1452}[id]??height-6;
+    const baseline=partyBaselines[id]??height-6;
     const frames=[];
     for(const pose of ["attack","hit"]){
       const src=run(`motionArt['${id}']['${pose}']`);
@@ -25,6 +26,8 @@ test("all eight actors have one attack and one hurt cutout with registered groun
       frames.push(png.bounds.bottom);
     }
     assert.ok(Math.abs(frames[0]-frames[1])<=2,`${id}: inconsistent ground`);
+    const defeat=readFileSync(new URL(`../${run(`motionArt['${id}'].defeat`)}`,import.meta.url));
+    assert.equal(defeat.toString("ascii",8,12),"WEBP");
   }
 });
 
@@ -154,6 +157,29 @@ test("companion poses honor reduced motion and speed, and cancellation restores 
   assert.equal(run("actionReadout.innerHTML"),"");
   assert.equal(run.timers.size,0);
   at(200);assert.equal(run("sprites.companion.src"),"companion-idle.png");
+});
+
+test("the archer and shaman show their own attack, hurt, and defeat frames",()=>{
+  for(const [kind,card] of [["archer","snapShot"],["shaman","unseal"]]){
+    const {run,at}=presentation({reduced:true,speed:4});
+    run(`const companionType=companionTypes['${kind}'];
+      game.companion=fighter(companionType.name,companionType.health,companionType.vitality);
+      panels.companion.dataset.portrait='${kind}';`);
+    run(`game.feedback=${JSON.stringify([{...hit("companion","enemy"),card}])};playCombatFeedback();`);
+    at(0);
+    assert.equal(run("sprites.companion.src"),`art/characters/motion/${kind}-attack.png`);
+    assert.match(run("emotes.companion.html"),new RegExp(card));
+    at(117.5);assert.equal(run("sprites.companion.src"),"companion-idle.png");
+    run("cancelCombatPresentation();");
+    run(`game.feedback=${JSON.stringify([hit("enemy","companion")])};playCombatFeedback();`);
+    at(0);assert.equal(run("sprites.companion.src"),`art/characters/motion/${kind}-hit.png`);
+    at(117.5);assert.equal(run("sprites.companion.src"),"companion-idle.png");
+    run("cancelCombatPresentation();");
+    run(`game.feedback=${JSON.stringify([{...hit("enemy","companion"),defeated:true,hp:0}])};playCombatFeedback();`);
+    at(999);assert.equal(run("sprites.companion.src"),`art/characters/motion/${kind}-defeat.webp`);
+    run("cancelCombatPresentation();");
+    assert.equal(run("sprites.companion.src"),"companion-idle.png");
+  }
 });
 
 test("an activated reward skill shows its real effects and stays readable at 4× speed",()=>{

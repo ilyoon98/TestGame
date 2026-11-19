@@ -6,7 +6,7 @@
     "hit"
   ],
   "alpha": "RGBA",
-  "registration": "One uniform scale and vertical offset per actor; horizontal centering per pose; rectangular extraction only.",
+  "registration": "Sheet poses use a uniform scale per actor. Individual poses use the idle canvas and align each pose to the idle foot baseline.",
   "actors": {
     "nun": {
       "width": 1024,
@@ -93,6 +93,36 @@
       "frames": {
         "attack": "awakened-attack.png",
         "hit": "awakened-hit.png"
+      }
+    },
+    "archer": {
+      "width": 1024,
+      "height": 1536,
+      "baseline": 1446,
+      "sources": {
+        "attack": "exec-f92853f9-3f32-4a72-bbb5-5a381a52741a.png",
+        "hit": "exec-5bc5f2f6-1338-4db3-8381-e0adf966e433.png",
+        "defeat": "exec-b882d17a-ab9c-4de6-b246-c1f9b4644221.png"
+      },
+      "frames": {
+        "attack": "archer-attack.png",
+        "hit": "archer-hit.png",
+        "defeat": "archer-defeat.webp"
+      }
+    },
+    "shaman": {
+      "width": 1024,
+      "height": 1536,
+      "baseline": 1452,
+      "sources": {
+        "attack": "exec-978e6618-1ada-44cb-ac35-f2304e545368.png",
+        "hit": "exec-9c308b70-40d9-4990-ac08-bad7ca37fb23.png",
+        "defeat": "exec-07e7d6c9-8c01-4a9d-a962-43cd0f63cd79.png"
+      },
+      "frames": {
+        "attack": "shaman-attack.png",
+        "hit": "shaman-hit.png",
+        "defeat": "shaman-defeat.webp"
       }
     },
     "janitor": {
