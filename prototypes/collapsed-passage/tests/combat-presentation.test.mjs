@@ -114,8 +114,9 @@ test("attack and hit stills hold through contact and restore idle before a count
   const {run,at}=presentation();
   run(`game.feedback=${JSON.stringify([hit(),hit("enemy","player")])};game.phase='won';playCombatFeedback();`);
   at(0);assert.match(run("sprites.player.src"),/nun-attack\.png$/);
-  assert.match(run("emotes.player.html"),/art\/skills\/strike\.webp/);
+  assert.match(run("emotes.player.html"),/<img class="combat-skill-emote" src="art\/skills\/emotes\/strike\.webp"/);
   assert.equal(run("panels.player.dataset.lunge"),"normal");
+  assert.equal(run("panels.player.dataset.attackMotion"),"thrust");
   assert.equal(run("sprites.enemy.style.backgroundImage"),"");
   at(105);assert.match(run("sprites.enemy.style.backgroundImage"),/janitor-hit\.png/);
   at(574);assert.match(run("sprites.player.src"),/nun-attack\.png$/);
@@ -123,6 +124,7 @@ test("attack and hit stills hold through contact and restore idle before a count
   assert.equal(run("Object.keys(emotes).length"),0);
   assert.match(run("sprites.enemy.style.backgroundImage"),/janitor-attack\.png/);
   assert.equal(run("panels.player.dataset.lunge"),undefined);
+  assert.equal(run("panels.player.dataset.attackMotion"),undefined);
   assert.equal(run("panels.enemy.dataset.lunge"),"normal");
   at(680);assert.match(run("sprites.player.src"),/nun-hit\.png$/);
   at(1150);assert.equal(run("sprites.player.src"),"player-idle.png");
@@ -199,7 +201,7 @@ test("a class skill shows its emote over the caster for 400 ms at 4× speed",()=
   const cast="game.feedback=[{type:'guard',card:'escort',from:'companion',side:'player',targets:['head'],added:3,intent:null}];playCombatFeedback();";
   run(cast);
   at(0);
-  assert.match(run("emotes.companion.html"),/art\/skills\/escort\.webp/);
+  assert.match(run("emotes.companion.html"),/<img class="combat-skill-emote" src="art\/skills\/emotes\/escort\.webp"/);
   assert.equal(run("emotes.player"),undefined);
   at(399);
   assert.equal(run("Boolean(emotes.companion)"),true);
@@ -254,13 +256,30 @@ test("critical feedback counts only bonus damage that gets through guard and par
   assert.equal(run("game.enemy.body.chest.hp=1; applyCard('heavy',game.player,game.enemy,['chest']); game.feedback.at(-1).critical"),0);
 });
 
+test("a critical chop keeps the larger emote until its 550 ms animation ends at 4×",()=>{
+  const {run,at}=presentation({speed:4});
+  run(`game.feedback=${JSON.stringify([{...hit(),card:"heavy",critical:1},hit("enemy","player")])};playCombatFeedback();`);
+  at(0);
+  assert.equal(run("panels.player.dataset.attackMotion"),"chop");
+  assert.match(run("emotes.player.html"),/data-emphasis="critical" style="--emote-duration:550ms"/);
+  at(549);
+  assert.equal(run("Boolean(emotes.player)"),true);
+  assert.equal(run("panels.enemy.dataset.attackMotion"),undefined);
+  at(550);
+  assert.equal(run("emotes.player"),undefined);
+  assert.equal(run("panels.enemy.dataset.attackMotion"),"thrust");
+});
+
 test("a final blow shows the defeat frame for one real second at 4×",()=>{
   const {run,at}=presentation({speed:4});
   run(`game.feedback=${JSON.stringify([{...hit(),hp:0,critical:1,defeated:true}])};game.phase='reward';playCombatFeedback();`);
   at(0);assert.equal(run("panels.player.dataset.lunge"),"strong");
+  assert.match(run("emotes.player.html"),/data-emphasis="finisher" style="--emote-duration:650ms"/);
   at(26.25);assert.match(run("sprites.enemy.style.backgroundImage"),/janitor-defeat\.webp/);
   assert.match(run("actionReadout.innerHTML"),/치명타 \+1 · 격파/);
   assert.equal(run("scene.dataset.impact"),"finisher");
+  at(649);assert.equal(run("Boolean(emotes.player)"),true);
+  at(650);assert.equal(run("emotes.player"),undefined);
   at(1026.24);assert.match(run("sprites.enemy.style.backgroundImage"),/janitor-defeat\.webp/);
   assert.notEqual(run("combatPresentation"),null);
   at(1026.25);assert.equal(run("combatPresentation"),null);

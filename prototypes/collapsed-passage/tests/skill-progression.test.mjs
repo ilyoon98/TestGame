@@ -14,6 +14,9 @@ test("preparation toggles known skills and requires exactly three equipped skill
   assert.match(prep,/수녀 부위별 내구도/);
   assert.equal((prep.match(/class="part-drawing"/g)||[]).length,6);
   assert.match(prep,/data-formation-side="player"/);
+  assert.deepEqual([...prep.matchAll(/class="formation-slot[^"]*" data-rank="(\d)"/g)].map(match=>match[1]),["2","1","0"]);
+  assert.match(prep,/class="formation-portrait"><img src="art\/characters\/nun-sd.png"/);
+  assert.match(prep,/aria-describedby="prep-tip-guard".*class="skill-term"><svg.*<strong>방어<\/strong>.*id="prep-tip-guard" role="tooltip".*가드로 아군 부위를 보호/s);
   assert.equal((prep.match(/aria-pressed="true"/g)||[]).length,3);
   run("game.skillLevels.force=1;");
   assert.equal(run("toggleEquippedSkill('force')"),false);
@@ -43,6 +46,7 @@ test("victory offers both a new skill and an upgrade and accepts one choice",()=
   assert.match(run("rewardPanel()"),/reward-kind learn[^>]*><svg/);
   assert.match(run("rewardPanel()"),/reward-kind upgrade[^>]*><svg/);
   assert.match(run("rewardPanel()"),/class="skill-card-art"/);
+  assert.match(run("const rewards=game.rewards; game.rewards=['pierce']; const piercing=rewardPanel(); game.rewards=rewards; piercing;"),/class="skill-term"><svg.*<strong>공격<\/strong>.*class="skill-term"><svg.*<strong>관통<\/strong>.*id="reward-tip-pierce" role="tooltip".*적의 가드를 표시된 수치만큼 무시/s);
   run("moveTo('duct');");
   assert.equal(run("game.area"),"threshold");
   run("globalThis.learned=game.rewards.find(id=>!game.skillLevels[id]); globalThis.other=game.rewards.find(id=>id!==learned);");

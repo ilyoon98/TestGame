@@ -461,6 +461,11 @@
   .formation-slot{display:grid;align-content:start;gap:6px;min-width:0;padding:8px;border:1px solid var(--edge);border-radius:5px;background:#181a17}
   .formation-slot.is-selected{border-color:var(--lime);background:#202c21}
   .formation-slot>.btn{font-size:13px;white-space:normal;word-break:keep-all}
+  .formation-member.btn{display:flex;align-items:center;gap:8px;text-align:left}
+  .formation-portrait{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;overflow:hidden;border:1px solid #6c6054;border-radius:6px;background:#29231f}
+  .formation-portrait img{position:absolute;top:0;left:50%;width:160%;height:auto;max-width:none;transform:translate(-50%,-6%)}
+  .formation-portrait.empty{border-style:dashed;color:var(--soft);background:none}
+  .formation-portrait svg{width:20px;height:20px}
   .formation-slot select{width:100%;min-width:0;padding:4px;border:1px solid var(--edge);border-radius:4px;background:#191e19;color:var(--ink);font:inherit;font-size:12px}
   .formation-rank{color:var(--soft);font-size:12px}
   .formation-skills{display:grid;gap:3px;margin:0;padding:0;list-style:none;color:var(--ink);font-size:12px}
@@ -501,15 +506,20 @@
   .prep-choice-state{flex:none;padding:2px 5px;border:1px solid #50574b;border-radius:4px;color:#c6cbbb;font-size:11px;font-weight:700;white-space:nowrap}
   .prep-choice[aria-pressed=true] .prep-choice-state{border-color:#a4e7b3;background:#a4e7b3;color:#102217}
   .skill-card-art{display:block;width:100%;height:auto;aspect-ratio:12/5;object-fit:cover;border:1px solid var(--class-edge);border-radius:4px;background:#171719}
-  .combat-skill-emote{position:absolute;z-index:5;inset-inline:0;bottom:calc(100% - 8px);width:min(96%,132px);margin-inline:auto;pointer-events:none}
-  .combat-skill-emote .skill-card-art{position:relative;z-index:1;border-color:var(--accent);border-radius:7px;box-shadow:0 3px 12px #000b}
-  .combat-skill-emote::after{content:"";position:absolute;left:50%;bottom:-3px;width:8px;height:8px;background:#1b1723;border-right:1px solid var(--accent);border-bottom:1px solid var(--accent);transform:translateX(-50%) rotate(45deg)}
+  .combat-skill-emote{position:absolute;z-index:5;inset-inline:0;bottom:calc(100% - 6px);width:min(96%,clamp(72px,18vw,104px));height:auto;margin-inline:auto;pointer-events:none;filter:drop-shadow(0 2px 3px #0009)}
+  .combat-skill-emote[data-emphasis="critical"]{width:min(105%,clamp(85px,21vw,124px));bottom:calc(100% - 10px)}
+  .combat-skill-emote[data-emphasis="finisher"]{width:min(110%,clamp(90px,23vw,132px));bottom:calc(100% - 13px)}
   .skill-owner{display:inline-flex;align-items:center;gap:4px;justify-self:start;padding:1px 4px;border-radius:3px;background:var(--class-surface);color:var(--class-color);font-size:11px;font-weight:800}
   .skill-owner svg{width:15px;height:15px;flex:none}
   .skill-effects{display:grid;gap:3px;color:var(--soft);font-size:12px;line-height:1.35}
   .skill-effect{display:block}
   .skill-effect.is-blocked{color:var(--loss)}
-  .skill-term{color:var(--ink);font-weight:800;text-decoration:underline;text-underline-offset:2px;cursor:help}
+  .skill-term{display:inline-flex;align-items:center;gap:3px;color:var(--ink);white-space:nowrap;cursor:help}
+  .skill-term strong{font-weight:800;text-decoration:underline;text-underline-offset:2px}
+  .skill-term svg{width:13px;height:13px;flex:none;color:var(--class-color)}
+  .skill-card-item{position:relative;display:grid;min-width:0}
+  .skill-tooltip{position:absolute;z-index:5;inset-inline:0;bottom:100%;display:grid;gap:5px;padding:8px 10px;border:1px solid var(--edge);border-radius:5px;background:#171419;color:var(--ink);font-size:12px;line-height:1.4;box-shadow:0 4px 10px #0008;visibility:hidden}
+  .skill-card-item:hover .skill-tooltip,.skill-card-item>button:focus-visible+.skill-tooltip{visibility:visible}
   .prep-choice-meta,.prep-hint{color:var(--soft);font-size:11px}
   .prep-choice-meta{color:var(--choice-accent)}
   .prep-hint{min-height:1.4em}
@@ -524,6 +534,8 @@
   .reward-kind.upgrade{border-color:#a7844b;color:#ffe0a2;background:#3d2f1b}
   .reward-kind svg{width:14px;height:14px}
   @media(max-width:580px){
+    .formation-member.btn{flex-direction:column;align-items:center;gap:4px;padding:5px 3px;text-align:center;font-size:11px}
+    .formation-portrait{width:38px;height:38px}
     .skill-rewards{grid-template-columns:1fr}
     .prep-choices{grid-template-columns:repeat(2,minmax(0,1fr))}
     .prep-choice.btn{gap:4px;padding:8px}
@@ -531,10 +543,11 @@
     .skill-effects{font-size:11px}
     .prep-footer .btn{width:100%}
   }
-  .combat .panel{--attack-step:clamp(16px,7vw,104px)}
+  .combat .panel{--attack-step:clamp(16px,7vw,104px);--attack-turn:17deg;--attack-reach:1;--attack-scale:1.13}
   .combat .companion-actor{--attack-step:clamp(14px,5vw,76px)}
-  .combat .actor-enemy{--attack-step:clamp(-104px,-7vw,-16px)}
+  .combat .actor-enemy{--attack-step:clamp(-104px,-7vw,-16px);--attack-turn:-17deg}
   .combat .panel[data-lunge]{z-index:2}
+  .combat .panel[data-lunge="strong"]{--attack-reach:1.18;--attack-scale:1.23}
   .actor-sprite[data-pose="defeat"]{object-position:center bottom;background-position:center bottom}
   .sd-actor .actor-sprite[data-pose="defeat"]{height:94%}
   .actor-sprite[data-defeated]{filter:saturate(.68) drop-shadow(0 5px 4px #0c0e0bd9)}
@@ -552,14 +565,20 @@
     .pursuit-entering .pursuit-shadow{animation:pursuit-enter .42s ease-out both}
     .pursuit-advancing .pursuit-shadow img{animation:pursuit-step .46s ease-out both}
     .leg-status.just-injured{animation:leg-status-in .2s ease-out both}
-    .combat-skill-emote{transform-origin:50% 100%;animation:skill-emote-pop .16s ease-out both}
+    .combat-skill-emote{transform-origin:50% 100%;animation:skill-emote-pop var(--emote-duration) ease-out both}
     .combat .actor-sprite{transform-origin:50% 90%;transition:transform var(--lunge-out,150ms) ease-out}
-    .combat .panel[data-lunge] .actor-sprite{transform:translateX(var(--attack-step)) scale(1.13);transition-duration:var(--lunge-in,105ms);transition-timing-function:cubic-bezier(.2,.65,.35,1)}
-    .combat .panel[data-lunge="strong"] .actor-sprite{transform:translateX(calc(var(--attack-step) * 1.18)) scale(1.23)}
+    .combat .panel[data-lunge] .actor-sprite{transform:translateX(calc(var(--attack-step) * var(--attack-reach))) scale(var(--attack-scale));transition-duration:var(--lunge-in,105ms);transition-timing-function:cubic-bezier(.2,.65,.35,1)}
+    .combat .panel[data-attack-motion="chop"] .actor-sprite{transform:translateX(calc(var(--attack-step) * var(--attack-reach) * .65)) translateY(5px) rotate(var(--attack-turn)) scale(var(--attack-scale));animation:attack-chop var(--lunge-in,105ms) ease-out}
+    @keyframes attack-chop{from{transform:none}38%{transform:translateY(-6px) rotate(calc(var(--attack-turn) * -.62)) scale(1.04)}}
     @keyframes pursuit-enter{from{opacity:0;translate:-10px 0}}
     @keyframes pursuit-step{from{transform:translate(-8px,-2px) scale(.9)}}
     @keyframes leg-status-in{from{opacity:.85;translate:0 3px}}
-    @keyframes skill-emote-pop{from{scale:.83;translate:0 3px}65%{scale:1.04}}
+    @keyframes skill-emote-pop{
+      from{opacity:0;scale:.8;translate:0 8px}
+      28%{opacity:1;scale:1.05;translate:0 -3px}
+      72%{opacity:1;scale:1;translate:0 -4px}
+      to{opacity:0;scale:.98;translate:0 -9px}
+    }
   }
   .companion-encounter{grid-template-columns:100px minmax(0,1fr);align-items:center}
   .encounter-portrait{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:contain;filter:drop-shadow(0 5px 4px #0007)}
@@ -634,6 +653,7 @@ const pursuitWarningDistance=2;
 const categories = {attack:"공격", defense:"방어", skill:"스킬"};
 const icons = {
   attack:'<path d="m5 19 5-5m-1-3 4 4m-2-3L19 4l1 1-8 8M4 20l3-3"/>',
+  pierce:'<path d="M10 4 4 7v5c0 4 3 6 6 8 3-2 6-4 6-8v-1M10 4l6 3M9 14l12-7m-6 0h6v6"/>',
   defense:'<path d="M12 3 5 6v5c0 4 2.9 7.6 7 10 4.1-2.4 7-6 7-10V6l-7-3Z"/>',
   skill:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/>',
   head:'<circle cx="12" cy="8" r="5"/><path d="M7 21v-2a5 5 0 0110 0v2"/>',
@@ -692,7 +712,7 @@ function warmCombatArt(){
   const sides=partySides();
   const actors=[...sides.map(side=>game[side].kind),areas[game.area].foe];
   const poses=actors.flatMap(id=>Object.values(motionArt[id] || {}));
-  const emotes=sides.flatMap(side=>sideLoadout(side)).filter(Boolean).map(skillArtSrc);
+  const emotes=sides.flatMap(side=>sideLoadout(side)).filter(Boolean).map(skillEmoteSrc);
   for(const src of [...poses,...emotes]){
     if(combatArtCache.has(src)) continue;
     const image=new Image();
@@ -1737,7 +1757,7 @@ function activeTraitChips(){
 function reservePanel(){
   const reserves=reserveSides();
   if(!reserves.length) return "";
-  const ranks=game.formation.map((side,index)=>side==="player"?"":`<option value="${index}">${formationRanks[index]}${side?` · ${game[side].name}`:""}</option>`).join("");
+  const ranks=game.formation.map((side,index)=>side==="player"?"":`<option value="${index}">${formationRanks[index]}${side?` · ${game[side].name}`:""}</option>`).reverse().join("");
   return `<div class="reserve-list" aria-label="대기 동료"><small>대기</small>${reserves.map(side=>`<div class="reserve-entry">
     <button class="btn" type="button" data-action="prep-member" data-side="${side}" aria-current="${game.prepSide===side}">${game[side].name}</button>
     ${traitTags(game[side])}
@@ -1747,19 +1767,22 @@ function reservePanel(){
 
 function formationPanel(){
   const slots=game.formation.map((side,rank)=>{
-    if(!side) return `<div class="formation-slot"><b class="formation-rank">${formationRanks[rank]}</b><small>빈자리</small></div>`;
+    if(!side) return `<div class="formation-slot" data-rank="${rank}"><b class="formation-rank">${formationRanks[rank]}</b><span class="formation-portrait empty" aria-hidden="true">${icon("head")}</span><small>빈자리</small></div>`;
     const actor=game[side], selected=side===game.prepSide;
-    const ranks=formationRanks.map((name,index)=>`<option value="${index}" ${index===rank?"selected":""}>${name}</option>`).join("");
+    const portrait=partyArt[side==="player"?"player":actor.kind];
+    const ranks=formationRanks.map((name,index)=>`<option value="${index}" ${index===rank?"selected":""}>${name}</option>`).reverse().join("");
     const loadout=sideLoadout(side).map(id=>{
       const restricted=cards[id]?.ranks && !cards[id].ranks.includes(rank);
       return `<li${restricted?' class="rank-limited"':""}>${id?cards[id].name:"—"}${restricted?" · 위치 제한":""}</li>`;
     }).join("");
-    return `<div class="formation-slot ${selected?"is-selected":""}">
+    return `<div class="formation-slot ${selected?"is-selected":""}" data-rank="${rank}">
       <select data-formation-side="${side}" aria-label="${actor.name} 위치">${ranks}</select>
-      <button class="btn" type="button" data-action="prep-member" data-side="${side}" aria-current="${selected}">${actor.name}</button>
+      <button class="btn formation-member" type="button" data-action="prep-member" data-side="${side}" aria-current="${selected}">
+        <span class="formation-portrait"><img src="${portrait.src}" width="1024" height="1536" alt="" draggable="false"></span><span>${actor.name}</span>
+      </button>
       ${traitTags(actor)}
       <ul class="formation-skills">${loadout}</ul></div>`;
-  }).join("");
+  }).reverse().join("");
   return `<div class="formation" role="group" aria-label="대열">${slots}</div>`;
 }
 
@@ -1773,29 +1796,51 @@ function skillReadout(skill,elapsed){
 
 const skillClassNames={common:"공용",nun:"수녀 전용",guard:"간수 전용",awakened:"개화 수감자 전용",archer:"감시탑 궁수 전용",shaman:"주술사 전용",bow:"활 전용"};
 const skillClassIcons={nun:"nunLantern",guard:"guardCrest",awakened:"brokenShackle",archer:"traitBow",shaman:"skill",bow:"traitBow"};
-const skillTermTips={
-  "가드":"해당 부위에 들어오는 다음 공격의 피해를 수치만큼 막아요.",
-  "부상":"부위 내구도가 1부터 최대치의 절반까지 남은 상태예요. 관련 기술이 약해질 수 있어요.",
-  "결손":"부위 내구도가 0인 상태예요. 그 부위의 기술을 쓸 수 없어요."
+const skillTerms={
+  "공격":{icon:"attack",tip:"적의 부위에 피해를 줘요."},
+  "방어":{icon:"defense",tip:"가드로 아군 부위를 보호해요."},
+  "관통":{icon:"pierce",tip:"적의 가드를 표시된 수치만큼 무시해요."},
+  "회복":{icon:"skill",tip:"아군 부위의 내구도를 되돌려요."},
+  "가드":{icon:"defense",tip:"해당 부위에 들어오는 다음 공격의 피해를 수치만큼 막아요."},
+  "부상":{icon:"arms",tip:"부위 내구도가 절반 이하로 남으면 관련 기술이 약해질 수 있어요."},
+  "결손":{icon:"hiddenIntent",tip:"부위 내구도가 0이 되어 관련 기술을 쓸 수 없어요."}
 };
 
 function skillTerm(term){
-  return `<strong class="skill-term" title="${skillTermTips[term]}">${term}</strong>`;
+  return `<span class="skill-term">${icon(skillTerms[term].icon)}<strong>${term}</strong></span>`;
 }
 
-function skillEffectLines(id,actor=game.player){
+function skillEffectLines(id,actor,term){
   const skill=cards[id];
   const amount=power(skill,actor);
   switch(skill.effect || id){
-    case "aim": return ["한 부위 피해 2",`${skillTerm("가드")} ${amount} 무시`];
-    case "break": return [`${skillTerm("가드")} ${amount} 제거`,"한 부위 피해 1"];
-    case "guard": return [`한 부위 ${skillTerm("가드")} +${amount}`];
-    case "split": return [`두 부위에 각각 ${skillTerm("가드")} +${amount}`];
+    case "aim": return ["한 부위 피해 2",`${term("관통")} ${amount} · ${term("가드")} 무시`];
+    case "break": return [`${term("가드")} ${amount} 제거`,"한 부위 피해 1"];
+    case "guard": return [`한 부위 ${term("가드")} +${amount}`];
+    case "split": return [`두 부위에 각각 ${term("가드")} +${amount}`];
     case "aid": return [`한 부위 내구도 최대 ${amount} 회복`,
-      `대상의 배 ${skillTerm("부상")} 시 회복량 절반`,
-      `${skillTerm("결손")} 부위는 회복 불가`];
+      `대상의 배 ${term("부상")} 시 회복량 절반`,
+      `${term("결손")} 부위는 회복 불가`];
     default: return [`한 부위 피해 ${amount}`];
   }
+}
+
+function skillCardText(id,actor=game.player){
+  const skill=cards[id];
+  const type=skill.type==="skill"?"회복":categories[skill.type];
+  const terms=new Set([type]);
+  const lines=skillEffectLines(id,actor,name=>{
+    terms.add(name);
+    return skillTerm(name);
+  });
+  return {type:skillTerm(type),lines,terms};
+}
+
+function skillTooltip(id,terms,holder){
+  return `<span class="skill-tooltip" id="${id}" role="tooltip">
+    ${holder?`<span>${holder} 장착</span>`:""}
+    ${[...terms].map(term=>`<span><b>${term}</b> · ${skillTerms[term].tip}</span>`).join("")}
+  </span>`;
 }
 
 function skillEffects(lines){
@@ -1806,6 +1851,10 @@ const revisedSkillArt=new Set(["snapShot","mending","unseal"]);
 
 function skillArtSrc(id){
   return `art/skills/${id}${revisedSkillArt.has(id)?"-v5":""}.webp`;
+}
+
+function skillEmoteSrc(id){
+  return `art/skills/emotes/${id}.webp`;
 }
 
 function skillCardArt(id){
@@ -1824,18 +1873,19 @@ function prepPanel(vitalsOpen=false){
   const choices=availableSkills(side).map(id=>{
     const skill=cards[id], selected=loadout.includes(id), level=skillLevel(id);
     const skillClass=skill.character || skill.weapon || "common";
-    const type=skill.type==="skill"?"회복":categories[skill.type];
+    const {type,lines,terms}=skillCardText(id,actor);
     const other=!selected && equippedBy(id);
     const blocked=skillBlocked({id,side});
     const ranks=skill.ranks?.map(rank=>formationRanks[rank]).join("·");
-    return `<li><button class="btn prep-choice skill-class-card ${skill.type}" data-skill-class="${skillClass}" type="button" data-action="toggle-skill" data-value="${id}" aria-pressed="${selected}" ${other?`disabled title="${game[other].name} 장착"`:""}>
+    const tooltipId=`prep-tip-${id}`;
+    return `<li class="skill-card-item"><button class="btn prep-choice skill-class-card ${skill.type}" data-skill-class="${skillClass}" type="button" data-action="toggle-skill" data-value="${id}" aria-pressed="${selected}" aria-describedby="${tooltipId}" ${other?"disabled":""}>
       <span class="prep-choice-top"><span class="prep-choice-icon">${icon(skill.type)}</span><b class="prep-choice-time">${combatSeconds(skillCooldown(id))}</b></span>
       ${skillCardArt(id)}
       <span class="prep-choice-name"><strong>${skill.name}</strong><span class="prep-choice-state">${selected?"✓ 장착":other?"사용 중":"미장착"}</span></span>
       <span class="prep-choice-meta">${skillOwnerMark(skillClass)} · ${type}${ranks?` · ${ranks}`:""}${level>1?` · Lv.${level}`:""}</span>
       ${blocked?`<span class="skill-effects"><span class="skill-effect is-blocked">${blocked}</span></span>`:""}
-      ${skillEffects(skillEffectLines(id,actor))}
-    </button></li>`;
+      ${skillEffects(lines)}
+    </button>${skillTooltip(tooltipId,terms,game[other]?.name)}</li>`;
   }).join("");
   return `<section class="routes prep-panel"><div class="prep-heading"><div><h2>전투 준비</h2>
     <p>${game.enemy.name} · 체력 ${game.enemy.hp}</p></div></div>
@@ -1855,10 +1905,12 @@ function rewardPanel(){
     const skill=cards[id], level=game.skillLevels[id];
     const skillClass=skill.character || skill.weapon || "common", currentTime=combatSeconds(skillCooldown(id));
     const changes=level?[`레벨 ${level} → ${level+1}`,`쿨타임 ${currentTime} → ${combatSeconds(skillCooldown(id,level+1))}`]:[`쿨타임 ${currentTime}`];
-    return `<button class="btn skill-reward skill-class-card" type="button" data-action="reward" data-value="${id}" data-skill-class="${skillClass}" aria-keyshortcuts="${index+1}">
+    const {type,lines,terms}=skillCardText(id);
+    const tooltipId=`reward-tip-${id}`;
+    return `<div class="skill-card-item"><button class="btn skill-reward skill-class-card" type="button" data-action="reward" data-value="${id}" data-skill-class="${skillClass}" aria-keyshortcuts="${index+1}" aria-describedby="${tooltipId}">
       <span class="reward-top"><span class="reward-kind ${level?"upgrade":"learn"}">${icon(level?"upgradeSkill":"learnSkill")}${level?"강화":"새 기술"}</span><kbd>${index+1}</kbd></span>
-      ${skillCardArt(id)}<strong>${skill.name}</strong>${skillOwnerMark(skillClass)}
-      ${skillEffects([...changes,...skillEffectLines(id)])}</button>`;
+      ${skillCardArt(id)}<strong>${skill.name}</strong><span class="prep-choice-meta">${skillOwnerMark(skillClass)} · ${type}</span>
+      ${skillEffects([...changes,...lines])}</button>${skillTooltip(tooltipId,terms)}</div>`;
   }).join("");
   return `<section class="routes" aria-label="기술 보상"><h2>기술 보상</h2><div class="skill-rewards">${options}</div>
     <button class="btn" type="button" data-action="skip-reward" aria-keyshortcuts="0">건너뛰기 (0)</button></section>`;
@@ -2302,7 +2354,10 @@ function setActorPose(scene,side,pose){
 }
 
 function restoreActorPoses(scene,keepDefeated=false){
-  scene?.querySelectorAll(".panel[data-lunge]").forEach(panel=>delete panel.dataset.lunge);
+  scene?.querySelectorAll(".panel[data-lunge]").forEach(panel=>{
+    delete panel.dataset.lunge;
+    delete panel.dataset.attackMotion;
+  });
   if(!keepDefeated) scene?.querySelectorAll(".actor-sprite[data-defeated]").forEach(sprite=>delete sprite.dataset.defeated);
   scene?.querySelectorAll(".actor-sprite[data-pose]").forEach(sprite=>{
     if(keepDefeated && sprite.dataset.pose==="defeat") return;
@@ -2368,9 +2423,11 @@ function showHitOutcome(scene,event){
   }else if(event.dealt) setActorPose(scene,event.side,"hit");
 }
 
-function showSkillEmote(scene,event){
+const overheadAttacks=new Set(["heavy","crush","irons"]);
+
+function showSkillEmote(scene,event,emphasis,duration){
   const caster=scene.querySelector(`.actor-${event.from} .actor-figure`);
-  caster?.insertAdjacentHTML("beforeend",`<span class="combat-skill-emote" aria-hidden="true">${skillCardArt(event.card)}</span>`);
+  caster?.insertAdjacentHTML("beforeend",`<img class="combat-skill-emote" src="${skillEmoteSrc(event.card)}" data-emphasis="${emphasis}" style="--emote-duration:${duration}ms" width="240" height="180" alt="" aria-hidden="true" draggable="false">`);
 }
 
 function playCombatFeedback(after, endOfTurn=false){
@@ -2401,9 +2458,12 @@ function playCombatFeedback(after, endOfTurn=false){
     const starts=elapsed;
     let resultAt=starts;
     let poseEnds=starts+400;
-    if(event.from!=="enemy" && skillCharge[event.card]){
-      schedule(()=>showSkillEmote(scene,event),starts);
-      schedule(()=>scene.querySelector(".combat-skill-emote")?.remove(),starts+400*speed);
+    const emphasis=event.defeated?"finisher":event.critical?"critical":"";
+    const showEmote=event.from!=="enemy" && skillCharge[event.card];
+    const emoteTime=showEmote?(emphasis==="finisher"?650:emphasis==="critical"?550:400):0;
+    if(emoteTime){
+      schedule(()=>showSkillEmote(scene,event,emphasis,emoteTime),starts);
+      schedule(()=>scene.querySelector(".combat-skill-emote")?.remove(),starts+emoteTime*speed);
     }
     if(event.intent!==null) schedule(()=>{
       scene.querySelector(".intent-chip.executing")?.classList.remove("executing");
@@ -2413,13 +2473,17 @@ function playCombatFeedback(after, endOfTurn=false){
       const from=event.from;
       schedule(()=>{
         setActorPose(scene,from,"attack");
-        if(!reduced) scene.querySelector(`.actor-${from}`).dataset.lunge=event.critical || event.defeated?"strong":"normal";
+        if(!reduced){
+          const {dataset}=scene.querySelector(`.actor-${from}`);
+          dataset.lunge=emphasis?"strong":"normal";
+          dataset.attackMotion=overheadAttacks.has(event.card)?"chop":"thrust";
+        }
       },starts);
       resultAt=starts+(reduced?0:105);
       poseEnds=resultAt+470;
       schedule(()=>{
         showImpact(scene,event);
-        if(event.defeated || event.critical) scene.dataset.impact=event.defeated?"finisher":"critical";
+        if(emphasis) scene.dataset.impact=emphasis;
         showHitOutcome(scene,event);
         if(soundEnabled && audioContext?.state==="running") synthesizeImpact(audioContext,audioOutput,event);
       },resultAt);
@@ -2442,7 +2506,7 @@ function playCombatFeedback(after, endOfTurn=false){
     },poseEnds);
     // The defeat frame holds for a real second at every battle speed.
     const readTime=event.defeated?1000:cards[event.card].reward?650:420;
-    elapsed=Math.max(poseEnds,resultAt+readTime*speed);
+    elapsed=Math.max(poseEnds,resultAt+readTime*speed,starts+emoteTime*speed);
   }
   schedule(()=>{
     scene.querySelector(".intent-chip.executing")?.classList.remove("executing");
