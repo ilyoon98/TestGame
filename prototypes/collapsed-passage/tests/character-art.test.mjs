@@ -44,11 +44,11 @@ test("both recruited companions appear and only the fallen companion leaves the 
   const field=()=>run("layoutCombatHud=()=>{}; renderScreen(); document.querySelector('#stage').innerHTML");
   assert.doesNotMatch(field(),/class="panel actor-companion/);
   run("game.enemy.hp=0; finishCombat(); chooseReward(null);");
-  assert.equal(run("companionEncounterPanel().includes('art/characters/guard-sd.png')"),true);
+  assert.match(run("companionEncounterPanel()"),/src="art\/encounters\/guard\.webp" width="960" height="540"/);
   run("recruitCompanion('guard'); moveTo('infirmary'); beginCombat();");
   assert.match(field(),/art\/characters\/guard-sd\.png/);
   run("game.enemy.hp=0; finishCombat(); chooseReward(null);");
-  assert.equal(run("companionEncounterPanel().includes('art/characters/awakened-sd.png')"),true);
+  assert.match(run("companionEncounterPanel()"),/src="art\/encounters\/awakened\.webp" width="960" height="540"/);
   run("recruitCompanion('awakened'); declineCompanion(); moveTo('lift'); beginCombat();");
   assert.match(field(),/--combat-columns:4/);
   assert.match(field(),/art\/characters\/awakened-sd\.png/);

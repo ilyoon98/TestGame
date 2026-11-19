@@ -89,7 +89,8 @@ function presentation({reduced=false,speed=1}={}){
         if(selector==='.actor-sprite[data-pose]') return Object.values(sprites).filter(s=>s.dataset.pose);
         if(selector==='.actor-sprite[data-defeated]') return Object.values(sprites).filter(s=>'defeated' in s.dataset);
         if(selector==='.panel[data-lunge]') return Object.values(panels).filter(p=>p.dataset.lunge);
-        if(selector==='.impact, .combat-skill-emote') return Object.values(emotes);
+        if(selector.split(', ').includes('.combat-skill-emote')) return Object.values(emotes);
+        if(selector==='.combat-impact-number') return globalThis.damageNumber?[damageNumber]:[];
         return [];
       }
     };
@@ -143,6 +144,17 @@ test("a completely blocked attack never uses the hurt image",()=>{
   assert.match(readout,/기본 공격.*수녀 가슴.*완전 방어 · 2 막음/s);
   assert.doesNotMatch(readout,/보상 기술/);
   at(575);assert.equal(run("sprites.enemy.style.backgroundImage"),"");
+});
+
+test("damage numbers stay above emotes and remain visible for 250 ms at 4×",()=>{
+  assert.match(html,/\.combat-impact-layer\{position:absolute;inset:0;z-index:10/);
+  const {run,at}=presentation({speed:4});
+  run(`showImpact=()=>{globalThis.damageNumber={remove(){globalThis.damageNumber=null;}};};
+    game.feedback=${JSON.stringify([hit()])};playCombatFeedback();`);
+  at(26.25);assert.equal(run("Boolean(damageNumber)"),true);
+  at(276.25);assert.equal(run("Boolean(damageNumber)"),true);
+  at(326.25);assert.equal(run("damageNumber"),null);
+  assert.equal(run("Boolean(emotes.player)"),true);
 });
 
 test("companion poses honor reduced motion and speed, and cancellation restores all sprites",()=>{

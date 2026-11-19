@@ -124,3 +124,31 @@ test("enemy intents show icon and number while HP renders below each portrait",(
   assert.match(player,/class="actor-figure".*class="foe-health".*class="hp-value"[^>]*>28\/28/s);
   assert.doesNotMatch(run("gauges()"),/class="status-box health/);
 });
+
+test("the training seed determines the rooms and fighting preserves the roster and loadouts",()=>{
+  const run=engine();
+  run("globalThis.config={seed:'V5-01',widths:[1,1,1,1],training:true}; start(config);");
+  const original=run("JSON.stringify(areas)");
+  run("start({ ...config, seed:'V5-02' });");
+  assert.notEqual(run("JSON.stringify(areas)"),original);
+  run("start(config);");
+  assert.equal(run("JSON.stringify(areas)"),original);
+  assert.equal(run("livingRoster().length"),5);
+  assert.equal(run("setTrainingSkill('companion3',0,'snapShot')"),true);
+  assert.equal(run("game.companion3.loadout.join(',')"),"snapShot,aimedShot");
+  assert.equal(run("setTrainingSkill('companion3',0,'prayer')"),false);
+  assert.equal(run("setTrainingReserve('companion4')"),true);
+  assert.equal(run("placePartyMember('companion4',1)"),true);
+  run("beginCombat(); hit(game.player,game.enemy,'head',99,{id:'heavy'},game);");
+  assert.equal(run("game.feedback.at(-1).defeated"),false);
+  assert.equal(run("game.enemy.hp===game.enemy.maxHp"),true);
+  run("while(game.phase==='combat' && game.cooldownBattle.elapsed<4000) advanceAutoBattle();");
+  assert.equal(run("game.phase"),"combat");
+  assert.equal(run("game.distance"),5);
+  assert.match(run("actorHealth(game.enemy)"),/무한 체력[^>]*>∞/);
+  run("hit(game.enemy,game.companion4,'head',99,{id:'heavy'},game); openTrainingView('route'); moveTo('room-4-2');");
+  assert.equal(run("game.phase"),"prep");
+  assert.equal(run("game.area"),"room-4-2");
+  assert.equal(run("partySides().map(side=>game[side].kind).join(',')"),"nun,shaman,archer");
+  assert.equal(run("game.companion3.loadout.join(',')"),"snapShot,aimedShot");
+});
