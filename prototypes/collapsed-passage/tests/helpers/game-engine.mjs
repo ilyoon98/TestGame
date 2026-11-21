@@ -2,10 +2,15 @@ import {readFileSync} from "node:fs";
 import vm from "node:vm";
 
 const html=readFileSync(new URL("../../index.html",import.meta.url),"utf8");
-const source=html.match(/<script>([\s\S]*?)<\/script>/)[1].replace(/\nstart\(\);\s*$/, "");
-const compiled=new vm.Script(source);
+export const engine=gameEngine(html);
 
-export function engine(seed=12345,{prep=false}={}){
+export function gameEngine(gameHtml){
+  const source=gameHtml.match(/<script>([\s\S]*?)<\/script>/)[1].replace(/\n(?:start|renderOpening)\(\);\s*$/, "");
+  const compiled=new vm.Script(source);
+  return (seed=12345,{prep=false}={})=>runGame(compiled,seed,prep);
+}
+
+function runGame(compiled,seed,prep){
   const elements=new Map(), timers=new Map();
   let timerId=0, randomSeed=seed;
   const math=Object.create(Math);

@@ -1,13 +1,18 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
 import {engine} from "./helpers/game-engine.mjs";
+import {playFirstStage} from "./helpers/first-stage-policy.mjs";
 
-test("the cooldown battle finishes automatically and waits for the reward choice",()=>{
+test("the cooldown battle finishes automatically and waits for recruitment and then the reward",()=>{
   const run=engine();
   assert.equal(run("game.distance"),5);
   run("render=()=>scheduleAutoBattle(); scheduleAutoBattle();");
   let ticks=0;
   while(run.tick()) assert.ok(++ticks<80,"automatic combat must terminate");
+  assert.equal(run("game.phase"),"route");
+  assert.equal(run("game.pendingCompanion"),"guard");
+  assert.equal(run("game.rewards.length"),0);
+  assert.equal(run("declineCompanion()"),true);
   assert.equal(run("game.phase"),"reward");
   assert.equal(run("game.combatTime"),6000);
   assert.equal(run("game.distance"),3);
@@ -51,7 +56,9 @@ test("opening and later fights have three cooldown gauges",()=>{
   run("layoutCombatHud=()=>{}; renderScreen();");
   const opening=run("document.querySelector('#stage').innerHTML");
   assert.match(opening,/class="skill-loadout"/);
+  assert.doesNotMatch(opening,/class="combat-action/);
   assert.deepEqual([...opening.matchAll(/data-skill="([^"]+)"/g)].map(match=>match[1]),["guard","heavy","strike"]);
+  assert.deepEqual([...opening.matchAll(/class="skill-slot-art" src="art\/skills\/emotes\/([^"]+)\.webp"/g)].map(match=>match[1]),["guard","heavy","strike"]);
   assert.equal((opening.match(/<progress /g)||[]).length,3);
   assert.doesNotMatch(opening,/class="hand /);
   run("enterArea('duct'); beginCombat(); renderScreen();");
@@ -59,6 +66,22 @@ test("opening and later fights have three cooldown gauges",()=>{
   assert.match(next,/class="skill-loadout"/);
   assert.equal((next.match(/<progress /g)||[]).length,3);
   assert.doesNotMatch(next,/data-action="(?:end|card)"/);
+});
+
+test("the minimap holds the battle clock independently of the player's pause",()=>{
+  const run=engine();
+  run("scheduleAutoBattle();");
+  assert.equal(run.timers.size,1);
+  run("minimapDialog.open=true; scheduleAutoBattle();");
+  assert.equal(run.timers.size,0);
+  assert.equal(run("game.combatTime"),0);
+  run("minimapDialog.open=false; minimapDialog.listeners.close();");
+  assert.equal(run.timers.size,1);
+  assert.equal(run.tick(),true);
+  assert.equal(run("game.combatTime"),100);
+  run("autoPaused=true; minimapDialog.open=true; scheduleAutoBattle(); minimapDialog.open=false; minimapDialog.listeners.close();");
+  assert.equal(run.timers.size,0);
+  assert.equal(run("autoPaused"),true);
 });
 
 test("simultaneous skills resolve in the same order regardless of their display slots",()=>{
@@ -95,45 +118,53 @@ test("a lost arm disables strong attacks and the pursuit clock still ends combat
   assert.match(run("game.reason"),/사형수에게 따라잡혔어요/);
 });
 
+test("the Bellboy blocks ordinary attacks and opens the gate between slams and bells",()=>{
+  const run=engine();
+  run(`enterArea("lift"); beginCombat(); game.distance=20;
+    game.cooldownBattle.skills=[];
+    executePartySkill({id:"strike",side:"player"});`);
+  assert.equal(run("bellboyPhase()"),"closed");
+  assert.equal(run("game.enemy.hp"),23);
+  assert.equal(run("game.enemy.body.head.hp"),21);
+  assert.equal(run("game.enemy.body.head.guard"),2);
+  assert.equal(run("game.feedback.at(-1).gateBlock"),true);
+  run(`applyCard("break",game.player,game.enemy,["head"]);`);
+  assert.equal(run("game.enemy.body.head.guard"),2);
+  run(`applyCard("pierce",game.player,game.enemy,["belly"]);`);
+  assert.equal(run("game.feedback.at(-1).targets[0]"),"head");
+  assert.ok(run("game.enemy.hp < game.enemy.maxHp"));
+  assert.equal(run("game.enemy.body.belly.hp"),5);
+
+  run(`while(game.cooldownBattle.elapsed<1400) advanceAutoBattle();`);
+  assert.equal(run("bellboyPhase()"),"closed");
+  run(`advanceAutoBattle();`);
+  assert.equal(run("bellboyPhase()"),"bell");
+  assert.match(run("bodyPanel('enemy',battleIntent(),'healthy')"),/호출벨 · 강타 강화/);
+  assert.match(run("intentPanel(battleIntent(),'healthy')"),/<strong>7<\/strong>/);
+  run(`while(bellboyPhase()!=="staggered") advanceAutoBattle();`);
+  assert.equal(run("game.feedback.at(-1).opensGate"),true);
+  assert.equal(run("game.feedback.at(-1).targets[0]"),"chest");
+  assert.equal(run("game.feedback.at(-1).dealt"),7);
+  assert.equal(run("game.cooldownBattle.elapsed"),3500);
+  assert.match(run("bodyPanel('enemy',battleIntent(),'healthy')"),/aria-label="철문 열림"/);
+  run(`applyCard("strike",game.player,game.enemy,["belly"]);`);
+  assert.equal(run("game.enemy.body.belly.hp"),3);
+  run(`while(game.cooldownBattle.elapsed<4900) advanceAutoBattle();`);
+  assert.equal(run("bellboyPhase()"),"staggered");
+  run(`advanceAutoBattle();`);
+  assert.equal(run("bellboyPhase()"),"bell");
+  run(`applyCard("strike",game.player,game.enemy,["belly"]);`);
+  assert.equal(run("game.enemy.body.belly.hp"),3);
+  assert.equal(run("game.feedback.at(-1).gateBlock"),true);
+});
+
 test("automatic combat runs through varied routes, loadouts and companions without invalid state",t=>{
-  let wins=0, losses=0;
+  let wins=0;
   for(let seed=1;seed<=45;seed++){
-    const run=engine(seed);
-    run(`globalThis.actions=0; globalThis.path=${seed%3};
-      while(!['won','lost'].includes(game.phase) && actions<1000){
-        if(game.phase==='prep'){
-          const learned=Object.keys(game.skillLevels).find(id=>!starterSkills.includes(id) && !game.loadout.includes(id) && cards[id].type==='attack');
-          if(learned){
-            toggleEquippedSkill(game.loadout[1]);
-            toggleEquippedSkill(learned);
-          }
-          beginCombat();
-        }else if(game.phase==='combat'){advanceAutoBattle(); game.feedback=[]; actions++;}
-        else if(game.phase==='reward') chooseReward(game.rewards[${seed%3}]);
-        else {
-          if(game.pendingCompanion) recruitCompanion(game.pendingCompanion);
-          if(game.area==='corridor'){
-            const patient=quickHealTarget();
-            if(patient) treatAtStairs(patient.target,patient.side);
-          }
-          const next=areas[game.area].next;
-          moveTo(game.area==='threshold'?next[path]:next[0]);
-        }
-        if(!Number.isFinite(game.distance) || !Number.isFinite(game.combatTime)) throw new Error('invalid resources');
-        for(const side of [...partySides(),'enemy']){
-          const actor=game[side];
-          if(actor.hp<0 || actor.hp>actor.maxHp) throw new Error('invalid HP');
-          for(const part of Object.values(actor.body)) if(part.hp<0 || part.hp>part.max || part.guard<0) throw new Error('invalid body state');
-        }
-      }
-    `);
-    assert.ok(run("actions<1000"));
-    const outcome=run("game.phase");
-    if(outcome==="won") wins++;
-    else if(outcome==="lost") losses++;
-    else assert.fail(`seed ${seed} stalled in ${outcome}`);
+    const outcome=playFirstStage(engine(seed),seed);
+    assert.ok(outcome.actions<1000,`seed ${seed} exceeded the action budget`);
+    if(outcome.won) wins++;
   }
-  assert.equal(wins+losses,45);
   assert.ok(wins>0,"automatic play must be able to escape");
-  t.diagnostic(`${wins} escapes, ${losses} losses across 45 deterministic complete runs`);
+  t.diagnostic(`${wins} escapes, ${45-wins} losses across 45 deterministic complete runs`);
 });

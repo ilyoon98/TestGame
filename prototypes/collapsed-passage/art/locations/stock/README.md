@@ -1,0 +1,5 @@
+# 암시장 상품 삽화
+
+내장 ImageGen에서 상품 4종을 하나의 투명 시트로 만들었다. 각 사분면의 알파 영역을 잘라 180×180 투명 WebP에 맞췄다.
+
+> Use case: stylized-concept. Create one production texture atlas for a Korean dark-fantasy prison escape game shop. A perfectly even 2×2 grid containing four isolated items with generous transparent gutters and no divider lines, each wholly inside the center 65% of its own quadrant. Upper left: neatly rolled ivory linen bandages tied in purple thread. Upper right: squat ruby-red medicinal glass flask with cork and twine. Lower left: a small round brass oil flask with an iron cap and a short wick. Lower right: a small moss-green leather pouch of three dark metal lockpicks, with lockpicks sticking clearly up above its edge. Make all four equally legible at 60 pixels. Painterly game inventory item sprites, hand-drawn dark plum contours, compact stylized proportions, warm amber dungeon candle rim light, muted dusty purple and ochre materials, attractive cel-shaded shapes. Straight-on three-quarter view. One object group per cell. A true transparent RGBA background, no floor, no bloom, no lettering, no UI, no watermark.

@@ -43,13 +43,13 @@ test("both recruited companions appear and only the fallen companion leaves the 
   const run=engine();
   const field=()=>run("layoutCombatHud=()=>{}; renderScreen(); document.querySelector('#stage').innerHTML");
   assert.doesNotMatch(field(),/class="panel actor-companion/);
-  run("game.enemy.hp=0; finishCombat(); chooseReward(null);");
+  run("game.enemy.hp=0; finishCombat();");
   assert.match(run("companionEncounterPanel()"),/src="art\/encounters\/guard\.webp" width="960" height="540"/);
-  run("recruitCompanion('guard'); moveTo('infirmary'); beginCombat();");
+  run("recruitCompanion('guard'); chooseReward(null); moveTo('infirmary'); beginCombat();");
   assert.match(field(),/art\/characters\/guard-sd\.png/);
-  run("game.enemy.hp=0; finishCombat(); chooseReward(null);");
+  run("game.enemy.hp=0; finishCombat();");
   assert.match(run("companionEncounterPanel()"),/src="art\/encounters\/awakened\.webp" width="960" height="540"/);
-  run("recruitCompanion('awakened'); declineCompanion(); moveTo('lift'); beginCombat();");
+  run("recruitCompanion('awakened'); declineCompanion(); chooseReward(null); moveTo('lift'); beginCombat();");
   assert.match(field(),/--combat-columns:4/);
   assert.match(field(),/art\/characters\/awakened-sd\.png/);
   assert.match(field(),/art\/characters\/guard-sd\.png/);
@@ -64,7 +64,7 @@ test("combat renders the ally on the field and retains expanded body readouts ac
   run("layoutCombatHud=()=>{}; renderScreen();");
   assert.equal(run("document.querySelector('#stage').innerHTML.includes('party-combat')"),false);
   run(`
-    game.enemy.hp=0; finishCombat(); chooseReward(null); recruitCompanion('guard'); moveTo('duct'); beginCombat();
+    game.enemy.hp=0; finishCombat(); recruitCompanion('guard'); chooseReward(null); moveTo('duct'); beginCombat();
     globalThis.readouts=['player','companion','enemy'].map(side=>({dataset:{side},open:false}));
     document.querySelector('#stage').querySelectorAll=selector=>selector==='.actor-body-status[open]'?[readouts[1]]:selector==='.actor-body-status'?readouts:[];
     renderScreen();
