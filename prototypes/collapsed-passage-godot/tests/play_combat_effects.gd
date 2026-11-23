@@ -2,6 +2,7 @@ extends SceneTree
 
 const Startup := preload("res://ui/startup.tscn")
 const CombatAudio := preload("res://ui/combat_audio.gd")
+const VitalityMeter := preload("res://ui/vitality_meter.gd")
 var _errors: Array[String] = []
 var _cues: Array[String] = []
 
@@ -12,6 +13,7 @@ func _initialize() -> void:
 
 func _check() -> void:
 	var args := OS.get_cmdline_user_args()
+	_check_hp_trail()
 	for size in [Vector2i(1100, 740), Vector2i(900, 650)]:
 		var viewport := SubViewport.new()
 		viewport.size = size
@@ -56,6 +58,11 @@ func _check() -> void:
 		_expect(game._fighters.enemy.pose == "hit" and game._effect._event.get("dealt") == 2 and _has_cue(game, "hit"),
 			"Contact plays the hit still, impact and low thud")
 		_expect(game._fighters.enemy.hp.value == max_hp - 2, "Contact updates HP")
+		_expect(game._fighters.enemy.hp.trail == max_hp, "Contact leaves the lost portion visible")
+		game._pause.pressed.emit()
+		game._process(1.5)
+		_expect(game._fighters.enemy.hp.trail == max_hp, "White trail freezes while combat is paused")
+		game._pause.pressed.emit()
 		if args.size() == 1 and size.x == 1100:
 			await RenderingServer.frame_post_draw
 			_capture(viewport, args[0], "godot-combat-hit.png")
@@ -104,8 +111,29 @@ func _check() -> void:
 	for error: String in _errors:
 		push_error(error)
 	if _errors.is_empty():
-		print("Attack, hit, guard, partial block, ranged flight, pause, mute and session settings passed at both viewport sizes")
+		print("Combat effects, one-second HP trail, pause, mute and session settings passed at both viewport sizes")
 	quit(0 if _errors.is_empty() else 1)
+
+
+func _check_hp_trail() -> void:
+	var meter := VitalityMeter.new()
+	meter.setup(30, 24, Color.AQUAMARINE)
+	_expect(meter.value == 24 and meter.trail == 24, "Initial HP must not show a phantom hit")
+	meter.set_health(16)
+	meter.advance(0.99)
+	_expect(meter.value == 16 and meter.trail == 24, "White layer holds for one second")
+	meter.advance(0.21)
+	_expect(meter.trail < 24 and meter.trail > 16, "White layer slides toward current HP")
+	var before := meter.trail
+	meter.set_health(9)
+	meter.advance(0.99)
+	_expect(meter.value == 9 and meter.trail == before, "A second hit renews the hold without jumping")
+	meter.advance(0.57)
+	_expect(meter.trail == 9 and meter.remaining_loss() == 0.0, "White layer catches up completely")
+	meter.set_health(1)
+	meter.set_health(12)
+	_expect(meter.value == 12 and meter.trail == 12, "Healing updates both layers and clears the loss")
+	meter.free()
 
 
 func _check_training(game: Control) -> void:

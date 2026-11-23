@@ -51,6 +51,10 @@ func _check() -> void:
 	viewport.add_child(game)
 	game.set_process(false)
 	game.find_child("BeginCombat", true, false).pressed.emit()
+	await process_frame
+	var screen_bounds := Rect2(Vector2.ZERO, Vector2(viewport.size))
+	_expect(screen_bounds.encloses(game._pursuit_track.get_global_rect()) and
+		screen_bounds.encloses(game._speed.get_global_rect()), "Pursuit art and controls fit the minimum viewport")
 	var cues: Array[String] = []
 	game._audio.cue_triggered.connect(func(id: String): cues.append(id))
 	game.run.distance = 3

@@ -2,6 +2,7 @@ extends SceneTree
 
 const Screen := preload("res://ui/threshold.tscn")
 const Run := preload("res://combat/threshold_run.gd")
+const FieldUI := preload("res://ui/field_ui.gd")
 var _failures: Array[String] = []
 
 
@@ -45,8 +46,38 @@ func _check() -> void:
 		_press(ui, "Recruit_guard" if recruit else "DeclineRecruit")
 		await process_frame
 		_check_focused(vp, size, "reward")
+		for id: String in ui.run.rewards:
+			var option := ui.find_child("Reward_" + id, true, false) as Button
+			var title := option.get_parent().find_child("CardTitle", true, false) as RichTextLabel
+			var number := option.get_parent().find_child("Time", true, false) as Label
+			var level: int = ui.run.levels.get(id, 0)
+			_expect(option.text == ("강화" if level > 0 else "획득") and
+				title.get_parsed_text().contains("+") == (level > 0),
+				"The reward action and card title distinguish acquisition and upgrading")
+			_expect(number.text == ui._seconds(ui.run.cooldown(id, level + 1)),
+				"The timer displays only the resulting cooldown")
+			_expect(number.get_theme_color("font_color") == (FieldUI.UPGRADE_INK if level > 0 else FieldUI.TEXT),
+				"Only an improved cooldown uses green")
+			var card := option.get_parent().get_parent() as Control
+			var shortcut := card.get_parent().get_node("CardShortcut") as Control
+			_expect(shortcut.get_global_rect().position.y >= card.get_global_rect().end.y,
+				"Card shortcuts are below the card frame")
 		if args.size() == 1 and size.x == 1100:
 			await _capture(vp, args[0], "godot-threshold-rewards")
+		var compare := ui.find_child("CompareUpgrade", true, false)
+		if compare != null:
+			var old_levels: Dictionary = ui.run.levels.duplicate()
+			_key(vp, KEY_U)
+			_expect(ui._show_before_upgrade and ui.run.levels == old_levels, "Comparison is a preview")
+			for id: String in ui._upgrade_cards:
+				var preview: PanelContainer = ui._upgrade_cards[id]
+				var number := preview.find_child("Time", true, false) as Label
+				_expect(number.text == ui._seconds(ui.run.cooldown(id)), "Comparison restores the owned cooldown")
+				_expect(number.get_theme_color("font_color") == FieldUI.TEXT, "The owned cooldown uses the original color")
+			if args.size() == 1 and size.x == 1100:
+				await _capture(vp, args[0], "godot-rewards-before-upgrade")
+			_press(ui, "CompareUpgrade")
+			_expect(not ui._show_before_upgrade, "Comparing again restores the reward preview")
 		var chosen: String = ui.run.rewards[1 if route == "corridor" else 0] if recruit else ""
 		_press(ui, "Reward_" + chosen if recruit else "SkipReward")
 		await process_frame
@@ -160,6 +191,13 @@ func _press(ui: Control, button_name: String) -> void:
 	_expect(button != null and not button.disabled, "Missing or disabled button: " + button_name)
 	if button != null and not button.disabled:
 		button.pressed.emit()
+
+
+func _key(viewport: SubViewport, key: Key) -> void:
+	var event := InputEventKey.new()
+	event.keycode = key
+	event.pressed = true
+	viewport.push_input(event)
 
 
 func _check_focused(vp: SubViewport, size: Vector2i, screen: String) -> void:

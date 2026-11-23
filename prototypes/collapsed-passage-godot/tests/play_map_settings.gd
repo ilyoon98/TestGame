@@ -44,7 +44,7 @@ func _check() -> void:
 			if kind != "widths":
 				_choose(title, kind, OPTIONS[kind])
 		_write(title, "Seed", "  격리문-04  ")
-		_expect(status.text == "구간 방 8개 · 일반 전투 2개", "Summary reflects edits")
+		_expect(status.text == "구간 방 8개, 일반 전투 2개", "Summary reflects edits")
 		await process_frame
 		for id in ["MapSettingsPanel", "StartRun", "OpenCodex"]:
 			_check_bounds(_control(title, id), size)

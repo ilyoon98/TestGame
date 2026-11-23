@@ -4,9 +4,10 @@ const Run := preload("res://combat/threshold_run.gd")
 const GameScreen := preload("res://ui/threshold.tscn")
 const Codex := preload("res://ui/codex.gd")
 const SeedMap := preload("res://world/seed_map.gd")
+const FieldUI := preload("res://ui/field_ui.gd")
 const OPENING_FOLDER := "res://art/opening/"
-const PALE := Color("#f2dbc2")
-const GOLD := Color("#e5ba85")
+const PALE := FieldUI.TEXT
+const GOLD := FieldUI.BRASS
 const SPECIAL_ROOM_LABELS := {"shops": "상점", "rests": "휴식", "elites": "강적", "mysteries": "사건"}
 
 var tutorial_path := "user://opening.cfg"
@@ -30,11 +31,13 @@ var _map_status: Label
 
 
 func _ready() -> void:
+	if get_parent() == get_tree().root:
+		get_tree().root.min_size = FieldUI.WINDOW_MIN
 	_data = JSON.parse_string(FileAccess.get_file_as_string("res://data/threshold.json"))
 	var save := ConfigFile.new()
 	if save.load(tutorial_path) == OK:
 		_tutorial_seen = save.get_value("opening", "tutorial_v1", false) == true
-	theme = _build_theme()
+	theme = FieldUI.make_theme()
 	_render()
 
 
@@ -88,7 +91,13 @@ func _build_home() -> void:
 
 	var content := _page(44)
 	content.alignment = BoxContainer.ALIGNMENT_END
-	content.add_child(_label("붕괴 통로", 70))
+	var lockup := HBoxContainer.new()
+	lockup.add_theme_constant_override("separation", 17)
+	content.add_child(lockup)
+	var seal := FieldUI.mark("seal", GOLD, 66)
+	seal.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	lockup.add_child(seal)
+	lockup.add_child(FieldUI.label("붕괴 통로", 70, FieldUI.TEXT, true))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	content.add_child(row)
@@ -108,8 +117,12 @@ func _build_home() -> void:
 	row.add_child(_map_toggle)
 	var start := _button("시작하기", "StartRun", _start, true)
 	row.add_child(start)
-	row.add_child(_button("QA 훈련장", "StartTraining", _start.bind(true)))
-	row.add_child(_button("도감", "OpenCodex", _open_codex))
+	var training := _button("QA 훈련장", "StartTraining", _start.bind(true))
+	row.add_child(training)
+	FieldUI.add_key_hint(training, "T")
+	var book := _button("도감", "OpenCodex", _open_codex)
+	row.add_child(book)
+	FieldUI.add_key_hint(book, "D")
 	_build_map_settings(content)
 	start.grab_focus()
 
@@ -117,7 +130,7 @@ func _build_home() -> void:
 func _build_map_settings(parent: VBoxContainer) -> void:
 	_map_panel = PanelContainer.new()
 	_map_panel.name = "MapSettingsPanel"
-	var panel_style := _style(Color("#211923f5"), Color("#705858"))
+	var panel_style := FieldUI.plate(Color("#211923f5"), FieldUI.RIM)
 	panel_style.content_margin_top = 12
 	panel_style.content_margin_bottom = 12
 	_map_panel.add_theme_stylebox_override("panel", panel_style)
@@ -197,7 +210,7 @@ func _validate_map(options: Dictionary, training := false) -> bool:
 	elif special > total:
 		_map_status.text = "특수 방 %d개가 전체 방 %d개를 넘습니다." % [special, total]
 	else:
-		_map_status.text = "구간 방 %d개 · 일반 전투 %d개" % [total, total - special]
+		_map_status.text = "구간 방 %d개, 일반 전투 %d개" % [total, total - special]
 	_map_status.add_theme_color_override("font_color", Color("#ef9b7a") if total == 0 or special > total else PALE)
 	return total > 0 and (training or special <= total)
 
@@ -207,7 +220,7 @@ func _build_pages() -> void:
 	if view == "comic":
 		var image := _texture(_comic_path(step))
 		image.name = "ComicImage"
-		image.tooltip_text = _data.openingPanels[step][1]
+		image.tooltip_text = FieldUI.display_copy(_data.openingPanels[step][1])
 		image.accessibility_name = image.tooltip_text
 		image.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		page.add_child(image)
@@ -230,7 +243,7 @@ func _build_pages() -> void:
 		box.add_child(title)
 		var description := _label(lesson[2], 20)
 		if step == 0:
-			description.text = "대원을 선택하고 전위·중위·후위를 눌러 배치하세요.\n적의 일반 공격은 맨 앞을 노립니다."
+			description.text = "대원을 고르고 전위, 중위 또는 후위를 눌러 배치하세요.\n적의 일반 공격은 맨 앞을 노립니다."
 		description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		description.custom_minimum_size.x = minf(550, maxf(200, size.x - 60))
@@ -306,9 +319,22 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			_close_codex()
 		return
-	if view not in ["comic", "tutorial"] or not event is InputEventKey or not event.pressed or event.echo:
+	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_LEFT:
+	if event.ctrl_pressed or event.alt_pressed or event.meta_pressed:
+		return
+	if view == "home":
+		if get_viewport().gui_get_focus_owner() == _field or event.shift_pressed:
+			return
+		if event.keycode == KEY_D:
+			_open_codex()
+		elif event.keycode == KEY_T:
+			_start(true)
+		else:
+			return
+	elif view not in ["comic", "tutorial"]:
+		return
+	elif event.keycode == KEY_LEFT:
 		_back()
 	elif event.keycode == KEY_RIGHT:
 		_advance()
@@ -368,46 +394,13 @@ func _texture(path: String) -> TextureRect:
 
 
 func _label(value: String, font_size: int) -> Label:
-	var label := Label.new()
-	label.text = value
-	label.add_theme_font_size_override("font_size", font_size)
-	return label
+	return FieldUI.label(value, font_size, FieldUI.TEXT, font_size >= 24)
 
 
 func _button(text_value: String, id: String, action: Callable, primary := false) -> Button:
 	var button := Button.new()
 	button.name = id
 	button.text = text_value
-	button.custom_minimum_size.y = 46
-	if primary:
-		button.add_theme_stylebox_override("normal", _style(Color("#725033"), GOLD))
+	FieldUI.style_action(button, primary)
 	button.pressed.connect(action)
 	return button
-
-
-func _build_theme() -> Theme:
-	var result := Theme.new()
-	var korean := SystemFont.new()
-	korean.font_names = ["Malgun Gothic", "Noto Sans CJK KR", "Apple SD Gothic Neo"]
-	result.default_font = korean
-	result.default_font_size = 17
-	result.set_color("font_color", "Label", PALE)
-	result.set_color("font_color", "Button", PALE)
-	result.set_stylebox("normal", "Button", _style(Color("#2b212c"), Color("#705858")))
-	result.set_stylebox("hover", "Button", _style(Color("#503747"), GOLD))
-	var focus := _style(Color.TRANSPARENT, GOLD)
-	focus.draw_center = false
-	focus.set_border_width_all(2)
-	result.set_stylebox("focus", "Button", focus)
-	return result
-
-
-func _style(background: Color, outline: Color) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = background
-	box.border_color = outline
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(5)
-	box.content_margin_left = 15
-	box.content_margin_right = 15
-	return box

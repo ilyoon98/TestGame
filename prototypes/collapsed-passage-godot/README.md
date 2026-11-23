@@ -1,5 +1,7 @@
 # 붕괴 통로 · Godot
 
+[UI 콘셉트와 부품 크기표](VISUAL_DESIGN.md)에 철제 조작부, 기술 카드, 방 문양의 표현과 해상도 계산을 정리했다.
+
 타이틀에서 시드를 입력하고 ‘시작하기’를 누른다. 비워 두거나 ‘무작위’를 누르면 새 시드를 사용한다. ‘지도 설정’에서 쉼표로 구간별 방 수를 입력한다. 구간은 1~4개, 각 구간은 방 1~3개를 배치할 수 있다. 상점·휴식·강적·사건 방 수를 정하면 남는 칸은 일반 전투방으로 채운다. 기본값은 `3,3`에 특수 방 종류별로 1개씩이다.
 
 같은 시드와 설정으로 방 배치, 연결, 전투 보상을 재현할 수 있다. 종료 화면의 ‘다시 준비’는 현재 설정으로 격리문 준비부터 다시 시작한다. ‘처음으로’에서도 현재 설정을 다시 불러온다.
@@ -53,6 +55,7 @@ node scripts/compare-stage.mjs
 node scripts/compare-training.mjs
 node scripts/compare-playthrough.mjs
 godot --headless --path . --script res://tests/play_ui.gd
+godot --headless --path . --script res://tests/play_ui_layout.gd
 godot --headless --path . --script res://tests/play_opening.gd
 godot --headless --path . --script res://tests/play_codex.gd
 godot --headless --path . --script res://tests/play_training.gd
@@ -96,4 +99,5 @@ Godot UI는 1100×740과 900×650에서 만화 8컷, 이전·다음·건너뛰�
 - [codex.gd](ui/codex.gd)에서 웹판과 같은 분류로 대원과 기술을 표시한다.
 - [threshold_screen.gd](ui/threshold_screen.gd)에서 전투 결과를 받아 자세를 교체하고 화면을 전환한다.
 - `node scripts/bake-combat-audio.mjs`는 웹판 타격, 방어 충돌, 회복, 호출벨과 추격 효과음을 합성해 Godot에서 사용하는 WAV로 저장한다. 공격 준비와 가드 장착 소리도 이 스크립트에서 만든다.
+- `godot --path . --script res://scripts/bake-card-ui.gd`는 기술별 UI 이미지와 금속 프레임을 `art/ui/cards/`에 다시 만든다. 이미지 합성에는 Godot 렌더러를 사용한다.
 - `node scripts/sync-web-data.mjs`는 [웹판](../collapsed-passage/index.html)의 기본 지도, 전투와 동료 데이터, 기술 카드 문구와 원화를 가져온다. 웹판 값을 의도적으로 갱신한 뒤 실행하고 비교를 다시 돌린다.

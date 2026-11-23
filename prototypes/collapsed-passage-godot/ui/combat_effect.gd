@@ -140,7 +140,7 @@ func _draw_impact() -> void:
 				labels.append("가드 −%d" % removed)
 			if added > 0:
 				labels.append("가드 +%d" % added)
-			_badge(text_position, " · ".join(labels), GUARD, 16, fade)
+			_badge(text_position, "   ".join(labels), GUARD, 16, fade)
 		if recovered > 0:
 			_draw_burst(target, HEAL, flash, 0.8)
 			_badge(text_position, "+%d" % recovered, HEAL, 18, fade)

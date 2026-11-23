@@ -14,12 +14,14 @@ const PursuitTrack := preload("res://ui/pursuit_track.gd")
 const CaptureScene := preload("res://ui/capture_scene.gd")
 const ActorPortrait := preload("res://ui/actor_portrait.gd")
 const LocationScene := preload("res://ui/location_scene.gd")
-const AMBER := Color("#efc58a")
-const INK := Color("#171c16")
-const PALE := Color("#f0e6d0")
-const MUTED := Color("#aeb5a3")
-const ALLY := Color("#9bd8be")
-const FOE := Color("#ef9b7a")
+const FieldUI := preload("res://ui/field_ui.gd")
+const VitalityMeter := preload("res://ui/vitality_meter.gd")
+const AMBER := FieldUI.BRASS
+const INK := FieldUI.BLACK
+const PALE := FieldUI.TEXT
+const MUTED := FieldUI.MUTED
+const ALLY := FieldUI.ALLY
+const FOE := FieldUI.DANGER
 const INJURY_LEVELS := {"healthy": "정상", "injured": "부상", "lost": "결손"}
 const QA_ACTIONS := {"win": "전투 승리 (K)", "heal": "아군 회복 (H)", "margin": "도망 여유 +5 (J)"}
 
@@ -66,6 +68,10 @@ var _pursuit_urgent := false
 var _pursuer_shadow: TextureRect
 var _qa_open := false
 var _qa_buttons: Dictionary = {}
+var _hotkeys: Dictionary[int, Button] = {}
+var _upgrade_cards: Dictionary[String, PanelContainer] = {}
+var _upgrade_compare: Button
+var _show_before_upgrade := false
 var _journal_open := false
 var _journal_body: RichTextLabel
 
@@ -73,7 +79,7 @@ var _journal_body: RichTextLabel
 func _ready() -> void:
 	if run == null:
 		run = Run.new()
-	theme = _make_theme()
+	theme = FieldUI.make_theme()
 	_audio = CombatAudio.new()
 	_audio.name = "CombatAudio"
 	_audio.enabled = sound_enabled
@@ -108,6 +114,10 @@ func _show(focus_key := "") -> void:
 	_injury_side = null
 	_injury_members.clear()
 	_qa_buttons.clear()
+	_hotkeys.clear()
+	_upgrade_cards.clear()
+	_upgrade_compare = null
+	_show_before_upgrade = false
 	_scroll.scroll_vertical = 0
 	_build_header()
 	if run.training:
@@ -129,10 +139,15 @@ func _show(focus_key := "") -> void:
 func _build_header() -> void:
 	var line := _row(12)
 	_page.add_child(line)
-	var title := _label("QA 훈련장" if run.training else "붕괴 통로", 34, PALE)
+	var seal := FieldUI.mark("seal", AMBER, 30)
+	seal.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	line.add_child(seal)
+	var room_name: String = run.data.map[run.area].name
+	var title := _label("QA 훈련장" if run.training else room_name, 32, PALE)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(title)
-	line.add_child(_label(run.data.map[run.area].name, 17, AMBER))
+	if run.training:
+		line.add_child(_label(room_name, 17, AMBER))
 	if run.map_options != null:
 		var seed_label := _label(run.seed, 15, MUTED)
 		seed_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -145,14 +160,17 @@ func _build_header() -> void:
 	_sound_toggle.toggle_mode = true
 	_refresh_sound_toggle()
 	line.add_child(_sound_toggle)
+	_bind_hotkey(_sound_toggle, KEY_V)
 	var map_button := _button("미니맵", _toggle_minimap)
 	map_button.name = "OpenMinimap"
 	map_button.tooltip_text = "전체 경로 보기 (M)"
 	line.add_child(map_button)
+	FieldUI.add_key_hint(map_button, "M")
 	if codex_requested.has_connections():
 		var book := _button("도감", func(): codex_requested.emit())
 		book.name = "OpenCodex"
 		line.add_child(book)
+		_bind_hotkey(book, KEY_D)
 	if not run.training and run.phase not in ["won", "lost"]:
 		var restart := _button("다시 시작", _restart)
 		restart.name = "RestartRun"
@@ -162,10 +180,13 @@ func _build_header() -> void:
 		var home := _button("처음으로", func(): return_to_title.emit())
 		home.name = "ReturnTitle"
 		line.add_child(home)
-	var box := _panel(Color("#1e251d"))
+	var box := _panel(FieldUI.IRON, FieldUI.RIM, 6)
 	_page.add_child(box)
 	var body := _row(14)
 	box.add_child(body)
+	var emblem := FieldUI.mark("heal" if run.training else "exit", AMBER, 24)
+	emblem.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	body.add_child(emblem)
 	_status = _label("", 16, ALLY)
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(_status)
@@ -178,6 +199,8 @@ func _build_header() -> void:
 		_speed = _button("배속 %d×" % speed, _cycle_speed)
 		body.add_child(_pause)
 		body.add_child(_speed)
+		_bind_hotkey(_pause, KEY_SPACE)
+		_bind_hotkey(_speed, KEY_X)
 		_pause.grab_focus()
 
 
@@ -231,14 +254,15 @@ func _build_prep(focus_key: String) -> void:
 	heading.add_child(heading_copy)
 	heading_copy.add_child(_label("전투 준비", 24, PALE))
 	var enemy_hp := "∞" if run.training else str(run.enemy.hp)
-	heading_copy.add_child(_label("%s · %s HP" % [run.enemy.name, enemy_hp], 14, MUTED))
+	heading_copy.add_child(_label("%s  %s HP" % [run.enemy.name, enemy_hp], 14, MUTED))
 	var start := _button("전투 시작", _begin, true)
 	start.name = "BeginCombat"
 	start.disabled = not run.ready_to_fight()
 	heading.add_child(start)
+	_bind_hotkey(start, KEY_B)
 	if focus_key.is_empty() and not start.disabled:
 		start.grab_focus()
-	var board := _arena(190 if run.training else 240, "res://" + run.data.map[run.area].arena)
+	var board := _arena(174 if run.training else 184, "res://" + run.data.map[run.area].arena)
 	_page.add_child(board)
 	var ranks := _row(10)
 	ranks.name = "PrepRanks"
@@ -246,36 +270,44 @@ func _build_prep(focus_key: String) -> void:
 	for rank_index in range(Run.RANKS.size() - 1, -1, -1):
 		var side = run.formation[rank_index]
 		var selected: bool = _prep_side == side
-		var card := _panel(Color("#202226eb"), AMBER if selected else Color("#515146"), 5 if run.training else 11)
+		var card := _panel(Color("#201c20d9"), AMBER if selected else FieldUI.RIM, 7)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_allow_formation_drop(card, rank_index)
 		ranks.add_child(card)
-		var content := _column(4 if run.training else 6)
+		var content := _column(5)
 		card.add_child(content)
 		var title: String = Run.RANKS[rank_index]
-		var position_button := _button(title, _move_ally.bind(rank_index), selected, run.training)
+		var position_button := _button(title, _move_ally.bind(rank_index), selected, true)
 		position_button.name = "Rank%d" % rank_index
 		position_button.tooltip_text = "%s 배치" % run.get(_prep_side).name
 		position_button.disabled = side == "player" and _prep_side not in run.formation
 		content.add_child(position_button)
+		_bind_hotkey(position_button, [KEY_E, KEY_W, KEY_Q][rank_index])
 		_allow_formation_drop(position_button, rank_index)
 		if focus_key == "rank%d" % rank_index:
 			position_button.grab_focus()
 		if side != null:
 			var actor: Dictionary = run.get(side)
-			var portrait := _texture(_idle_art(actor.kind), 58 if run.training else 72)
-			portrait.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			content.add_child(portrait)
-			var member := _button(actor.name, _pick_ally.bind(side), selected, run.training)
+			var member_row := _row(6)
+			member_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			content.add_child(member_row)
+			var portrait := _texture(_idle_art(actor.kind), 82)
+			portrait.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			member_row.add_child(portrait)
+			var identity := _column(5)
+			identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			identity.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			member_row.add_child(identity)
+			var member := _button(actor.name, _pick_ally.bind(side), selected, true)
 			member.name = "Member_" + side
 			member.tooltip_text = _member_traits(actor)
-			content.add_child(member)
+			identity.add_child(member)
 			_allow_formation_drop(member, rank_index, side)
 			if focus_key == side:
 				member.grab_focus()
 			var health := _label(_member_health(actor), 13, ALLY)
 			health.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			content.add_child(health)
+			identity.add_child(health)
 		else:
 			var empty := _label("빈자리", 16, MUTED)
 			empty.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -293,12 +325,12 @@ func _build_prep(focus_key: String) -> void:
 	for id: String in active:
 		var threshold := int(run.data.traitThreshold)
 		if active[id] >= threshold and run.data.traits[id].has("effect"):
-			var synergy := _label("%s %d/%d" % [run.data.traits[id].name, active[id], threshold], 14, ALLY)
+			var synergy := FieldUI.badge("link", "%s %d/%d" % [run.data.traits[id].name, active[id], threshold], ALLY)
 			synergy.name = "Synergy_" + id
-			synergy.tooltip_text = run.data.traits[id].effect
+			synergy.tooltip_text = FieldUI.display_copy(run.data.traits[id].effect)
 			synergy.mouse_filter = Control.MOUSE_FILTER_PASS
 			skills_head.add_child(synergy)
-	skills_head.add_child(_label("장착 %d / %d" % [equipped, loadout.size()], 17, AMBER))
+	skills_head.add_child(FieldUI.badge("equipped", "장착 %d/%d" % [equipped, loadout.size()]))
 	_page.add_child(skills_head)
 	if run.training:
 		_build_training_skills(loadout, focus_key)
@@ -310,17 +342,22 @@ func _build_prep(focus_key: String) -> void:
 
 func _build_run_skills(loadout: Array, equipped: int, focus_key: String) -> void:
 	var choices := GridContainer.new()
-	choices.columns = 4
-	choices.add_theme_constant_override("h_separation", 10)
-	choices.add_theme_constant_override("v_separation", 10)
+	choices.add_theme_constant_override("h_separation", FieldUI.CARD_GAP)
+	choices.add_theme_constant_override("v_separation", FieldUI.CARD_GAP)
 	_page.add_child(choices)
-	for id: String in run.available_skills(_prep_side):
+	var fit_cards := func():
+		choices.columns = FieldUI.card_columns(_scroll.size.x - _scroll.get_v_scroll_bar().size.x, 4)
+	_scroll.resized.connect(fit_cards)
+	choices.tree_exiting.connect(func(): _scroll.resized.disconnect(fit_cards), CONNECT_ONE_SHOT)
+	fit_cards.call()
+	var available: Array = run.available_skills(_prep_side)
+	for slot in available.size():
+		var id: String = available[slot]
 		var card: Dictionary = run.cards[id]
 		var active: bool = loadout.has(id)
-		var button := _card_button(choices, card, "%s · %s" % [_seconds(run.cooldown(id)), "장착" if active else "선택"],
-			_toggle_skill.bind(id), active)
+		var full: bool = not active and equipped == loadout.size()
+		var button := _card_button(choices, card, _toggle_skill.bind(id), slot + 1, active, -1, full)
 		button.name = "Equip_" + id
-		button.disabled = not active and equipped == loadout.size()
 		if not run.skill_available(id, _prep_side):
 			button.tooltip_text = "현재 대열 또는 부위 상태에서 발동 불가"
 		if focus_key == id and not button.disabled:
@@ -368,9 +405,9 @@ func _build_training_skills(loadout: Array, focus_key: String) -> void:
 		for id: String in options:
 			var definition: Dictionary = run.cards[id]
 			var index := picker.item_count
-			picker.add_item("%s · %s" % [definition.name, _seconds(run.cooldown(id))])
+			picker.add_item("%s  %s" % [definition.name, _seconds(run.cooldown(id))])
 			picker.set_item_metadata(index, id)
-			picker.get_popup().set_item_tooltip(index, definition.description)
+			picker.get_popup().set_item_tooltip(index, FieldUI.display_copy(definition.description))
 			if loadout[slot] == id:
 				picker.select(index)
 		picker.item_selected.connect(_set_training_skill.bind(slot, picker))
@@ -474,31 +511,44 @@ func _build_combat() -> void:
 		var group := _column(5)
 		group.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		skills.add_child(group)
-		group.add_child(_label(run.get(side).name, 15, ALLY))
-		groups[side] = group
+		var owner := _label(run.get(side).name, 17, ALLY)
+		owner.add_theme_font_override("font", FieldUI.DISPLAY_FONT)
+		group.add_child(owner)
+		var slots := GridContainer.new()
+		slots.columns = 3 if sides.size() == 1 else 1
+		slots.add_theme_constant_override("h_separation", 6)
+		slots.add_theme_constant_override("v_separation", 5)
+		group.add_child(slots)
+		groups[side] = slots
 	for slot: Dictionary in run.slots:
 		var id: String = slot.id
-		var box := _panel(Color("#20261e"))
+		var box := _panel(FieldUI.IRON, FieldUI.RIM, 5)
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		groups[slot.side].add_child(box)
-		var content := _column(7)
+		var content := _column(3)
 		box.add_child(content)
 		var title: String = run.cards[id].name
 		var level := int(run.levels.get(id, 1))
-		var label := _label("%s · Lv.%d" % [title, level] if level > 1 else title, 15, PALE)
-		label.tooltip_text = run.cards[id].description
+		var label := _label("%s Lv.%d" % [title, level] if level > 1 else title, 15, PALE)
+		label.tooltip_text = FieldUI.display_copy(run.cards[id].description)
 		var name_row := _row(7)
 		content.add_child(name_row)
-		var icon := _texture("res://" + run.cards[id].emote, 28)
-		icon.custom_minimum_size.x = 37
+		var symbol := FieldUI.card_symbol(run.cards[id])
+		var icon := FieldUI.mark(symbol, FieldUI.CARD_TYPES[symbol][1], 21)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		name_row.add_child(icon)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_row.add_child(label)
 		var activation := _label("", 12, AMBER)
 		name_row.add_child(activation)
 		var bar := _bar(slot.cooldown, ALLY)
-		content.add_child(bar)
-		var time := _label("", 14, MUTED)
-		content.add_child(time)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var charge := _row(6)
+		content.add_child(charge)
+		charge.add_child(bar)
+		var time := _label("", 13, MUTED)
+		charge.add_child(time)
 		_skill_bars[id] = {"bar": bar, "time": time, "activation": activation}
 	_add_fallen_notice()
 	_refresh_combat()
@@ -547,7 +597,7 @@ func _apply_injury(parts: OptionButton, condition: OptionButton) -> void:
 	_restore_poses()
 	_refresh_combat()
 	if not _present_events():
-		_combat_note.text = "QA · %s %s %s" % [run.get(side).name, run.data.parts[part], INJURY_LEVELS[level]]
+		_combat_note.text = "QA  %s %s %s" % [run.get(side).name, run.data.parts[part], INJURY_LEVELS[level]]
 
 
 func _add_fighter(parent: HBoxContainer, side: String, color: Color) -> void:
@@ -555,8 +605,11 @@ func _add_fighter(parent: HBoxContainer, side: String, color: Color) -> void:
 	var column := _column(8)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
-	column.add_child(_label(actor.name, 19, color))
+	var nameplate := FieldUI.badge("attack" if side == "enemy" else "defense", actor.name, color, 17)
+	nameplate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	column.add_child(nameplate)
 	var cue := _label(" ", 13, color)
+	cue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(cue)
 	if side == "enemy":
 		_intent = cue
@@ -587,11 +640,18 @@ func _add_fighter(parent: HBoxContainer, side: String, color: Color) -> void:
 				bars.draw_line(Vector2(x, 0), Vector2(x, bars.size.y), Color("#796249"), 5.0)
 			bars.draw_line(Vector2(rect.position.x, bars.size.y * 0.5), Vector2(rect.end.x, bars.size.y * 0.5), Color("#59442e"), 8.0))
 		bars.resized.connect(bars.queue_redraw)
-	var hp := _bar(actor.maxHp, color)
-	hp.custom_minimum_size.y = 17
-	column.add_child(hp)
+	var vitality := _panel(Color("#151217e6"), color.darkened(0.55), 5)
+	vitality.custom_minimum_size.x = 158
+	vitality.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	column.add_child(vitality)
+	var meter := _column(2)
+	vitality.add_child(meter)
 	var caption := _label("", 15, color)
-	column.add_child(caption)
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	meter.add_child(caption)
+	var hp := VitalityMeter.new()
+	hp.setup(actor.maxHp, actor.hp, color)
+	meter.add_child(hp)
 	_fighters[side] = {"sprite": sprite, "hp": hp, "caption": caption,
 		"gate": gate, "column": column, "pose": "idle", "defeated": false}
 
@@ -608,7 +668,7 @@ func _actor_conditions(actor: Dictionary) -> Dictionary:
 func _refresh_status() -> void:
 	_refresh_journal()
 	if run.training:
-		_status.text = "훈련 경과  %s      ·      수녀  %d / %d HP" % [
+		_status.text = "훈련 경과 %s   수녀 %d / %d HP" % [
 			_seconds(run.combat_time), run.player.hp, run.player.maxHp]
 		return
 	var in_combat: bool = run.phase == "combat"
@@ -619,13 +679,13 @@ func _refresh_status() -> void:
 		_update_pursuer_shadow()
 		var interval := int(run.data.timing.pursuit)
 		var countdown := interval - int(run.elapsed) % interval
-		_status.text = "도망 여유 %d · %s 뒤 −1 · 다음 이동 +%d · 전투 %s" % [
+		_status.text = "도망 여유 %d   %s 뒤 −1   다음 이동 +%d   전투 %s" % [
 			run.distance, _seconds(countdown), run.travel_gain(), _seconds(run.elapsed)]
 		if urgent and not _pursuit_urgent:
 			_audio.cue("pursuit")
 		_pursuit_urgent = urgent
 	else:
-		_status.text = "도망 여유 %d · 다음 이동 +%d · 이동 %d칸 · 전투 %s · 수녀 %d/%d HP" % [
+		_status.text = "도망 여유 %d   다음 이동 +%d   이동 %d칸   전투 %s   수녀 %d/%d HP" % [
 			run.distance, run.travel_gain(), run.steps, _seconds(run.combat_time), run.player.hp, run.player.maxHp]
 
 
@@ -648,12 +708,12 @@ func _refresh_combat(actors: Dictionary = {}) -> void:
 		var actor: Dictionary = actors.get(side, run.get(side))
 		var view: Dictionary = _fighters[side]
 		view.sprite.set_conditions(_actor_conditions(actor))
-		view.hp.value = actor.hp
+		view.hp.set_health(actor.hp)
 		var guards := 0
 		for part: Dictionary in actor.body.values():
 			guards += part.guard
 		var health := "∞ HP" if actor.get("infinite", false) else "%d / %d HP" % [actor.hp, actor.maxHp]
-		var guard := "   ·   가드 %d" % guards if guards and (eyes != "lost" or side == "enemy") else ""
+		var guard := "   가드 %d" % guards if guards and (eyes != "lost" or side == "enemy") else ""
 		view.caption.text = health + guard
 	if not actors.is_empty():
 		_body_readout.refresh(_shown_intent, actors)
@@ -671,8 +731,8 @@ func _refresh_combat(actors: Dictionary = {}) -> void:
 				_restore_poses()
 		if gate == "bell":
 			_audio.cue("bell")
-	var gate_label: String = {"closed": "철문 닫힘", "bell": "호출벨 · 철문 닫힘",
-		"staggered": "기절 · 철문 열림"}.get(gate, "")
+	var gate_label: String = {"closed": "철문 닫힘", "bell": "호출벨 (철문 닫힘)",
+		"staggered": "기절 (철문 열림)"}.get(gate, "")
 	_show_intent(planned, eyes, gate_label)
 	_body_readout.refresh(planned)
 	for slot: Dictionary in run.slots:
@@ -698,7 +758,7 @@ func _show_intent(planned: Dictionary, eyes: String, gate_label: String) -> void
 	if planned.is_empty():
 		text = "적 행동 꺼짐"
 	elif eyes != "healthy":
-		text = "? · 눈 부상으로 예고 가려짐"
+		text = "?  눈 부상으로 예고 가려짐"
 	else:
 		var card: Dictionary = run.cards[planned.id]
 		var targets: PackedStringArray = []
@@ -709,9 +769,9 @@ func _show_intent(planned: Dictionary, eyes: String, gate_label: String) -> void
 			recipient = run.get(planned.side).name + " "
 		var amount: int = run.intent_power(planned)
 		var value := str(amount) if card.type == "attack" else "+%d" % amount
-		text = "%s · %s%s %s · %s" % [card.name, recipient, "·".join(targets), value,
+		text = "%s  %s%s %s  %s" % [card.name, recipient, ", ".join(targets), value,
 			_seconds(maxi(0, run.enemy_ready_at - run.elapsed))]
-	_intent.text = text if gate_label.is_empty() else gate_label + " · " + text
+	_intent.text = text if gate_label.is_empty() else gate_label + "  " + text
 	_intent.tooltip_text = _intent.text
 
 
@@ -745,12 +805,14 @@ func _refresh_durability() -> void:
 	for part: String in Run.PARTS:
 		var state: Dictionary = actor.body[part]
 		wounds.append("%s %d/%d" % [run.data.parts[part], state.hp, state.max])
-	body.text = actor.name + " 부위   " + "   ·   ".join(wounds)
+	body.text = actor.name + " 부위   " + "   ".join(wounds)
 
 
 func _process(delta: float) -> void:
 	if paused or is_instance_valid(_minimap) or not is_visible_in_tree() or not is_instance_valid(_status):
 		return
+	for view: Dictionary in _fighters.values():
+		view.hp.advance(delta)
 	if _hold > 0:
 		_advance_feedback(delta)
 		return
@@ -838,7 +900,7 @@ func _play_next_event() -> void:
 	var facing := -1.0 if event.from == "enemy" else 1.0
 	_effect.windup(_combat_anchor(event.from, "arms"), facing, 0.105 / speed)
 	_show_cast_art(event)
-	_combat_note.text = "%s · 공격" % run.cards[event.card].name
+	_combat_note.text = "%s  공격" % run.cards[event.card].name
 
 
 func _projectile_for(event: Dictionary) -> String:
@@ -889,6 +951,9 @@ func _resolve_contact() -> void:
 		points.append(_combat_anchor(event.side, "chest" if event.get("gateBlock", false) else part))
 	_effect.impact(event, points, -1.0 if event.side == "enemy" else 1.0, maxf(0.02, _hold))
 	_audio.play_result(event)
+	if _pending_screen and _feedback.is_empty():
+		for view: Dictionary in _fighters.values():
+			_hold = maxf(_hold, view.hp.remaining_loss())
 	_active_event = {}
 	_contact_state = {}
 
@@ -912,9 +977,9 @@ func _show_event(event: Dictionary) -> void:
 				_pose("enemy", "staggered")
 			if event.get("training_override", false):
 				var actor: Dictionary = run.get(event.side)
-				_combat_note.text = "QA · %s %s %s" % [actor.name, part, INJURY_LEVELS[run.condition(actor, event.targets[0])]]
+				_combat_note.text = "QA  %s %s %s" % [actor.name, part, INJURY_LEVELS[run.condition(actor, event.targets[0])]]
 			elif event.get("gateBlock", false):
-				_combat_note.text = "%s · 철문에 막힘" % skill
+				_combat_note.text = "%s  철문에 막힘" % skill
 			else:
 				var result := PackedStringArray()
 				if event.dealt:
@@ -923,13 +988,13 @@ func _show_event(event: Dictionary) -> void:
 					result.append("막음 %d" % event.blocked)
 				if event.get("removed", 0):
 					result.append("가드 −%d" % event.removed)
-				_combat_note.text = "%s · %s %s" % [skill, part, " · ".join(result)]
+				_combat_note.text = "%s  %s %s" % [skill, part, ", ".join(result)]
 		"guard":
 			_pose(event.from, "guard")
-			_combat_note.text = "%s · %s 가드 %d" % [skill, part, event.added]
+			_combat_note.text = "%s  %s 가드 %d" % [skill, part, event.added]
 		"heal":
 			_pose(event.from, "heal")
-			_combat_note.text = "%s · %s 회복 %d" % [skill, part, event.recovered]
+			_combat_note.text = "%s  %s 회복 %d" % [skill, part, event.recovered]
 		"setup":
 			_combat_note.text = skill
 
@@ -975,8 +1040,6 @@ func _input(event: InputEvent) -> void:
 		_toggle_minimap()
 	elif is_instance_valid(_minimap) or event.shift_pressed:
 		return
-	elif run.phase == "combat" and key == KEY_SPACE:
-		_toggle_pause()
 	elif key == KEY_F8:
 		if _hold > 0.0:
 			return
@@ -993,17 +1056,23 @@ func _input(event: InputEvent) -> void:
 			_show()
 	elif _qa_open and key in [KEY_K, KEY_H, KEY_J]:
 		_run_qa({KEY_K: "win", KEY_H: "heal", KEY_J: "margin"}[key])
-	elif run.phase == "reward" and key in [KEY_0, KEY_1, KEY_2, KEY_3]:
-		var slot := key - KEY_1
-		if slot < 0:
-			_take_reward("")
-		elif slot < run.rewards.size():
-			_take_reward(run.rewards[slot])
-		else:
-			return
+	elif _hotkeys.has(key):
+		var button := _hotkeys[key]
+		if not button.disabled and button.is_visible_in_tree():
+			button.pressed.emit()
 	else:
 		return
 	get_viewport().set_input_as_handled()
+
+
+func _bind_hotkey(button: Button, key: int, corner := false) -> void:
+	_hotkeys[key] = button
+	FieldUI.add_key_hint(button, OS.get_keycode_string(key), corner)
+
+
+func _bind_number(button: Button, number: int, corner := false) -> void:
+	if number <= 9:
+		_bind_hotkey(button, KEY_0 + number, corner)
 
 
 func _toggle_minimap() -> void:
@@ -1023,7 +1092,7 @@ func _toggle_minimap() -> void:
 		_map_return_focus = _page.find_child("OpenMinimap", true, false)
 	_minimap = ColorRect.new()
 	_minimap.name = "Minimap"
-	_minimap.color = Color("#151816")
+	_minimap.color = FieldUI.BLACK
 	_overlay(self, _minimap, 0)
 	var content := _column(12)
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1056,9 +1125,11 @@ func _build_journal() -> void:
 		_journal_body.visible = _journal_open
 		_refresh_journal(), false, true)
 	toggle.name = "ToggleJournal"
+	toggle.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	toggle.toggle_mode = true
 	toggle.set_pressed_no_signal(_journal_open)
 	_page.add_child(toggle)
+	_bind_hotkey(toggle, KEY_L)
 	_journal_body = RichTextLabel.new()
 	_journal_body.name = "JournalEntries"
 	_journal_body.custom_minimum_size.y = 144
@@ -1069,7 +1140,7 @@ func _build_journal() -> void:
 
 func _refresh_journal() -> void:
 	if _journal_open and is_instance_valid(_journal_body):
-		var entries := "\n".join(run.journal)
+		var entries := FieldUI.display_copy("\n".join(run.journal))
 		if entries != _journal_body.text:
 			_journal_body.text = entries
 
@@ -1111,7 +1182,7 @@ func _build_recruit() -> void:
 	var kind: String = run.pending_recruit
 	var recruit: Dictionary = run.data.recruits[kind]
 	_page.add_child(_label("동료와의 만남", 24, PALE))
-	var panel := _panel(Color("#24251e"), AMBER.darkened(0.5))
+	var panel := _panel(FieldUI.IRON, AMBER.darkened(0.5))
 	_page.add_child(panel)
 	var row := _row(20)
 	panel.add_child(row)
@@ -1125,7 +1196,7 @@ func _build_recruit() -> void:
 	var tags: Array[String] = []
 	for trait_id: String in recruit.factions + recruit.jobs:
 		tags.append(run.data.traits[trait_id].name)
-	var traits := _label(" · ".join(tags), 15, AMBER)
+	var traits := _label(", ".join(tags), 15, AMBER)
 	traits.mouse_filter = Control.MOUSE_FILTER_PASS
 	traits.tooltip_text = _member_traits(recruit)
 	text.add_child(traits)
@@ -1134,28 +1205,33 @@ func _build_recruit() -> void:
 	var arm := int(recruit.get("hurtArm", max_arm))
 	var life := "%d / %d HP" % [max_hp - max_arm + arm, max_hp]
 	if arm < max_arm:
-		life += " · 팔 부상 %d / %d" % [arm, max_arm]
+		life += "  팔 부상 %d / %d" % [arm, max_arm]
 	text.add_child(_label(life, 16, MUTED))
 	for id: String in recruit.loadout:
-		text.add_child(_label(run.cards[id].name + "  ·  " + _seconds(run.cooldown(id)), 16, PALE))
+		text.add_child(_label(run.cards[id].name + "   " + _seconds(run.cooldown(id)), 16, PALE))
 	var full: bool = run.party_sides().size() == Run.RANKS.size()
 	if full:
+		var slot := 1
 		for side: String in run.party_sides():
 			if side == "player":
 				continue
 			var swap := _button("%s 대신 영입" % run.get(side).name, _recruit.bind(true, side))
 			swap.name = "Replace_" + side
 			text.add_child(swap)
+			_bind_number(swap, slot)
+			slot += 1
 			_add_recruit_synergy(text, recruit, side)
 	else:
 		var accept := _button("함께 가기", _recruit.bind(true), true)
 		accept.name = "Recruit_" + kind
 		text.add_child(accept)
+		_bind_number(accept, 1)
 		_add_recruit_synergy(text, recruit)
 		accept.grab_focus()
 	var decline := _button("지나가기", _recruit.bind(false))
 	decline.name = "DeclineRecruit"
 	text.add_child(decline)
+	_bind_number(decline, 0)
 	if full:
 		decline.grab_focus()
 
@@ -1166,7 +1242,7 @@ func _member_traits(actor: Dictionary) -> String:
 		var trait_data: Dictionary = run.data.traits[id]
 		var text: String = trait_data.name
 		if trait_data.has("effect"):
-			text += " · " + trait_data.effect
+			text += "  " + FieldUI.display_copy(trait_data.effect)
 		labels.append(text)
 	return "\n".join(labels)
 
@@ -1183,9 +1259,9 @@ func _add_recruit_synergy(container: VBoxContainer, candidate: Dictionary, outgo
 			continue
 		var text := "활성" if to_count >= threshold else "해제"
 		var color := ALLY if to_count >= threshold else FOE
-		var preview := _label("%s %d→%d · %s" % [trait_data.name, from_count, to_count, text], 15, color)
+		var preview := _label("%s %d→%d  %s" % [trait_data.name, from_count, to_count, text], 15, color)
 		preview.name = "RecruitSynergy_" + (outgoing if not outgoing.is_empty() else "join") + "_" + id
-		preview.tooltip_text = trait_data.effect
+		preview.tooltip_text = FieldUI.display_copy(trait_data.effect)
 		preview.mouse_filter = Control.MOUSE_FILTER_PASS
 		container.add_child(preview)
 
@@ -1193,7 +1269,7 @@ func _add_recruit_synergy(container: VBoxContainer, candidate: Dictionary, outgo
 func _add_fallen_notice() -> void:
 	var fallen: PackedStringArray = run.fallen_names()
 	if not fallen.is_empty():
-		_page.add_child(_label("사망 · " + " · ".join(fallen), 15, FOE))
+		_page.add_child(_label("사망  " + ", ".join(fallen), 15, FOE))
 
 
 func _recruit(accept: bool, outgoing := "") -> void:
@@ -1202,27 +1278,45 @@ func _recruit(accept: bool, outgoing := "") -> void:
 
 
 func _build_rewards() -> void:
-	_page.add_child(_label("전투 보상", 25, PALE))
+	var heading := _row(10)
+	_page.add_child(heading)
+	var title := _label("전투 보상", 25, PALE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(title)
 	var row := _row(12)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_page.add_child(row)
-	for id: String in run.rewards:
+	for slot in run.rewards.size():
+		var id: String = run.rewards[slot]
 		var card: Dictionary = run.cards[id]
 		var level := int(run.levels.get(id, 0))
-		var rarity: String = run.data.rarities[card.get("rarity", "common")].name
-		var detail := "신규 · %s · %s" % [rarity, _seconds(run.cooldown(id, 1))]
-		if level > 0:
-			detail = "Lv.%d → %d · %s → %s" % [level, level + 1, _seconds(run.cooldown(id)), _seconds(run.cooldown(id, level + 1))]
-		if card.has("character"):
-			var kind: String = card.character
-			var owner: String = run.data.nun.name if kind == "nun" else run.data.recruits[kind].name
-			detail += "\n" + owner
-		var button := _card_button(row, card, detail, _take_reward.bind(id))
+		var button := _card_button(row, card, _take_reward.bind(id), slot + 1, false, level)
 		button.name = "Reward_" + id
 		if id == run.rewards[0]:
 			button.grab_focus()
+	if not _upgrade_cards.is_empty():
+		_upgrade_compare = _button("강화 전 보기", _toggle_upgrade_preview, false, true)
+		_upgrade_compare.name = "CompareUpgrade"
+		_upgrade_compare.tooltip_text = "강화 보상의 현재 수치를 확인합니다."
+		heading.add_child(_upgrade_compare)
+		_bind_hotkey(_upgrade_compare, KEY_U)
 	var skip := _button("건너뛰기", _take_reward.bind(""))
 	skip.name = "SkipReward"
+	skip.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_page.add_child(skip)
+	_bind_number(skip, 0)
+
+
+func _toggle_upgrade_preview() -> void:
+	_show_before_upgrade = not _show_before_upgrade
+	_upgrade_compare.text = "강화 후 보기" if _show_before_upgrade else "강화 전 보기"
+	_upgrade_compare.tooltip_text = "강화 후 수치를 미리 봅니다." if _show_before_upgrade else "강화 보상의 현재 수치를 확인합니다."
+	for id: String in _upgrade_cards:
+		var level := int(run.levels[id])
+		var displayed_level := level if _show_before_upgrade else level + 1
+		var time: int = run.cooldown(id, displayed_level)
+		FieldUI.set_card_values(_upgrade_cards[id], run.cards[id].name, displayed_level, time,
+			time != run.cooldown(id, level))
 
 
 func _take_reward(id: String) -> void:
@@ -1242,6 +1336,9 @@ func _build_route() -> void:
 	if room.type == "rest":
 		treatment_focus = _build_rest()
 	var map := _build_map_panel(_page)
+	var moves: Array[Button] = map.move_buttons()
+	for slot in moves.size():
+		_bind_number(moves[slot], slot + 1, true)
 	if room.type == "shop":
 		_build_market()
 	if treatment_focus != null:
@@ -1252,7 +1349,7 @@ func _build_route() -> void:
 
 func _build_map_panel(parent: Container, preview := false) -> Control:
 	var room: Dictionary = run.data.map[run.area]
-	var panel := _panel(Color("#1b251d"))
+	var panel := _panel(FieldUI.IRON)
 	parent.add_child(panel)
 	var content := _column(9)
 	panel.add_child(content)
@@ -1263,25 +1360,20 @@ func _build_map_panel(parent: Container, preview := false) -> Control:
 	heading.add_child(title)
 	if not run.training:
 		var gain: int = run.travel_gain()
-		var travel_text := "다음 이동 · 도망 여유 +%d" % gain
+		var travel_text := "다음 이동 시 도망 여유 +%d" % gain
 		if run.distance + gain <= 0:
 			travel_text = "이동 시 추격에 붙잡힘"
 		if run.map_options != null:
-			travel_text = "동전 %d · %s" % [run.coins, travel_text]
+			travel_text = "동전 %d   %s" % [run.coins, travel_text]
 		heading.add_child(_label(travel_text, 15, FOE if run.distance + gain <= 0 else AMBER))
-	var legend := _row(14)
+	var legend := HFlowContainer.new()
+	legend.add_theme_constant_override("h_separation", 6)
 	content.add_child(legend)
 	var types: Array = run.data.map.values().map(func(item): return item.type)
 	for type: String in RouteMap.TYPES:
 		if type not in types:
 			continue
-		var mark := _texture("res://art/route/%s.svg" % type, 16)
-		mark.custom_minimum_size.x = 16
-		mark.modulate = RouteMap.TYPES[type][1]
-		var entry := _row(5)
-		entry.add_child(mark)
-		entry.add_child(_label(RouteMap.TYPES[type][0], 13, MUTED))
-		legend.add_child(entry)
+		legend.add_child(FieldUI.badge(type, RouteMap.TYPES[type][0], RouteMap.TYPES[type][1]))
 	var map := RouteMap.new()
 	map.name = "RouteMap"
 	var reachable: Array = room.next
@@ -1314,7 +1406,7 @@ func _arrive(room: String) -> void:
 
 
 func _build_rest() -> Button:
-	var panel := _panel(Color("#28271f"), AMBER.darkened(0.5))
+	var panel := _panel(FieldUI.IRON, AMBER.darkened(0.5))
 	_page.add_child(panel)
 	var row := _row(16)
 	panel.add_child(row)
@@ -1331,7 +1423,7 @@ func _build_rest() -> Button:
 	var treatment: Dictionary = run.stair_treatment
 	if not treatment.is_empty():
 		if treatment.area == run.area:
-			content.add_child(_label("%s · %s +%d" % [
+			content.add_child(_label("%s  %s +%d" % [
 				treatment.name, run.data.parts[treatment.target], treatment.recovered], 15, ALLY))
 		else:
 			content.add_child(_label("치료 기회 사용", 15, MUTED))
@@ -1347,7 +1439,7 @@ func _build_rest() -> Button:
 				continue
 			var actor: Dictionary = run.get(side)
 			var wound: Dictionary = actor.body[part]
-			var text := "%s · %s %d → %d" % [
+			var text := "%s  %s %d → %d" % [
 				actor.name, run.data.parts[part], wound.hp, mini(wound.max, wound.hp + 2)]
 			var button := _button(text, _treat.bind(side, part))
 			button.name = "Treat_%s_%s" % [side, part]
@@ -1357,7 +1449,7 @@ func _build_rest() -> Button:
 		var message := "도망 여유 부족" if run.distance <= 1 else "치료할 부상 없음"
 		content.add_child(_label(message, 15, MUTED))
 		return _rest_finish_button(content)
-	content.add_child(_label("도망 여유 −1 · 내구도 최대 +2", 14, AMBER))
+	content.add_child(_label("도망 여유 −1   내구도 최대 +2", 14, AMBER))
 	return buttons[0]
 
 
@@ -1378,7 +1470,7 @@ func _rest_finish_button(content: VBoxContainer) -> Button:
 
 func _build_market() -> void:
 	_page.add_child(_label("암시장", 23, PALE))
-	var panel := _panel(Color("#25271f"))
+	var panel := _panel(FieldUI.IRON)
 	_page.add_child(panel)
 	var body := _row(14)
 	panel.add_child(body)
@@ -1396,7 +1488,7 @@ func _build_market() -> void:
 		icon.custom_minimum_size.x = 38
 		row.add_child(icon)
 		var item := _label(offer.name, 15, PALE)
-		item.tooltip_text = offer.effect
+		item.tooltip_text = FieldUI.display_copy(offer.effect)
 		item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(item)
 		var issue: String = run.shop_issue(id)
@@ -1410,11 +1502,11 @@ func _build_market() -> void:
 				picker.set_item_metadata(picker.item_count - 1, key)
 			picker.select(0)
 			row.add_child(picker)
-		var caption := "구입 · 동전 %d" % int(offer.price) if issue.is_empty() else issue
+		var caption := "구입 (동전 %d)" % int(offer.price) if issue.is_empty() else issue
 		var buy := _button(caption, _buy.bind(id, picker))
 		buy.name = "Buy_" + id
 		buy.disabled = not issue.is_empty()
-		buy.tooltip_text = offer.effect
+		buy.tooltip_text = item.tooltip_text
 		row.add_child(buy)
 
 
@@ -1431,7 +1523,7 @@ func _build_mystery() -> void:
 	_page.add_child(_label(event.name, 23, PALE))
 	_page.add_child(_label(event.description, 16, MUTED))
 	var issue: String = run.mystery_issue()
-	var effect := "도망 여유 %d → %d · 동전 %d → %d" % [
+	var effect := "도망 여유 %d → %d   동전 %d → %d" % [
 		run.distance, run.distance + run.mystery_distance(), run.coins, run.coins + int(event.coins)]
 	_page.add_child(_label(effect if issue.is_empty() else issue, 15, AMBER))
 	var buttons := _row(10)
@@ -1460,7 +1552,7 @@ func _member_health(actor: Dictionary) -> String:
 		var wound: Dictionary = actor.body[part]
 		if wound.hp < wound.max:
 			details.append("%s %d/%d" % [run.data.parts[part], wound.hp, wound.max])
-	return " · ".join(details)
+	return "   ".join(details)
 
 
 func _idle_art(kind: String) -> String:
@@ -1483,7 +1575,7 @@ func _build_loss() -> void:
 		var scene := CaptureScene.new()
 		scene.name = "CaptureScene"
 		_page.add_child(scene)
-	var panel := _panel(Color("#24251e"), AMBER.darkened(0.5))
+	var panel := _panel(FieldUI.IRON, AMBER.darkened(0.5))
 	_page.add_child(panel)
 	var body := _column(17)
 	panel.add_child(body)
@@ -1496,7 +1588,7 @@ func _build_loss() -> void:
 
 func _add_restart(parent: Container) -> void:
 	if run.qa_uses:
-		parent.add_child(_label("QA · 치트 %d회 사용" % run.qa_uses, 15, AMBER))
+		parent.add_child(_label("QA  치트 %d회 사용" % run.qa_uses, 15, AMBER))
 	var restart := _button("다시 준비", _restart)
 	restart.name = "Restart"
 	parent.add_child(restart)
@@ -1544,45 +1636,11 @@ func _seconds(ms: int) -> String:
 	return "%.1f초" % (ms / 1000.0)
 
 
-func _make_theme() -> Theme:
-	var result := Theme.new()
-	var korean := SystemFont.new()
-	korean.font_names = ["Malgun Gothic", "Noto Sans CJK KR", "Apple SD Gothic Neo"]
-	result.default_font = korean
-	result.default_font_size = 16
-	result.set_color("font_color", "Label", PALE)
-	result.set_color("font_color", "Button", PALE)
-	result.set_color("font_hover_color", "Button", Color.WHITE)
-	result.set_stylebox("normal", "Button", _style(Color("#30382b"), Color("#56684f")))
-	result.set_stylebox("hover", "Button", _style(Color("#394638"), ALLY))
-	result.set_stylebox("pressed", "Button", _style(Color("#49351f"), AMBER))
-	result.set_stylebox("disabled", "Button", _style(Color("#21241d"), Color("#383d32")))
-	result.set_type_variation("CompactButton", "Button")
-	for state in ["normal", "hover", "pressed", "disabled"]:
-		var box := result.get_stylebox(state, "Button").duplicate() as StyleBoxFlat
-		box.content_margin_top = 4
-		box.content_margin_bottom = 4
-		result.set_stylebox(state, "CompactButton", box)
-	var focus := _style(Color.TRANSPARENT, AMBER)
-	focus.draw_center = false
-	result.set_stylebox("focus", "Button", focus)
-	return result
-
-
 func _style(fill: Color, edge: Color, pad := 11) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = fill
-	box.border_color = edge
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(6)
-	box.content_margin_left = pad
-	box.content_margin_right = pad
-	box.content_margin_top = pad
-	box.content_margin_bottom = pad
-	return box
+	return FieldUI.plate(fill, edge, pad)
 
 
-func _panel(color: Color, edge := Color("#484e41"), padding := 11) -> PanelContainer:
+func _panel(color: Color, edge := FieldUI.RIM, padding := 11) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _style(color, edge, padding))
 	return panel
@@ -1601,21 +1659,13 @@ func _column(separation: int) -> VBoxContainer:
 
 
 func _label(value: String, font_size: int, color: Color) -> Label:
-	var label := Label.new()
-	label.text = value
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	return label
+	return FieldUI.label(value, font_size, color, font_size >= 21)
 
 
 func _button(value: String, action: Callable, accent := false, compact := false) -> Button:
 	var button := Button.new()
 	button.text = value
-	button.custom_minimum_size.y = 32 if compact else 42
-	if compact:
-		button.theme_type_variation = "CompactButton"
-	if accent:
-		button.add_theme_stylebox_override("normal", _style(Color("#483925"), AMBER.darkened(0.37), 4 if compact else 11))
+	FieldUI.style_action(button, accent, compact)
 	button.pressed.connect(action)
 	return button
 
@@ -1638,6 +1688,12 @@ func _arena(height: int, image_path: String) -> Control:
 	shade.color = Color("#100e1245")
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay(board, shade, 0)
+	var surround := Panel.new()
+	var rim := FieldUI.plate(Color.TRANSPARENT, FieldUI.RIM, 0)
+	rim.draw_center = false
+	surround.add_theme_stylebox_override("panel", rim)
+	surround.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay(board, surround, 0)
 	return board
 
 
@@ -1660,24 +1716,40 @@ func _bar(maximum: int, color: Color) -> ProgressBar:
 	return bar
 
 
-func _card_button(parent: Container, card: Dictionary, details: String, action: Callable, active := false) -> Button:
-	var panel := _panel(Color("#23291f"), ALLY.darkened(0.38) if active else Color("#484e41"))
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	parent.add_child(panel)
-	var column := _column(6)
-	panel.add_child(column)
-	column.add_child(_texture("res://" + card.art, 82))
-	column.add_child(_label(details, 14, AMBER))
-	if card.has("ranks"):
-		var positions: Array[String] = []
-		for position: float in card.ranks:
-			positions.append(Run.RANKS[int(position)])
-		column.add_child(_label(" · ".join(positions), 13, AMBER))
-	var description := _label(card.description, 14, MUTED)
-	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	description.custom_minimum_size.y = 40
+func _card_button(parent: Container, card: Dictionary, action: Callable, number: int,
+		active := false, reward_from := -1, disabled := false) -> Button:
+	var stack := _column(5)
+	stack.size_flags_horizontal = Control.SIZE_FILL if reward_from >= 0 else Control.SIZE_EXPAND_FILL
+	parent.add_child(stack)
+	var panel := FieldUI.card_shell(card, run.data)
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if reward_from >= 0:
+		panel.custom_minimum_size.x = 252
+	stack.add_child(panel)
+	var owned_level := int(run.levels.get(card.id, 1))
+	var displayed_level := reward_from + 1 if reward_from >= 0 else owned_level
+	var time: int = run.cooldown(card.id, displayed_level)
+	var reference: int = run.cooldown(card.id, owned_level if reward_from > 0 else 1)
+	FieldUI.set_card_values(panel, card.name, displayed_level, time, time != reference)
+	if reward_from > 0:
+		_upgrade_cards[card.id] = panel
+	var column := panel.get_node("CardContent") as VBoxContainer
+	var body := column.get_node("Details/CardBody") as VBoxContainer
+	var description := FieldUI.card_effect_text(card.description)
 	description.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(description)
-	var button := _button(card.name, action, active)
+	body.add_child(description)
+	var action_text := "획득" if reward_from == 0 else "강화" if reward_from > 0 else "해제" if active else "장착"
+	var button := _button(action_text, action, active)
+	button.disabled = disabled
+	FieldUI.style_card_action(button, active)
+	button.accessibility_name = "%s %s" % [card.name, action_text]
+	button.tooltip_text = description.tooltip_text
+	button.accessibility_description = description.tooltip_text
 	column.add_child(button)
+	if number <= 9:
+		_hotkeys[KEY_0 + number] = button
+		var keycap := FieldUI.card_shortcut(number)
+		if disabled:
+			keycap.modulate.a = 0.5
+		stack.add_child(keycap)
 	return button

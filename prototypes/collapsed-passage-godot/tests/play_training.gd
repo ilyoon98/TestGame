@@ -107,6 +107,8 @@ func _check() -> void:
 		_press(game, "ApplyInjury")
 		_expect(run.phase == "lost", "Nun head loss ends the attempt")
 		game._process(1.0)
+		_expect(game._pending_screen, "Loss screen waits for the final white HP trail")
+		game._process(0.56)
 		_press(game, "Restart")
 		_expect(run.phase == "prep" and run.area == "lift" and run.player.body.head.hp == 9 and run.training_enemy_damage == 5,
 			"Retry keeps the room and enemy settings while clearing wounds")

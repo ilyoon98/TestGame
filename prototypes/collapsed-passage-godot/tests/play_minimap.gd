@@ -22,7 +22,22 @@ func _check() -> void:
 		var start := game.find_child("BeginCombat", true, false) as Button
 		await _check_map(viewport, game)
 		_expect(viewport.gui_get_focus_owner() == start, "Closing the map restores keyboard focus")
-		start.pressed.emit()
+		var first_skill: Button = game._hotkeys[KEY_1]
+		var skill_id := String(first_skill.name).trim_prefix("Equip_")
+		_expect(game.run.loadout.has(skill_id), "First key represents the first equipped card")
+		_key(viewport, KEY_1)
+		_expect(not game.run.loadout.has(skill_id), "Number keys change the prepared skills")
+		_key(viewport, KEY_B)
+		_expect(game.run.phase == "prep", "Battle shortcut respects the disabled start button")
+		_key(viewport, KEY_1)
+		_key(viewport, KEY_B)
+		_expect(game.run.phase == "combat", "B begins a prepared battle")
+		_key(viewport, KEY_V)
+		_expect(not game.sound_enabled, "V toggles audio")
+		_key(viewport, KEY_X)
+		_expect(game.speed == 2, "X changes battle speed")
+		_key(viewport, KEY_X)
+		_key(viewport, KEY_X)
 		for tick in 30:
 			if not game._active_event.is_empty():
 				break
@@ -49,15 +64,17 @@ func _check() -> void:
 			game._process(0.1)
 		_expect(game.run.phase == "recruit", "Battle reaches recruitment normally")
 		await _check_map(viewport, game)
-		game.find_child("DeclineRecruit", true, false).pressed.emit()
+		_key(viewport, KEY_0)
 		var first_reward: String = game.run.rewards[0]
 		_key(viewport, KEY_1)
 		_expect(game.run.phase == "route" and game.run.levels.has(first_reward), "Reward keys select the matching card")
-		var move := game.find_child("Move_" + String(game.run.data.map.threshold.next.front()), true, false)
-		move.pressed.emit()
+		var move: Button = game._hotkeys[KEY_1]
+		var destination := String(move.name).trim_prefix("Move_")
+		_expect(move.has_node("KeyHint"), "The available room displays its shortcut")
+		_key(viewport, KEY_1)
 		_expect(game._traveling and game.run.area == "threshold", "Travel plays before the destination is committed")
 		await game.arrived
-		_expect(not game._traveling and game.run.area != "threshold", "Travel commits once on arrival")
+		_expect(not game._traveling and game.run.area == destination, "Travel commits to the numbered room once on arrival")
 		await _check_map(viewport, game)
 		var before: Dictionary = game.run.data.map
 		game.find_child("RestartRun", true, false).pressed.emit()
@@ -65,7 +82,7 @@ func _check() -> void:
 			"Restart is available before the ending and preserves the seed layout")
 		viewport.free()
 	if failures == 0:
-		print("Read-only minimap, focus, Space, reward keys and combat pause passed at both viewport sizes")
+		print("Keyboard preparation, combat, recruitment, rewards, map and numbered travel passed at both viewport sizes")
 	quit(int(failures > 0))
 
 

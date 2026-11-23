@@ -1,7 +1,8 @@
 extends VBoxContainer
 
 const LABELS := {"healthy": "정상", "injured": "부상", "lost": "결손"}
-const COLORS := {"healthy": Color("#aeb5a3"), "injured": Color("#efc58a"), "lost": Color("#ef9b7a")}
+const FieldUI := preload("res://ui/field_ui.gd")
+const COLORS := {"healthy": FieldUI.MUTED, "injured": FieldUI.BRASS, "lost": FieldUI.DANGER}
 const PARTS := preload("res://combat/threshold_run.gd").PARTS
 
 var _run: RefCounted
@@ -47,11 +48,7 @@ func setup(run: RefCounted, sides: Array) -> void:
 		amount.custom_minimum_size.y = 36
 		box.add_child(summary)
 		box.add_child(amount)
-		var style := StyleBoxFlat.new()
-		style.bg_color = Color("#1c271f")
-		style.set_border_width_all(1)
-		style.set_corner_radius_all(4)
-		style.set_content_margin_all(6)
+		var style := FieldUI.plate(FieldUI.IRON, FieldUI.RIM, 6)
 		tile.add_theme_stylebox_override("panel", style)
 		_parts[part] = {"panel": tile, "style": style, "summary": summary, "amount": amount}
 	_body.hide()
@@ -76,7 +73,7 @@ func refresh(intent: Dictionary, actors: Dictionary = {}) -> void:
 			if lost:
 				detail.append("결손 %d" % lost)
 		var button: Button = _buttons[side]
-		button.text = actor.name if detail.is_empty() else "%s · %s" % [actor.name, " · ".join(detail)]
+		button.text = actor.name if detail.is_empty() else "%s  %s" % [actor.name, ", ".join(detail)]
 		button.add_theme_color_override("font_color", COLORS.lost if lost else COLORS.injured if injured else COLORS.healthy)
 	_draw_parts()
 
@@ -114,14 +111,14 @@ func _draw_parts() -> void:
 		if actor.get("mark", {}).get("target") == part:
 			detail.append("표식 +%d" % actor.mark.bonus)
 		var cell: Dictionary = _parts[part]
-		cell.summary.text = "%s · %s" % [title, LABELS[condition]]
+		cell.summary.text = "%s  %s" % [title, LABELS[condition]]
 		cell.summary.add_theme_color_override("font_color", COLORS[condition])
-		cell.amount.text = "%d/%d · 가드 %s" % [state.hp, state.max, guard]
+		cell.amount.text = "%d/%d  가드 %s" % [state.hp, state.max, guard]
 		if not detail.is_empty():
-			cell.amount.text += "\n" + " · ".join(detail)
-		cell.panel.tooltip_text = _run.data.effects.get(part, "") if _selected == "player" else "팔 결손 시 팔 기술 사용 불가" if part == "arms" else ""
+			cell.amount.text += "\n" + "\n".join(detail)
+		cell.panel.tooltip_text = FieldUI.display_copy(_run.data.effects.get(part, "")) if _selected == "player" else "팔 결손 시 팔 기술 사용 불가" if part == "arms" else ""
 		cell.panel.accessibility_name = "%s %s %s %s" % [actor.name, title, LABELS[condition], cell.amount.text]
-		cell.style.border_color = Color("#a87360") if not detail.is_empty() else Color("#485447")
+		cell.style.border_color = Color("#a87360") if not detail.is_empty() else FieldUI.RIM
 
 
 func _label(text_value: String, size_px: int) -> Label:

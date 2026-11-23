@@ -3,13 +3,12 @@ extends Control
 
 signal dismissed
 
-const BG := Color("#151816")
-const TEXT := Color("#f0e5d3")
-const MUTED := Color("#b9b6a8")
-const GOLD := Color("#e8bf83")
-const BORDER := Color("#4a4d3e")
-const RARE_COLORS := {"common": Color("#b9c3ab"), "uncommon": Color("#9fcad6"), "rare": Color("#e9bd82")}
-const TYPE_LABELS := {"attack": "공격", "defense": "방어", "skill": "기술"}
+const FieldUI := preload("res://ui/field_ui.gd")
+const BG := FieldUI.BLACK
+const TEXT := FieldUI.TEXT
+const MUTED := FieldUI.MUTED
+const GOLD := FieldUI.BRASS
+const BORDER := FieldUI.RIM
 
 var _data: Dictionary
 var _cards: Dictionary = {}
@@ -35,6 +34,7 @@ func setup(data: Dictionary) -> void:
 
 
 func _ready() -> void:
+	theme = FieldUI.make_theme()
 	var backdrop := ColorRect.new()
 	backdrop.color = BG
 	add_child(backdrop)
@@ -56,7 +56,7 @@ func _ready() -> void:
 	var body := _row(12)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_child(body)
-	var rail := _panel(Color("#20241e"), BORDER, 9)
+	var rail := _panel(FieldUI.IRON, BORDER, 9)
 	rail.custom_minimum_size.x = 135
 	body.add_child(rail)
 	var menu := _column(7)
@@ -95,8 +95,8 @@ func _ready() -> void:
 	results.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(results)
 	_grid = GridContainer.new()
-	_grid.add_theme_constant_override("h_separation", 8)
-	_grid.add_theme_constant_override("v_separation", 8)
+	_grid.add_theme_constant_override("h_separation", FieldUI.CARD_GAP)
+	_grid.add_theme_constant_override("v_separation", FieldUI.CARD_GAP)
 	results.add_child(_grid)
 	_empty = _label("해당 카드 없음", 16, MUTED)
 	results.add_child(_empty)
@@ -128,7 +128,7 @@ func _draw_profile() -> void:
 	if _member == "common":
 		return
 	var member: Dictionary = _data.nun if _member == "nun" else _data.recruits[_member]
-	var panel := _panel(Color("#26251e"), Color("#60533e"), 10)
+	var panel := _panel(FieldUI.IRON, BORDER, 10)
 	_profile.add_child(panel)
 	var row := _row(15)
 	panel.add_child(row)
@@ -147,19 +147,18 @@ func _draw_profile() -> void:
 	for id: String in member.factions + member.jobs:
 		var trait_data: Dictionary = _data.traits[id]
 		var accent := GOLD if trait_data.group == "faction" else Color("#9ec5d3")
-		var badge := _panel(Color("#1b1e1c"), accent.darkened(0.4), 4)
+		var badge := FieldUI.badge("seal" if trait_data.group == "faction" else "link", trait_data.name, accent)
 		tags.add_child(badge)
-		badge.tooltip_text = trait_data.get("effect", "")
+		badge.tooltip_text = FieldUI.display_copy(trait_data.get("effect", ""))
 		badge.mouse_filter = Control.MOUSE_FILTER_STOP
-		badge.add_child(_label(trait_data.name, 13, accent))
-	copy.add_child(_label("%d HP · %s · 기술 %d칸" % [
+	copy.add_child(_label("%d HP   %s   기술 %d칸" % [
 		int(member.vitality), _data.codex.weapons[member.weapon], int(_tabs[_member].slots)], 14, TEXT))
 	var parts: Array[String] = []
 	var index := 0
 	for part: String in _data.parts:
 		parts.append("%s %d" % [_data.parts[part], int(member.health[index])])
 		index += 1
-	var durability := _label(" · ".join(parts), 14, MUTED)
+	var durability := _label("   ".join(parts), 14, MUTED)
 	durability.name = "PartDurability"
 	durability.hide()
 	var toggle := _button("부위 내구도", "ShowParts", func(): durability.visible = not durability.visible)
@@ -186,42 +185,18 @@ func _draw_cards() -> void:
 
 
 func _card(card: Dictionary, details: Array) -> PanelContainer:
-	var rarity: String = card.get("rarity", "common")
-	var accent: Color = RARE_COLORS[rarity]
-	var tile := _panel(Color("#22271f"), accent.darkened(0.64), 8)
+	var tile := FieldUI.card_shell(card, _data)
+	FieldUI.set_card_values(tile, card.name, 1, int(card.cooldown), false)
 	tile.name = "Card_" + card.id
-	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var content := _column(5)
-	tile.add_child(content)
-	var meta := _row(5)
-	content.add_child(meta)
-	var timer := _label("%.1f초" % (float(card.cooldown) / 1000.0), 14, TEXT)
-	timer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	meta.add_child(timer)
+	var content := tile.get_node("CardContent/Details/CardBody") as VBoxContainer
 	if not card.get("reward", false):
-		meta.add_child(_label("기본", 13, MUTED))
-	meta.add_child(_label(_data.rarities[rarity].name, 14, accent))
-	content.add_child(_image(card.art, 72))
-	var title := _label(card.name, 18, TEXT)
-	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(title)
-	var ranges: Array[String] = []
-	for position in card.get("ranks", [0, 1, 2]):
-		ranges.append(str(int(position)))
-	var positions: String = _data.codex.ranks.get(",".join(ranges), "모든 위치")
-	var type: String = TYPE_LABELS[card.type]
-	if card.get("effect") == "aid":
-		type = "회복"
-	content.add_child(_label("%s · %s" % [type, positions], 13, GOLD))
-	for line: String in details:
-		var description := _label(line, 14, MUTED)
-		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		content.add_child(description)
+		content.add_child(FieldUI.label("기본", 13, FieldUI.PAPER_MUTED))
+	content.add_child(FieldUI.card_effect_text("\n".join(details)))
 	return tile
 
 
 func _update_columns() -> void:
-	_grid.columns = 3 if _scroll.size.x >= 735 else 2
+	_grid.columns = FieldUI.card_columns(_scroll.size.x - _scroll.get_v_scroll_bar().size.x, 3)
 
 
 func _clear(container: Container) -> void:
@@ -234,29 +209,15 @@ func _button(title: String, id: String, action: Callable) -> Button:
 	var control := Button.new()
 	control.name = id
 	control.text = title
-	control.custom_minimum_size.y = 38
-	control.add_theme_stylebox_override("pressed", _style(Color("#473923"), GOLD, 6))
+	FieldUI.style_action(control, false)
 	control.pressed.connect(action)
 	return control
 
 
 func _panel(fill: Color, edge: Color, pad: int) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _style(fill, edge, pad))
+	panel.add_theme_stylebox_override("panel", FieldUI.plate(fill, edge, pad))
 	return panel
-
-
-func _style(fill: Color, edge: Color, pad: int) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = fill
-	box.border_color = edge
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(5)
-	box.content_margin_left = pad
-	box.content_margin_right = pad
-	box.content_margin_top = pad
-	box.content_margin_bottom = pad
-	return box
 
 
 func _image(path: String, height: int) -> TextureRect:
@@ -282,8 +243,4 @@ func _column(spacing: int) -> VBoxContainer:
 
 
 func _label(value: String, font_size: int, color: Color) -> Label:
-	var label := Label.new()
-	label.text = value
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	return label
+	return FieldUI.label(value, font_size, color, font_size >= 19)
