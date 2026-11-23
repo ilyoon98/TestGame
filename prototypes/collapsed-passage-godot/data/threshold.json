@@ -1,0 +1,6538 @@
+{
+  "parts": {
+    "head": "머리",
+    "eyes": "눈",
+    "arms": "팔",
+    "chest": "가슴",
+    "belly": "배",
+    "legs": "다리"
+  },
+  "effects": {
+    "head": "결손 시 사망",
+    "eyes": "부상 시 행동 예고가 가려짐 · 결손 시 내 가드도 가려짐",
+    "arms": "부상 시 팔 기술의 위력 감소 · 결손 시 사용 불가",
+    "chest": "가슴 결손 시 철문 방패 사용 불가",
+    "belly": "부상 시 받는 회복량 절반 · 결손 시 전투 중 회복 불가",
+    "legs": "이동 시 얻는 도망 여유가 부상 시 +1, 결손 시 +0"
+  },
+  "nun": {
+    "name": "수녀",
+    "factions": [
+      "nun"
+    ],
+    "jobs": [
+      "mage"
+    ],
+    "weapon": "mace",
+    "health": [
+      9,
+      5,
+      7,
+      7,
+      6,
+      7
+    ],
+    "vitality": 28
+  },
+  "recruits": {
+    "guard": {
+      "name": "탈출 중인 간수",
+      "factions": [
+        "guard"
+      ],
+      "jobs": [
+        "warrior"
+      ],
+      "weapon": "baton",
+      "health": [
+        8,
+        5,
+        7,
+        7,
+        6,
+        7
+      ],
+      "vitality": 20,
+      "hurtArm": 3,
+      "loadout": [
+        "baton",
+        "escort"
+      ]
+    },
+    "awakened": {
+      "name": "개화한 수감자",
+      "factions": [
+        "prisoner"
+      ],
+      "jobs": [
+        "warrior"
+      ],
+      "weapon": "chains",
+      "health": [
+        8,
+        5,
+        7,
+        6,
+        6,
+        7
+      ],
+      "vitality": 18,
+      "hurtArm": 3,
+      "loadout": [
+        "irons",
+        "hook"
+      ]
+    },
+    "archer": {
+      "name": "감시탑 궁수",
+      "factions": [
+        "guard"
+      ],
+      "jobs": [
+        "archer"
+      ],
+      "weapon": "bow",
+      "health": [
+        7,
+        5,
+        6,
+        6,
+        5,
+        7
+      ],
+      "vitality": 16,
+      "preferredRank": 2,
+      "loadout": [
+        "aimedShot",
+        "snapShot"
+      ]
+    },
+    "shaman": {
+      "name": "탈옥한 주술사",
+      "factions": [
+        "prisoner"
+      ],
+      "jobs": [
+        "mage"
+      ],
+      "weapon": "staff",
+      "health": [
+        7,
+        5,
+        6,
+        6,
+        6,
+        6
+      ],
+      "vitality": 16,
+      "loadout": [
+        "mending",
+        "unseal"
+      ]
+    }
+  },
+  "foes": {
+    "janitor": {
+      "name": "탈옥한 죄수",
+      "hp": [
+        8,
+        4,
+        5,
+        6,
+        4,
+        5
+      ],
+      "vitality": 8,
+      "armor": {
+        "head": 2
+      },
+      "patterns": [
+        [
+          [
+            "heavy",
+            "legs"
+          ],
+          [
+            "guard",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "aim",
+            "arms"
+          ],
+          [
+            "guard",
+            "head"
+          ]
+        ],
+        [
+          [
+            "heavy",
+            "chest"
+          ],
+          [
+            "counter",
+            "head"
+          ]
+        ]
+      ]
+    },
+    "crawler": {
+      "name": "기어오는 탈옥수",
+      "hp": [
+        7,
+        4,
+        4,
+        5,
+        4,
+        4
+      ],
+      "vitality": 10,
+      "armor": {
+        "head": 1
+      },
+      "patterns": [
+        [
+          [
+            "aim",
+            "arms"
+          ],
+          [
+            "guard",
+            "eyes"
+          ]
+        ],
+        [
+          [
+            "heavy",
+            "legs"
+          ]
+        ],
+        [
+          [
+            "split",
+            "head",
+            "arms"
+          ],
+          [
+            "strike",
+            "eyes"
+          ]
+        ]
+      ]
+    },
+    "medic": {
+      "name": "붕대를 감은 탈옥수",
+      "hp": [
+        7,
+        4,
+        4,
+        6,
+        4,
+        4
+      ],
+      "vitality": 11,
+      "armor": {
+        "head": 1
+      },
+      "patterns": [
+        [
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "strike",
+            "belly"
+          ]
+        ],
+        [
+          [
+            "aid"
+          ],
+          [
+            "aim",
+            "chest"
+          ],
+          [
+            "guard",
+            "head"
+          ]
+        ],
+        [
+          [
+            "heavy",
+            "arms"
+          ]
+        ]
+      ]
+    },
+    "sentinel": {
+      "name": "방패를 든 탈옥수",
+      "hp": [
+        9,
+        5,
+        5,
+        6,
+        4,
+        5
+      ],
+      "vitality": 12,
+      "armor": {
+        "head": 3
+      },
+      "patterns": [
+        [
+          [
+            "guard",
+            "head"
+          ],
+          [
+            "aim",
+            "eyes"
+          ]
+        ],
+        [
+          [
+            "heavy",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "split",
+            "head",
+            "eyes"
+          ],
+          [
+            "strike",
+            "arms"
+          ]
+        ]
+      ]
+    },
+    "bellboy": {
+      "name": "뒤틀린 벨보이",
+      "hp": [
+        21,
+        5,
+        5,
+        7,
+        5,
+        5
+      ],
+      "vitality": 23,
+      "armor": {
+        "head": 2
+      },
+      "patterns": [
+        [
+          [
+            "heavy",
+            "chest"
+          ]
+        ]
+      ]
+    }
+  },
+  "timing": {
+    "tick": 100,
+    "pursuit": 3000,
+    "enemyInterval": 3500
+  },
+  "bellboyTiming": {
+    "windup": 2000,
+    "damageBonus": 2
+  },
+  "traits": {
+    "nun": {
+      "name": "수녀",
+      "icon": "nunLantern",
+      "group": "faction"
+    },
+    "guard": {
+      "name": "간수",
+      "icon": "guardCrest",
+      "group": "faction",
+      "effect": "맨 앞 대원에게 처음 주는 가드 +2",
+      "bonus": 2
+    },
+    "prisoner": {
+      "name": "수감자",
+      "icon": "brokenShackle",
+      "group": "faction",
+      "effect": "수감자가 처음 가드를 깎으면 같은 부위에 피해 +1",
+      "bonus": 1
+    },
+    "neutral": {
+      "name": "중립",
+      "icon": "routeMystery",
+      "group": "faction"
+    },
+    "warrior": {
+      "name": "전사",
+      "icon": "routeBattle",
+      "group": "job",
+      "effect": "전사마다 첫 부상 부위 적중 시 피해 +1",
+      "bonus": 1
+    },
+    "mage": {
+      "name": "마법사",
+      "icon": "skill",
+      "group": "job",
+      "effect": "마법사의 첫 회복량 +1",
+      "bonus": 1
+    },
+    "archer": {
+      "name": "궁수",
+      "icon": "traitBow",
+      "group": "job"
+    }
+  },
+  "traitThreshold": 2,
+  "pursuitWarningDistance": 2,
+  "openingPanels": [
+    [
+      "01-descent-v2",
+      "수녀가 등불을 들고 지하 감옥 계단을 내려간다."
+    ],
+    [
+      "02-cell-v2",
+      "수녀가 철창 너머 사형수 앞에 선다."
+    ],
+    [
+      "03-prayer",
+      "수녀가 무릎을 꿇고 두 손을 모아 기도한다."
+    ],
+    [
+      "04-glance",
+      "수녀가 돌아서 나가자 사형수가 그 뒷모습을 바라본다."
+    ],
+    [
+      "05-quake-v2",
+      "통로가 크게 흔들리고 천장에서 돌이 떨어진다."
+    ],
+    [
+      "06-chaos",
+      "감옥 문이 벌어지고 사람들은 무너지는 통로에서 흩어진다."
+    ],
+    [
+      "07-flight-v2",
+      "수녀가 등불을 쥐고 무너지는 감옥을 달려 나간다."
+    ],
+    [
+      "08-pursuit-v2",
+      "멀리 어둠 속에서 사형수가 쇠사슬을 끌며 다가온다."
+    ]
+  ],
+  "openingLessons": [
+    [
+      "대열",
+      "defense",
+      "대원 카드를 끌어 전위·중위·후위를 바꾸세요. 적의 일반 공격은 맨 앞을 노립니다."
+    ],
+    [
+      "자동 전투",
+      "routeBattle",
+      "대원 카드를 눌러 기술을 장착하세요. 충전이 끝나면 자동으로 발동합니다."
+    ],
+    [
+      "추격",
+      "pursuer",
+      "전투 3초마다 도망 여유가 1 줄어듭니다. 0이 되면 붙잡힙니다."
+    ]
+  ],
+  "shopOffers": {
+    "shortcut": {
+      "name": "뒷길 정보",
+      "price": 1,
+      "amount": 2,
+      "effect": "도망 여유 +2",
+      "art": "art/locations/shortcut.webp"
+    },
+    "bandage": {
+      "name": "붕대 묶음",
+      "price": 1,
+      "amount": 3,
+      "effect": "한 부위 내구도 최대 +3",
+      "art": "art/locations/stock/bandage.webp"
+    },
+    "tonic": {
+      "name": "회복 약병",
+      "price": 2,
+      "amount": 6,
+      "effect": "한 대원 체력 최대 +6",
+      "art": "art/locations/stock/tonic.webp"
+    },
+    "oil": {
+      "name": "등불 기름",
+      "price": 2,
+      "amount": 3,
+      "effect": "다음 전투 전위 가드 +3",
+      "art": "art/locations/stock/oil.webp"
+    },
+    "lockpicks": {
+      "name": "자물쇠 따개",
+      "price": 1,
+      "effect": "물자함 도망 여유 소모 면제",
+      "art": "art/locations/stock/lockpicks.webp"
+    }
+  },
+  "mysteryEvents": {
+    "cache": {
+      "name": "잠긴 물자함",
+      "description": "안에서 동전 소리가 난다.",
+      "action": "자물쇠 열기",
+      "distance": -1,
+      "coins": 2,
+      "art": "art/locations/mystery-cache.webp",
+      "alt": "수녀가 등불을 들어 물자함의 자물쇠를 살핀다."
+    },
+    "drain": {
+      "name": "배수로 입구",
+      "description": "대가를 내면 지름길을 알려주겠다고 한다.",
+      "action": "길 묻기",
+      "distance": 3,
+      "coins": -1,
+      "art": "art/locations/mystery-drain.webp",
+      "alt": "수녀가 등불로 물이 흐르는 배수로 입구를 비춘다."
+    }
+  },
+  "healingOrigins": {
+    "nun": {
+      "heal": [
+        0.5,
+        0.47
+      ],
+      "idle": [
+        0.22,
+        0.57
+      ]
+    },
+    "shaman": {
+      "heal": [
+        0.81,
+        0.18
+      ],
+      "idle": [
+        0.85,
+        0.18
+      ]
+    }
+  },
+  "wounds": {
+    "appearance": {
+      "injured": {
+        "arms": [
+          "scratch",
+          13
+        ],
+        "chest": [
+          "scratch",
+          13
+        ],
+        "belly": [
+          "scratch",
+          15
+        ],
+        "legs": [
+          "scratch",
+          14
+        ]
+      },
+      "lost": {
+        "head": [
+          null,
+          15
+        ],
+        "chest": [
+          "wrap",
+          18
+        ],
+        "belly": [
+          "wrap",
+          19
+        ],
+        "legs": [
+          "wrap",
+          18
+        ]
+      }
+    },
+    "decals": {
+      "scratch": "art/characters/conditions/wounds/scratch.webp",
+      "wrap": "art/characters/conditions/wounds/wrap.webp"
+    },
+    "eyeWraps": {
+      "art/characters/nun-sd.png": [
+        58.8,
+        22,
+        -1,
+        18.5
+      ],
+      "art/characters/conditions/arms-lost/nun-idle.webp": [
+        58.8,
+        22,
+        -1,
+        18.5
+      ],
+      "art/characters/motion/nun-attack.png": [
+        62.9,
+        32.9,
+        -4,
+        18.5
+      ],
+      "art/characters/conditions/arms-lost/nun-attack.webp": [
+        62.9,
+        32.9,
+        -4,
+        18.5
+      ],
+      "art/characters/motion/nun-hit.png": [
+        47.9,
+        32.4,
+        -10,
+        19.5
+      ],
+      "art/characters/conditions/arms-lost/nun-hit.webp": [
+        47.9,
+        32.4,
+        -10,
+        19.5
+      ],
+      "art/characters/motion/nun-guard.webp": [
+        62.5,
+        26.8,
+        -3,
+        18.2
+      ],
+      "art/characters/conditions/arms-lost/nun-guard.webp": [
+        62.5,
+        26.8,
+        -3,
+        18.2
+      ],
+      "art/characters/motion/nun-heal.webp": [
+        53.6,
+        28.9,
+        2,
+        19.7
+      ],
+      "art/characters/conditions/arms-lost/nun-heal.webp": [
+        53.6,
+        28.9,
+        2,
+        19.7
+      ],
+      "art/characters/motion/nun-defeat.webp": [
+        75.1,
+        71.6,
+        22,
+        13.5
+      ],
+      "art/characters/conditions/arms-lost/nun-defeat.webp": [
+        77.1,
+        72.6,
+        27,
+        13.5
+      ],
+      "art/characters/conditions/legs-lost/nun-idle.webp": [
+        64.8,
+        38.4,
+        -5,
+        17.7
+      ],
+      "art/characters/conditions/legs-lost/nun-attack.webp": [
+        67.3,
+        41.6,
+        -3,
+        18
+      ],
+      "art/characters/conditions/legs-lost/nun-hit.webp": [
+        55.3,
+        37.5,
+        -12,
+        18.7
+      ],
+      "art/characters/conditions/legs-lost/nun-guard.webp": [
+        66.3,
+        38.6,
+        -8,
+        19
+      ],
+      "art/characters/conditions/legs-lost/nun-idle-arms-lost.webp": [
+        65.1,
+        37.8,
+        1,
+        18.3
+      ],
+      "art/characters/conditions/legs-lost/nun-attack-arms-lost.webp": [
+        72.8,
+        42,
+        -12,
+        17.2
+      ],
+      "art/characters/conditions/legs-lost/nun-hit-arms-lost.webp": [
+        51.6,
+        37.5,
+        -24,
+        18.7
+      ],
+      "art/characters/conditions/legs-lost/nun-guard-arms-lost.webp": [
+        68,
+        40.7,
+        -4,
+        19
+      ],
+      "art/characters/guard-sd.png": [
+        60.8,
+        23.4,
+        -1,
+        18.7
+      ],
+      "art/characters/conditions/arms-lost/guard-idle.webp": [
+        60.8,
+        23.4,
+        -1,
+        18.7
+      ],
+      "art/characters/motion/guard-attack.png": [
+        57.8,
+        33.3,
+        6,
+        18
+      ],
+      "art/characters/conditions/arms-lost/guard-attack.webp": [
+        57.8,
+        33.3,
+        6,
+        18
+      ],
+      "art/characters/motion/guard-hit.png": [
+        50.1,
+        32.1,
+        -25,
+        17.3
+      ],
+      "art/characters/conditions/arms-lost/guard-hit.webp": [
+        50.1,
+        32.1,
+        -25,
+        17.3
+      ],
+      "art/characters/motion/guard-guard.webp": [
+        62.9,
+        28.6,
+        1,
+        18.8
+      ],
+      "art/characters/conditions/arms-lost/guard-guard.webp": [
+        62.9,
+        28.6,
+        1,
+        18.8
+      ],
+      "art/characters/motion/guard-defeat.webp": [
+        59.4,
+        81.2,
+        36,
+        11.5
+      ],
+      "art/characters/conditions/arms-lost/guard-defeat.webp": [
+        66.1,
+        80.8,
+        40,
+        12
+      ],
+      "art/characters/conditions/legs-lost/guard-idle.webp": [
+        57.8,
+        38.9,
+        -1,
+        18.2
+      ],
+      "art/characters/conditions/legs-lost/guard-attack.webp": [
+        66.6,
+        43.8,
+        -2,
+        17.1
+      ],
+      "art/characters/conditions/legs-lost/guard-hit.webp": [
+        51.3,
+        41.1,
+        -12,
+        18.2
+      ],
+      "art/characters/conditions/legs-lost/guard-guard.webp": [
+        62.6,
+        42.1,
+        2,
+        18
+      ],
+      "art/characters/conditions/legs-lost/guard-idle-arms-lost.webp": [
+        61.3,
+        40.3,
+        2,
+        18.7
+      ],
+      "art/characters/conditions/legs-lost/guard-attack-arms-lost.webp": [
+        65.4,
+        43.8,
+        15,
+        18.1
+      ],
+      "art/characters/conditions/legs-lost/guard-hit-arms-lost.webp": [
+        53.7,
+        41.2,
+        -17,
+        17.9
+      ],
+      "art/characters/conditions/legs-lost/guard-guard-arms-lost.webp": [
+        63.3,
+        41,
+        0,
+        17.2
+      ],
+      "art/characters/awakened-sd.png": [
+        58.1,
+        20.4,
+        7,
+        19.1
+      ],
+      "art/characters/conditions/arms-lost/awakened-idle.webp": [
+        58.1,
+        20.4,
+        7,
+        19.1
+      ],
+      "art/characters/motion/awakened-attack.png": [
+        59.8,
+        29.7,
+        5,
+        19
+      ],
+      "art/characters/conditions/arms-lost/awakened-attack.webp": [
+        59.8,
+        29.7,
+        5,
+        19
+      ],
+      "art/characters/motion/awakened-hit.png": [
+        48.6,
+        28.4,
+        -19,
+        19.3
+      ],
+      "art/characters/conditions/arms-lost/awakened-hit.webp": [
+        48.6,
+        28.4,
+        -19,
+        19.3
+      ],
+      "art/characters/motion/awakened-guard.webp": [
+        62.5,
+        23.5,
+        9,
+        19.1
+      ],
+      "art/characters/conditions/arms-lost/awakened-guard.webp": [
+        62.5,
+        23.5,
+        9,
+        19.1
+      ],
+      "art/characters/motion/awakened-defeat.webp": [
+        77,
+        79.4,
+        18,
+        12
+      ],
+      "art/characters/conditions/arms-lost/awakened-defeat.webp": [
+        76.2,
+        80.3,
+        18,
+        12.8
+      ],
+      "art/characters/conditions/legs-lost/awakened-idle.webp": [
+        60.7,
+        37.2,
+        2,
+        18.5
+      ],
+      "art/characters/conditions/legs-lost/awakened-attack.webp": [
+        66.9,
+        40.5,
+        11,
+        18.3
+      ],
+      "art/characters/conditions/legs-lost/awakened-hit.webp": [
+        47.4,
+        36.2,
+        -31,
+        18.8
+      ],
+      "art/characters/conditions/legs-lost/awakened-guard.webp": [
+        60.3,
+        37.6,
+        9,
+        18.6
+      ],
+      "art/characters/conditions/legs-lost/awakened-idle-arms-lost.webp": [
+        60.2,
+        37,
+        11,
+        19.4
+      ],
+      "art/characters/conditions/legs-lost/awakened-attack-arms-lost.webp": [
+        66.1,
+        41.3,
+        4,
+        18.8
+      ],
+      "art/characters/conditions/legs-lost/awakened-hit-arms-lost.webp": [
+        50.2,
+        35.7,
+        -29,
+        19.5
+      ],
+      "art/characters/conditions/legs-lost/awakened-guard-arms-lost.webp": [
+        61,
+        37.6,
+        5,
+        18
+      ],
+      "art/characters/archer-sd-v5.png": [
+        57,
+        22.3,
+        7,
+        18.9
+      ],
+      "art/characters/conditions/arms-lost/archer-idle.webp": [
+        57,
+        22.3,
+        7,
+        18.9
+      ],
+      "art/characters/motion/archer-attack.png": [
+        48,
+        24.4,
+        6,
+        18.2
+      ],
+      "art/characters/conditions/arms-lost/archer-attack.webp": [
+        47.9,
+        23,
+        6,
+        18.2
+      ],
+      "art/characters/motion/archer-hit.png": [
+        47.2,
+        26.6,
+        -9,
+        19.6
+      ],
+      "art/characters/conditions/arms-lost/archer-hit.webp": [
+        47.2,
+        26.6,
+        -9,
+        19.6
+      ],
+      "art/characters/motion/archer-guard.webp": [
+        58.5,
+        25.5,
+        11,
+        18.2
+      ],
+      "art/characters/conditions/arms-lost/archer-guard.webp": [
+        58.5,
+        25.5,
+        11,
+        18.2
+      ],
+      "art/characters/motion/archer-release.webp": [
+        47.9,
+        24.3,
+        5,
+        18.7
+      ],
+      "art/characters/conditions/arms-lost/archer-release.webp": [
+        47.8,
+        22.9,
+        5,
+        18.7
+      ],
+      "art/characters/motion/archer-defeat.webp": [
+        74.9,
+        80.2,
+        40,
+        13
+      ],
+      "art/characters/conditions/arms-lost/archer-defeat.webp": [
+        78.1,
+        81.9,
+        38,
+        13
+      ],
+      "art/characters/conditions/legs-lost/archer-idle.webp": [
+        60.8,
+        39,
+        7,
+        18.6
+      ],
+      "art/characters/conditions/legs-lost/archer-attack.webp": [
+        59.6,
+        40.3,
+        4,
+        17.7
+      ],
+      "art/characters/conditions/legs-lost/archer-hit.webp": [
+        55.3,
+        37.5,
+        -15,
+        17.7
+      ],
+      "art/characters/conditions/legs-lost/archer-guard.webp": [
+        65.8,
+        37.9,
+        8,
+        18.3
+      ],
+      "art/characters/conditions/legs-lost/archer-idle-arms-lost.webp": [
+        63.5,
+        39.7,
+        5,
+        19.2
+      ],
+      "art/characters/conditions/legs-lost/archer-attack-arms-lost.webp": [
+        67.2,
+        41.8,
+        4,
+        18.5
+      ],
+      "art/characters/conditions/legs-lost/archer-hit-arms-lost.webp": [
+        57.4,
+        38.2,
+        -10,
+        20
+      ],
+      "art/characters/conditions/legs-lost/archer-guard-arms-lost.webp": [
+        65,
+        39.4,
+        10,
+        18.3
+      ],
+      "art/characters/shaman-sd-v5.png": [
+        56.3,
+        22.3,
+        6,
+        19.2
+      ],
+      "art/characters/conditions/arms-lost/shaman-idle.webp": [
+        56.3,
+        22.3,
+        6,
+        19.2
+      ],
+      "art/characters/motion/shaman-attack.png": [
+        50.3,
+        36.9,
+        -9,
+        18.8
+      ],
+      "art/characters/conditions/arms-lost/shaman-attack.webp": [
+        50.3,
+        36.9,
+        -9,
+        18.8
+      ],
+      "art/characters/motion/shaman-hit.png": [
+        44.7,
+        29.5,
+        -20,
+        20
+      ],
+      "art/characters/conditions/arms-lost/shaman-hit.webp": [
+        44.7,
+        29.5,
+        -20,
+        20
+      ],
+      "art/characters/motion/shaman-guard.webp": [
+        58.1,
+        27.1,
+        2,
+        18.2
+      ],
+      "art/characters/conditions/arms-lost/shaman-guard.webp": [
+        58.1,
+        27.1,
+        2,
+        18.2
+      ],
+      "art/characters/motion/shaman-heal.webp": [
+        57.2,
+        24.5,
+        6,
+        18.6
+      ],
+      "art/characters/conditions/arms-lost/shaman-heal.webp": [
+        57.2,
+        24.5,
+        6,
+        18.6
+      ],
+      "art/characters/motion/shaman-defeat.webp": [
+        76,
+        81.6,
+        30,
+        13
+      ],
+      "art/characters/conditions/arms-lost/shaman-defeat.webp": [
+        75.2,
+        82.3,
+        29,
+        13
+      ],
+      "art/characters/conditions/legs-lost/shaman-idle.webp": [
+        59.1,
+        40.4,
+        4,
+        18.4
+      ],
+      "art/characters/conditions/legs-lost/shaman-attack.webp": [
+        60.8,
+        47.3,
+        -13,
+        17.9
+      ],
+      "art/characters/conditions/legs-lost/shaman-hit.webp": [
+        54.7,
+        42.2,
+        -23,
+        19.7
+      ],
+      "art/characters/conditions/legs-lost/shaman-guard.webp": [
+        60,
+        42.5,
+        2,
+        18
+      ],
+      "art/characters/conditions/legs-lost/shaman-idle-arms-lost.webp": [
+        62.2,
+        41.5,
+        5,
+        18.8
+      ],
+      "art/characters/conditions/legs-lost/shaman-attack-arms-lost.webp": [
+        58.9,
+        48.6,
+        -11,
+        18.5
+      ],
+      "art/characters/conditions/legs-lost/shaman-hit-arms-lost.webp": [
+        56.6,
+        42.9,
+        -23,
+        18.8
+      ],
+      "art/characters/conditions/legs-lost/shaman-guard-arms-lost.webp": [
+        57.8,
+        43,
+        1,
+        17.7
+      ]
+    }
+  },
+  "camp": {
+    "groups": [
+      {
+        "order": [
+          "guard",
+          "awakened",
+          "nun"
+        ],
+        "seats": [
+          [],
+          [
+            [
+              37,
+              12,
+              29
+            ]
+          ],
+          [
+            [
+              26,
+              21,
+              25
+            ],
+            [
+              40,
+              10,
+              28
+            ]
+          ],
+          [
+            [
+              13,
+              25,
+              24
+            ],
+            [
+              25,
+              17,
+              26
+            ],
+            [
+              41,
+              8,
+              27
+            ]
+          ]
+        ]
+      },
+      {
+        "order": [
+          "shaman",
+          "archer"
+        ],
+        "seats": [
+          [],
+          [
+            [
+              67,
+              13,
+              27
+            ]
+          ],
+          [
+            [
+              64,
+              9,
+              26
+            ],
+            [
+              79,
+              22,
+              25
+            ]
+          ]
+        ]
+      }
+    ],
+    "departure": [
+      [],
+      [
+        [
+          63,
+          13,
+          24
+        ]
+      ],
+      [
+        [
+          50,
+          17,
+          22
+        ],
+        [
+          70,
+          23,
+          21
+        ]
+      ],
+      [
+        [
+          45,
+          23,
+          19
+        ],
+        [
+          60,
+          19,
+          20
+        ],
+        [
+          77,
+          28,
+          18
+        ]
+      ],
+      [
+        [
+          42,
+          25,
+          18
+        ],
+        [
+          55,
+          19,
+          19
+        ],
+        [
+          68,
+          25,
+          18
+        ],
+        [
+          82,
+          31,
+          17
+        ]
+      ],
+      [
+        [
+          40,
+          27,
+          17
+        ],
+        [
+          51,
+          21,
+          18
+        ],
+        [
+          63,
+          24,
+          17
+        ],
+        [
+          75,
+          28,
+          16
+        ],
+        [
+          87,
+          32,
+          15
+        ]
+      ]
+    ],
+    "appearance": {
+      "injured": {
+        "arms": [
+          "scratch",
+          13
+        ],
+        "chest": [
+          "scratch",
+          13
+        ],
+        "belly": [
+          "scratch",
+          15
+        ],
+        "legs": [
+          "scratch",
+          14
+        ],
+        "head": [
+          "scratch",
+          11
+        ],
+        "eyes": [
+          "scratch",
+          12
+        ]
+      },
+      "lost": {
+        "head": [
+          null,
+          15
+        ],
+        "chest": [
+          "wrap",
+          18
+        ],
+        "belly": [
+          "wrap",
+          19
+        ],
+        "legs": [
+          "wrap",
+          18
+        ],
+        "eyes": [
+          null,
+          10
+        ],
+        "arms": [
+          null,
+          15
+        ]
+      }
+    },
+    "poses": {
+      "nun": {
+        "normal": {
+          "src": "art/locations/camp-poses/nun-normal.webp",
+          "anchors": {
+            "head": [
+              54.080000000000005,
+              19.2
+            ],
+            "eyes": [
+              54.2,
+              28.2
+            ],
+            "arms": [
+              39.1,
+              51.9
+            ],
+            "chest": [
+              54.480000000000004,
+              49.2
+            ],
+            "belly": [
+              54.7,
+              65.7
+            ],
+            "legs": [
+              66.1,
+              78.2
+            ]
+          }
+        },
+        "arms": {
+          "src": "art/locations/camp-poses/nun-arms.webp",
+          "anchors": {
+            "head": [
+              54.344,
+              19.7
+            ],
+            "eyes": [
+              54.2,
+              28.7
+            ],
+            "arms": [
+              30.7,
+              53.2
+            ],
+            "chest": [
+              53.864000000000004,
+              49.7
+            ],
+            "belly": [
+              53.6,
+              66.2
+            ],
+            "legs": [
+              66.1,
+              78.2
+            ]
+          }
+        },
+        "legs": {
+          "src": "art/locations/camp-poses/nun-legs.webp",
+          "anchors": {
+            "head": [
+              53.456,
+              19.82
+            ],
+            "eyes": [
+              53.6,
+              28.7
+            ],
+            "arms": [
+              38.5,
+              51.9
+            ],
+            "chest": [
+              53.936,
+              49.42
+            ],
+            "belly": [
+              54.2,
+              65.7
+            ],
+            "legs": [
+              65.6,
+              78.2
+            ]
+          }
+        },
+        "both": {
+          "src": "art/locations/camp-poses/nun-both.webp",
+          "anchors": {
+            "head": [
+              52.836,
+              19.58
+            ],
+            "eyes": [
+              53.1,
+              28.7
+            ],
+            "arms": [
+              28.6,
+              54.2
+            ],
+            "chest": [
+              53.716,
+              49.980000000000004
+            ],
+            "belly": [
+              54.2,
+              66.7
+            ],
+            "legs": [
+              64.1,
+              77.8
+            ]
+          }
+        }
+      },
+      "guard": {
+        "normal": {
+          "src": "art/locations/camp-poses/guard-normal.webp",
+          "anchors": {
+            "head": [
+              57.80799999999999,
+              27.760000000000005
+            ],
+            "eyes": [
+              56.8,
+              35.2
+            ],
+            "arms": [
+              64.1,
+              46.3
+            ],
+            "chest": [
+              54.448,
+              52.56
+            ],
+            "belly": [
+              52.6,
+              66.2
+            ],
+            "legs": [
+              66.7,
+              79.2
+            ]
+          }
+        },
+        "arms": {
+          "src": "art/locations/camp-poses/guard-arms.webp",
+          "anchors": {
+            "head": [
+              60.028,
+              27.140000000000004
+            ],
+            "eyes": [
+              58.9,
+              34.7
+            ],
+            "arms": [
+              67.7,
+              46.8
+            ],
+            "chest": [
+              56.268,
+              52.34
+            ],
+            "belly": [
+              54.2,
+              66.2
+            ],
+            "legs": [
+              72.9,
+              79.6
+            ]
+          }
+        },
+        "legs": {
+          "src": "art/locations/camp-poses/guard-legs.webp",
+          "anchors": {
+            "head": [
+              57.928,
+              27.140000000000004
+            ],
+            "eyes": [
+              56.8,
+              34.7
+            ],
+            "arms": [
+              64.1,
+              47.7
+            ],
+            "chest": [
+              54.168,
+              52.34
+            ],
+            "belly": [
+              52.1,
+              66.2
+            ],
+            "legs": [
+              65.1,
+              81
+            ]
+          }
+        },
+        "both": {
+          "src": "art/locations/camp-poses/guard-both.webp",
+          "anchors": {
+            "head": [
+              58.80799999999999,
+              27.260000000000005
+            ],
+            "eyes": [
+              57.8,
+              34.7
+            ],
+            "arms": [
+              71.4,
+              47.7
+            ],
+            "chest": [
+              55.448,
+              52.06
+            ],
+            "belly": [
+              53.6,
+              65.7
+            ],
+            "legs": [
+              69.8,
+              81.5
+            ]
+          }
+        }
+      },
+      "awakened": {
+        "normal": {
+          "src": "art/locations/camp-poses/awakened-normal.webp",
+          "anchors": {
+            "head": [
+              53.84,
+              17.348
+            ],
+            "eyes": [
+              53.6,
+              26.9
+            ],
+            "arms": [
+              37.5,
+              52.8
+            ],
+            "chest": [
+              53.04,
+              49.188
+            ],
+            "belly": [
+              52.6,
+              66.7
+            ],
+            "legs": [
+              74.5,
+              69.9
+            ]
+          }
+        },
+        "arms": {
+          "src": "art/locations/camp-poses/awakened-arms.webp",
+          "anchors": {
+            "head": [
+              53.72,
+              17.467999999999996
+            ],
+            "eyes": [
+              53.6,
+              26.9
+            ],
+            "arms": [
+              35.9,
+              53.2
+            ],
+            "chest": [
+              53.32,
+              48.908
+            ],
+            "belly": [
+              53.1,
+              66.2
+            ],
+            "legs": [
+              75,
+              69.9
+            ]
+          }
+        },
+        "legs": {
+          "src": "art/locations/camp-poses/awakened-legs.webp",
+          "anchors": {
+            "head": [
+              53.1,
+              17.587999999999997
+            ],
+            "eyes": [
+              53.1,
+              26.9
+            ],
+            "arms": [
+              37,
+              52.8
+            ],
+            "chest": [
+              53.1,
+              48.628
+            ],
+            "belly": [
+              53.1,
+              65.7
+            ],
+            "legs": [
+              71.9,
+              75
+            ]
+          }
+        },
+        "both": {
+          "src": "art/locations/camp-poses/awakened-both.webp",
+          "anchors": {
+            "head": [
+              54.464000000000006,
+              17.467999999999996
+            ],
+            "eyes": [
+              54.2,
+              26.9
+            ],
+            "arms": [
+              36.5,
+              53.2
+            ],
+            "chest": [
+              53.584,
+              48.908
+            ],
+            "belly": [
+              53.1,
+              66.2
+            ],
+            "legs": [
+              71.9,
+              76.4
+            ]
+          }
+        }
+      },
+      "archer": {
+        "normal": {
+          "src": "art/locations/camp-poses/archer-normal.webp",
+          "anchors": {
+            "head": [
+              41.92399999999999,
+              17.571999999999996
+            ],
+            "eyes": [
+              44.3,
+              25.9
+            ],
+            "arms": [
+              30.2,
+              45.8
+            ],
+            "chest": [
+              49.844,
+              45.332
+            ],
+            "belly": [
+              54.2,
+              60.6
+            ],
+            "legs": [
+              32.3,
+              69
+            ]
+          }
+        },
+        "arms": {
+          "src": "art/locations/camp-poses/archer-arms.webp",
+          "anchors": {
+            "head": [
+              41.684,
+              27.140000000000004
+            ],
+            "eyes": [
+              44.3,
+              34.7
+            ],
+            "arms": [
+              38.5,
+              53.2
+            ],
+            "chest": [
+              50.404,
+              52.34
+            ],
+            "belly": [
+              55.2,
+              66.2
+            ],
+            "legs": [
+              32.8,
+              72.2
+            ]
+          }
+        },
+        "legs": {
+          "src": "art/locations/camp-poses/archer-legs.webp",
+          "anchors": {
+            "head": [
+              42.544,
+              18.071999999999996
+            ],
+            "eyes": [
+              44.8,
+              26.4
+            ],
+            "arms": [
+              30.7,
+              46.8
+            ],
+            "chest": [
+              50.064,
+              45.832
+            ],
+            "belly": [
+              54.2,
+              61.1
+            ],
+            "legs": [
+              31.8,
+              73.6
+            ]
+          }
+        },
+        "both": {
+          "src": "art/locations/camp-poses/archer-both.webp",
+          "anchors": {
+            "head": [
+              40.440000000000005,
+              27.544000000000004
+            ],
+            "eyes": [
+              43.2,
+              35.2
+            ],
+            "arms": [
+              36.5,
+              54.2
+            ],
+            "chest": [
+              49.64,
+              53.064
+            ],
+            "belly": [
+              54.7,
+              67.1
+            ],
+            "legs": [
+              36.5,
+              75.9
+            ]
+          }
+        }
+      },
+      "shaman": {
+        "normal": {
+          "src": "art/locations/camp-poses/shaman-normal.webp",
+          "anchors": {
+            "head": [
+              38.232,
+              34.528000000000006
+            ],
+            "eyes": [
+              39.6,
+              41.2
+            ],
+            "arms": [
+              31.3,
+              61.6
+            ],
+            "chest": [
+              42.792,
+              56.768
+            ],
+            "belly": [
+              45.3,
+              69
+            ],
+            "legs": [
+              46.4,
+              83.8
+            ]
+          }
+        },
+        "arms": {
+          "src": "art/locations/camp-poses/shaman-arms.webp",
+          "anchors": {
+            "head": [
+              38.468,
+              34.648
+            ],
+            "eyes": [
+              40.1,
+              41.2
+            ],
+            "arms": [
+              30.7,
+              61.6
+            ],
+            "chest": [
+              43.908,
+              56.488
+            ],
+            "belly": [
+              46.9,
+              68.5
+            ],
+            "legs": [
+              45.8,
+              84.3
+            ]
+          }
+        },
+        "legs": {
+          "src": "art/locations/camp-poses/shaman-legs.webp",
+          "anchors": {
+            "head": [
+              38.112,
+              34.74400000000001
+            ],
+            "eyes": [
+              39.6,
+              41.2
+            ],
+            "arms": [
+              31.3,
+              62
+            ],
+            "chest": [
+              43.072,
+              56.263999999999996
+            ],
+            "belly": [
+              45.8,
+              68.1
+            ],
+            "legs": [
+              49.5,
+              84.3
+            ]
+          }
+        },
+        "both": {
+          "src": "art/locations/camp-poses/shaman-both.webp",
+          "anchors": {
+            "head": [
+              38.112,
+              34.74400000000001
+            ],
+            "eyes": [
+              39.6,
+              41.2
+            ],
+            "arms": [
+              30.7,
+              62
+            ],
+            "chest": [
+              43.072,
+              56.263999999999996
+            ],
+            "belly": [
+              45.8,
+              68.1
+            ],
+            "legs": [
+              49,
+              84.3
+            ]
+          }
+        }
+      }
+    }
+  },
+  "codex": {
+    "tabs": [
+      {
+        "id": "nun",
+        "label": "수녀",
+        "role": "단일 치유 · 회복 연계",
+        "slots": 3,
+        "cards": [
+          {
+            "id": "prayer",
+            "lines": [
+              "한 부위 내구도 최대 3 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          },
+          {
+            "id": "votiveStrike",
+            "lines": [
+              "한 부위 피해 4"
+            ]
+          },
+          {
+            "id": "litanyGuard",
+            "lines": [
+              "두 부위에 각각 가드 +3"
+            ]
+          },
+          {
+            "id": "lanternWash",
+            "lines": [
+              "한 부위 내구도 최대 5 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          },
+          {
+            "id": "sharedPrayer",
+            "lines": [
+              "머리·가슴 한 곳 3 회복 · 그 외 2 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          },
+          {
+            "id": "emergencyStitch",
+            "lines": [
+              "부상한 팔·다리 한 곳 3 회복",
+              "정상으로 회복 가능한 부위 우선"
+            ]
+          },
+          {
+            "id": "woundCover",
+            "lines": [
+              "부상에서 정상으로 회복한 부위에 가드 3"
+            ]
+          },
+          {
+            "id": "penance",
+            "lines": [
+              "자신의 손상 부위 3 회복"
+            ]
+          },
+          {
+            "id": "candleCrash",
+            "lines": [
+              "피해 3 · 스스로 회복한 뒤 첫 타격 +2"
+            ]
+          },
+          {
+            "id": "lanternVow",
+            "lines": [
+              "피해 2 · 적중하면 자신의 손상 부위 1 회복"
+            ]
+          },
+          {
+            "id": "lanternSpark",
+            "lines": [
+              "한 부위 피해 2",
+              "관통 1 · 가드 무시"
+            ]
+          },
+          {
+            "id": "shortHymn",
+            "lines": [
+              "한 부위 내구도 최대 1 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          },
+          {
+            "id": "plantFeet",
+            "lines": [
+              "자신의 다리에 가드 2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "guard",
+        "label": "간수",
+        "role": "전위 방어 · 반격",
+        "slots": 2,
+        "cards": [
+          {
+            "id": "baton",
+            "lines": [
+              "한 부위 피해 6"
+            ]
+          },
+          {
+            "id": "escort",
+            "lines": [
+              "한 부위 가드 +4"
+            ]
+          },
+          {
+            "id": "shieldRam",
+            "lines": [
+              "가드 5 제거",
+              "한 부위 피해 1"
+            ]
+          },
+          {
+            "id": "brace",
+            "lines": [
+              "한 부위 가드 +5"
+            ]
+          },
+          {
+            "id": "shieldCounter",
+            "lines": [
+              "한 부위 가드 +3",
+              "해당 부위 피격 시 반격 3"
+            ]
+          },
+          {
+            "id": "rearEscort",
+            "lines": [
+              "맨 뒤 아군 두 부위에 각각 가드 +3"
+            ]
+          },
+          {
+            "id": "holdShield",
+            "lines": [
+              "자신의 예고 부위에 가드 4 · 예고 없으면 머리"
+            ]
+          },
+          {
+            "id": "shoveBack",
+            "lines": [
+              "피해 2",
+              "자신이 가드로 막은 뒤 첫 타격은 가드 3 제거"
+            ]
+          },
+          {
+            "id": "ironGorget",
+            "lines": [
+              "자신의 머리·가슴에 각각 가드 2 · 부상 부위 +1"
+            ]
+          },
+          {
+            "id": "takeAimHit",
+            "lines": [
+              "뒤 아군을 노리는 다음 정밀 타격을 대신 받음"
+            ]
+          },
+          {
+            "id": "coverBack",
+            "lines": [
+              "맨 뒤의 부상한 아군 한 부위에 가드 4"
+            ]
+          },
+          {
+            "id": "batonCheck",
+            "lines": [
+              "피해 2 · 적의 부상한 팔 우선"
+            ]
+          },
+          {
+            "id": "shoulderHold",
+            "lines": [
+              "자신의 머리에 가드 2 · 팔 결손에도 발동"
+            ]
+          },
+          {
+            "id": "kneePad",
+            "lines": [
+              "자신의 다리에 가드 1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "awakened",
+        "label": "개화 수감자",
+        "role": "가드 제거 · 부상 추가 피해",
+        "slots": 2,
+        "cards": [
+          {
+            "id": "irons",
+            "lines": [
+              "한 부위 피해 6"
+            ]
+          },
+          {
+            "id": "hook",
+            "lines": [
+              "가드 4 제거",
+              "한 부위 피해 1"
+            ]
+          },
+          {
+            "id": "chainSwing",
+            "lines": [
+              "한 부위 피해 4",
+              "부상 부위 피해 +1"
+            ]
+          },
+          {
+            "id": "chainWard",
+            "lines": [
+              "두 부위에 각각 가드 +3"
+            ]
+          },
+          {
+            "id": "chainRend",
+            "lines": [
+              "가드 4 제거",
+              "한 부위 피해 3"
+            ]
+          },
+          {
+            "id": "chainSweep",
+            "lines": [
+              "두 부위에 각각 피해 3"
+            ]
+          },
+          {
+            "id": "tightenWound",
+            "lines": [
+              "한 부위 피해 2",
+              "부상 부위 피해 +2"
+            ]
+          },
+          {
+            "id": "seizeJoint",
+            "lines": [
+              "피해 2 · 부상한 팔·다리면 +3"
+            ]
+          },
+          {
+            "id": "digDeep",
+            "lines": [
+              "피해 2 · 부상 부위가 둘 이상이면 부상 부위에 +3"
+            ]
+          },
+          {
+            "id": "twistRing",
+            "lines": [
+              "가장 두꺼운 부위 가드 최대 4 제거",
+              "가드가 생길 때 발동"
+            ]
+          },
+          {
+            "id": "openGap",
+            "lines": [
+              "피해 2 · 최근 가드를 제거한 부위 첫 타격 +2"
+            ]
+          },
+          {
+            "id": "tornRing",
+            "lines": [
+              "가드 2 제거 · 피해 2",
+              "그 부위의 가드를 0으로 만들면 피해 +1"
+            ]
+          },
+          {
+            "id": "shackleKick",
+            "lines": [
+              "피해 1 · 팔 결손에도 발동"
+            ]
+          },
+          {
+            "id": "roughWrap",
+            "lines": [
+              "자신의 가슴에 가드 1 · 팔 결손에도 발동"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "archer",
+        "label": "궁수",
+        "role": "중위 연타 · 후위 일격",
+        "slots": 2,
+        "cards": [
+          {
+            "id": "aimedShot",
+            "lines": [
+              "한 부위 피해 2",
+              "관통 3 · 가드 무시"
+            ]
+          },
+          {
+            "id": "snapShot",
+            "lines": [
+              "한 부위 피해 3"
+            ]
+          },
+          {
+            "id": "barbedArrow",
+            "lines": [
+              "가드 4 제거",
+              "한 부위 피해 1"
+            ]
+          },
+          {
+            "id": "longShot",
+            "lines": [
+              "한 부위 피해 5"
+            ]
+          },
+          {
+            "id": "needleShot",
+            "lines": [
+              "한 부위 피해 3",
+              "관통 3 · 가드 무시"
+            ]
+          },
+          {
+            "id": "woundShot",
+            "lines": [
+              "한 부위 피해 2",
+              "부상 부위 피해 +2"
+            ]
+          },
+          {
+            "id": "holdBreath",
+            "lines": [
+              "다음 단일 사격 한 발에 피해 +2"
+            ]
+          },
+          {
+            "id": "executionArrow",
+            "lines": [
+              "한 부위 피해 7"
+            ]
+          },
+          {
+            "id": "forkShot",
+            "lines": [
+              "서로 다른 두 부위에 피해 2 · 팔·다리 우선"
+            ]
+          },
+          {
+            "id": "fanShot",
+            "lines": [
+              "최대 세 부위에 각각 피해 1 · 가드 없는 부위 우선"
+            ]
+          },
+          {
+            "id": "scatteringTips",
+            "lines": [
+              "서로 다른 두 부위에 가드 1 제거 후 피해 1"
+            ]
+          },
+          {
+            "id": "fragmentArrow",
+            "lines": [
+              "한 부위 피해 3 · 적중 시 다른 부위 피해 1"
+            ]
+          },
+          {
+            "id": "bowBlock",
+            "lines": [
+              "자신의 예고 부위에 가드 2 · 예고 없으면 머리"
+            ]
+          },
+          {
+            "id": "shortArrow",
+            "lines": [
+              "한 부위 피해 1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "shaman",
+        "label": "주술사",
+        "role": "여러 아군 치유 · 강화와 약화",
+        "slots": 2,
+        "cards": [
+          {
+            "id": "mending",
+            "lines": [
+              "한 부위 내구도 최대 2 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          },
+          {
+            "id": "unseal",
+            "lines": [
+              "가드 3 제거",
+              "한 부위 피해 1"
+            ]
+          },
+          {
+            "id": "hexBolt",
+            "lines": [
+              "한 부위 피해 2",
+              "관통 3 · 가드 무시"
+            ]
+          },
+          {
+            "id": "shamanWard",
+            "lines": [
+              "한 부위 가드 +4"
+            ]
+          },
+          {
+            "id": "runeWard",
+            "lines": [
+              "아군 최대 2명 · 각각 한 부위 내구도 최대 2 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          },
+          {
+            "id": "exposeHex",
+            "lines": [
+              "한 부위 피해 1",
+              "적중 시 표식 · 다음 아군 피해 +2"
+            ]
+          },
+          {
+            "id": "incenseSmoke",
+            "lines": [
+              "다친 출전 대원 모두의 부위를 하나씩 1 회복"
+            ]
+          },
+          {
+            "id": "medicinalKnot",
+            "lines": [
+              "자신 외 아군 최대 2명 · 각각 회복 1과 가드 1"
+            ]
+          },
+          {
+            "id": "requiemBreath",
+            "lines": [
+              "부상한 대원이 둘 이상일 때 각자 부상 부위 2 회복"
+            ]
+          },
+          {
+            "id": "stifleBreath",
+            "lines": [
+              "적의 다음 공격 피해 −2"
+            ]
+          },
+          {
+            "id": "battleKnot",
+            "lines": [
+              "다른 아군의 다음 첫 적중 피해 +1"
+            ]
+          },
+          {
+            "id": "smokeWard",
+            "lines": [
+              "가장 내구도가 낮은 부상 부위에 가드 2"
+            ]
+          },
+          {
+            "id": "smallCharm",
+            "lines": [
+              "자신의 예고 부위에 가드 1 · 예고 없으면 가슴"
+            ]
+          },
+          {
+            "id": "pebbleSpell",
+            "lines": [
+              "피해 1 · 눈 결손에도 발동"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "common",
+        "label": "공용",
+        "role": "",
+        "slots": 2,
+        "cards": [
+          {
+            "id": "strike",
+            "lines": [
+              "한 부위 피해 2"
+            ]
+          },
+          {
+            "id": "heavy",
+            "lines": [
+              "한 부위 피해 5"
+            ]
+          },
+          {
+            "id": "guard",
+            "lines": [
+              "한 부위 가드 +3"
+            ]
+          },
+          {
+            "id": "force",
+            "lines": [
+              "한 부위 피해 4"
+            ]
+          },
+          {
+            "id": "pierce",
+            "lines": [
+              "한 부위 피해 2",
+              "관통 5 · 가드 무시"
+            ]
+          },
+          {
+            "id": "crush",
+            "lines": [
+              "한 부위 피해 7"
+            ]
+          },
+          {
+            "id": "shelter",
+            "lines": [
+              "한 부위 가드 +6"
+            ]
+          },
+          {
+            "id": "cover",
+            "lines": [
+              "두 부위에 각각 가드 +3"
+            ]
+          },
+          {
+            "id": "dressing",
+            "lines": [
+              "한 부위 내구도 최대 4 회복",
+              "대상의 배 부상 시 회복량 절반",
+              "결손 부위는 회복 불가"
+            ]
+          }
+        ]
+      }
+    ],
+    "weapons": {
+      "mace": "등불 · 방패",
+      "baton": "진압봉",
+      "chains": "사슬",
+      "bow": "활",
+      "staff": "지팡이"
+    },
+    "ranks": {
+      "0": "전위만",
+      "1": "중위만",
+      "2": "후위만",
+      "0,1": "후위 불가",
+      "1,2": "전위 불가",
+      "0,2": "중위 불가"
+    }
+  },
+  "visuals": {
+    "nun": {
+      "idle": "art/characters/nun-sd.png",
+      "poses": {
+        "attack": "art/characters/motion/nun-attack.png",
+        "hit": "art/characters/motion/nun-hit.png",
+        "guard": "art/characters/motion/nun-guard.webp",
+        "defeat": "art/characters/motion/nun-defeat.webp",
+        "heal": "art/characters/motion/nun-heal.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            57.92,
+            15.8
+          ],
+          "eyes": [
+            56,
+            23
+          ],
+          "arms": [
+            64.84,
+            40.1
+          ],
+          "chest": [
+            51.519999999999996,
+            39.8
+          ],
+          "belly": [
+            48,
+            53
+          ],
+          "legs": [
+            60,
+            76
+          ]
+        },
+        "attack": {
+          "head": [
+            58.84,
+            26.28
+          ],
+          "eyes": [
+            55,
+            33
+          ],
+          "arms": [
+            61.33,
+            44.01
+          ],
+          "chest": [
+            46.04,
+            48.68
+          ],
+          "belly": [
+            39,
+            61
+          ],
+          "legs": [
+            64,
+            76
+          ]
+        },
+        "hit": {
+          "head": [
+            45.8,
+            27.04
+          ],
+          "eyes": [
+            47,
+            34
+          ],
+          "arms": [
+            59.38,
+            46.35
+          ],
+          "chest": [
+            49.8,
+            50.24
+          ],
+          "belly": [
+            52,
+            63
+          ],
+          "legs": [
+            71,
+            79
+          ]
+        },
+        "guard": {
+          "head": [
+            61.64,
+            21.28
+          ],
+          "eyes": [
+            59,
+            28
+          ],
+          "arms": [
+            64.84,
+            40.89
+          ],
+          "chest": [
+            52.84,
+            43.68
+          ],
+          "belly": [
+            48,
+            56
+          ],
+          "legs": [
+            65,
+            76
+          ]
+        },
+        "defeat": {
+          "head": [
+            91.28,
+            61.64
+          ],
+          "eyes": [
+            80,
+            65
+          ],
+          "arms": [
+            70.56,
+            76.13
+          ],
+          "chest": [
+            53.67999999999999,
+            72.84
+          ],
+          "belly": [
+            33,
+            79
+          ],
+          "legs": [
+            11,
+            81
+          ]
+        },
+        "heal": {
+          "head": [
+            57.16,
+            22.28
+          ],
+          "eyes": [
+            55,
+            29
+          ],
+          "arms": [
+            60.16,
+            42.45
+          ],
+          "chest": [
+            49.96,
+            44.68
+          ],
+          "belly": [
+            46,
+            57
+          ],
+          "legs": [
+            55,
+            75
+          ]
+        }
+      },
+      "armLoss": {
+        "idle": "art/characters/conditions/arms-lost/nun-idle.webp",
+        "hit": "art/characters/conditions/arms-lost/nun-hit.webp",
+        "attack": "art/characters/conditions/arms-lost/nun-attack.webp",
+        "guard": "art/characters/conditions/arms-lost/nun-guard.webp",
+        "heal": "art/characters/conditions/arms-lost/nun-heal.webp",
+        "defeat": "art/characters/conditions/arms-lost/nun-defeat.webp"
+      },
+      "kneeling": {
+        "legsOnly": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/nun-idle.webp",
+            "anchors": {
+              "head": [
+                64.782,
+                32.4764
+              ],
+              "eyes": [
+                63.39,
+                38.69
+              ],
+              "arms": [
+                65.63,
+                54.17
+              ],
+              "chest": [
+                60.142,
+                53.1884
+              ],
+              "belly": [
+                57.59,
+                64.58
+              ],
+              "legs": [
+                70.54,
+                83.33
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/nun-attack.webp",
+            "anchors": {
+              "head": [
+                69.1676,
+                35.5836
+              ],
+              "eyes": [
+                65.63,
+                41.37
+              ],
+              "arms": [
+                74.11,
+                51.19
+              ],
+              "chest": [
+                57.3756,
+                54.8716
+              ],
+              "belly": [
+                50.89,
+                65.48
+              ],
+              "legs": [
+                65.18,
+                81.55
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/nun-guard.webp",
+            "anchors": {
+              "head": [
+                69.28359999999999,
+                32.69
+              ],
+              "eyes": [
+                66.07,
+                38.69
+              ],
+              "arms": [
+                62.05,
+                53.57
+              ],
+              "chest": [
+                58.5716,
+                52.69
+              ],
+              "belly": [
+                52.68,
+                63.69
+              ],
+              "legs": [
+                70.54,
+                81.55
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/nun-hit.webp",
+            "anchors": {
+              "head": [
+                55.36,
+                32.244
+              ],
+              "eyes": [
+                55.36,
+                38.1
+              ],
+              "arms": [
+                74.11,
+                48.51
+              ],
+              "chest": [
+                55.36,
+                51.764
+              ],
+              "belly": [
+                55.36,
+                62.5
+              ],
+              "legs": [
+                74.55,
+                79.76
+              ]
+            }
+          }
+        },
+        "armsAndLegs": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/nun-idle-arms-lost.webp",
+            "anchors": {
+              "head": [
+                65.68440000000001,
+                32.0304
+              ],
+              "eyes": [
+                64.29,
+                38.1
+              ],
+              "arms": [
+                72.32,
+                53.27
+              ],
+              "chest": [
+                61.0364,
+                52.2624
+              ],
+              "belly": [
+                58.48,
+                63.39
+              ],
+              "legs": [
+                70.54,
+                83.33
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/nun-attack-arms-lost.webp",
+            "anchors": {
+              "head": [
+                71.08399999999999,
+                38.0764
+              ],
+              "eyes": [
+                68.3,
+                43.15
+              ],
+              "arms": [
+                71.88,
+                54.17
+              ],
+              "chest": [
+                61.804,
+                54.988400000000006
+              ],
+              "belly": [
+                56.7,
+                64.29
+              ],
+              "legs": [
+                73.21,
+                82.14
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/nun-guard-arms-lost.webp",
+            "anchors": {
+              "head": [
+                69.19839999999999,
+                35.6412
+              ],
+              "eyes": [
+                66.52,
+                41.07
+              ],
+              "arms": [
+                71.43,
+                54.46
+              ],
+              "chest": [
+                60.270399999999995,
+                53.7372
+              ],
+              "belly": [
+                55.36,
+                63.69
+              ],
+              "legs": [
+                68.3,
+                81.55
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/nun-hit-arms-lost.webp",
+            "anchors": {
+              "head": [
+                46.699600000000004,
+                31.5
+              ],
+              "eyes": [
+                47.77,
+                37.5
+              ],
+              "arms": [
+                72.77,
+                49.7
+              ],
+              "chest": [
+                50.2676,
+                51.5
+              ],
+              "belly": [
+                52.23,
+                62.5
+              ],
+              "legs": [
+                68.3,
+                80.65
+              ]
+            }
+          }
+        }
+      }
+    },
+    "guard": {
+      "idle": "art/characters/guard-sd.png",
+      "poses": {
+        "attack": "art/characters/motion/guard-attack.png",
+        "hit": "art/characters/motion/guard-hit.png",
+        "guard": "art/characters/motion/guard-guard.webp",
+        "defeat": "art/characters/motion/guard-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            61.16,
+            16.04
+          ],
+          "eyes": [
+            59,
+            23
+          ],
+          "arms": [
+            70.31,
+            41.67
+          ],
+          "chest": [
+            53.96,
+            39.24
+          ],
+          "belly": [
+            50,
+            52
+          ],
+          "legs": [
+            63,
+            78
+          ]
+        },
+        "attack": {
+          "head": [
+            54.44,
+            26.52
+          ],
+          "eyes": [
+            53,
+            33
+          ],
+          "arms": [
+            56.25,
+            45.83
+          ],
+          "chest": [
+            49.64,
+            48.120000000000005
+          ],
+          "belly": [
+            47,
+            60
+          ],
+          "legs": [
+            57,
+            80
+          ]
+        },
+        "hit": {
+          "head": [
+            48.76,
+            26.52
+          ],
+          "eyes": [
+            49,
+            33
+          ],
+          "arms": [
+            66.8,
+            47.66
+          ],
+          "chest": [
+            49.56,
+            48.120000000000005
+          ],
+          "belly": [
+            50,
+            60
+          ],
+          "legs": [
+            73,
+            81
+          ]
+        },
+        "guard": {
+          "head": [
+            59.92,
+            22.04
+          ],
+          "eyes": [
+            58,
+            29
+          ],
+          "arms": [
+            66.41,
+            43.75
+          ],
+          "chest": [
+            53.519999999999996,
+            45.24
+          ],
+          "belly": [
+            50,
+            58
+          ],
+          "legs": [
+            70,
+            79
+          ]
+        },
+        "defeat": {
+          "head": [
+            72.72,
+            75.52
+          ],
+          "eyes": [
+            66,
+            76
+          ],
+          "arms": [
+            58.45,
+            79.07
+          ],
+          "chest": [
+            50.32,
+            77.12
+          ],
+          "belly": [
+            38,
+            78
+          ],
+          "legs": [
+            18,
+            84
+          ]
+        }
+      },
+      "armLoss": {
+        "idle": "art/characters/conditions/arms-lost/guard-idle.webp",
+        "hit": "art/characters/conditions/arms-lost/guard-hit.webp",
+        "attack": "art/characters/conditions/arms-lost/guard-attack.webp",
+        "guard": "art/characters/conditions/arms-lost/guard-guard.webp",
+        "defeat": "art/characters/conditions/arms-lost/guard-defeat.webp"
+      },
+      "kneeling": {
+        "legsOnly": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/guard-idle.webp",
+            "anchors": {
+              "head": [
+                57.461600000000004,
+                32.174
+              ],
+              "eyes": [
+                57.14,
+                38.39
+              ],
+              "arms": [
+                66.52,
+                54.76
+              ],
+              "chest": [
+                56.3896,
+                52.894000000000005
+              ],
+              "belly": [
+                55.8,
+                64.29
+              ],
+              "legs": [
+                62.95,
+                85.42
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/guard-attack.webp",
+            "anchors": {
+              "head": [
+                67.1948,
+                37.3616
+              ],
+              "eyes": [
+                64.73,
+                42.86
+              ],
+              "arms": [
+                67.86,
+                56.55
+              ],
+              "chest": [
+                58.9788,
+                55.6896
+              ],
+              "belly": [
+                54.46,
+                65.77
+              ],
+              "legs": [
+                63.39,
+                85.12
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/guard-guard.webp",
+            "anchors": {
+              "head": [
+                64.83399999999999,
+                35.2836
+              ],
+              "eyes": [
+                62.05,
+                41.07
+              ],
+              "arms": [
+                56.7,
+                52.68
+              ],
+              "chest": [
+                55.554,
+                54.571600000000004
+              ],
+              "belly": [
+                50.45,
+                65.18
+              ],
+              "legs": [
+                63.39,
+                85.42
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/guard-hit.webp",
+            "anchors": {
+              "head": [
+                50.89,
+                36.6008
+              ],
+              "eyes": [
+                50.89,
+                41.96
+              ],
+              "arms": [
+                62.95,
+                50
+              ],
+              "chest": [
+                50.89,
+                54.464800000000004
+              ],
+              "belly": [
+                50.89,
+                64.29
+              ],
+              "legs": [
+                65.18,
+                84.82
+              ]
+            }
+          }
+        },
+        "armsAndLegs": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/guard-idle-arms-lost.webp",
+            "anchors": {
+              "head": [
+                60.355199999999996,
+                33.935199999999995
+              ],
+              "eyes": [
+                59.82,
+                39.58
+              ],
+              "arms": [
+                66.96,
+                56.55
+              ],
+              "chest": [
+                58.571200000000005,
+                52.7512
+              ],
+              "belly": [
+                57.59,
+                63.1
+              ],
+              "legs": [
+                68.75,
+                81.25
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/guard-attack-arms-lost.webp",
+            "anchors": {
+              "head": [
+                66.174,
+                40.3272
+              ],
+              "eyes": [
+                63.39,
+                45.54
+              ],
+              "arms": [
+                65.18,
+                58.33
+              ],
+              "chest": [
+                56.894,
+                57.7032
+              ],
+              "belly": [
+                51.79,
+                67.26
+              ],
+              "legs": [
+                61.16,
+                84.52
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/guard-guard-arms-lost.webp",
+            "anchors": {
+              "head": [
+                65.2012,
+                34.696
+              ],
+              "eyes": [
+                62.95,
+                40.48
+              ],
+              "arms": [
+                68.3,
+                56.25
+              ],
+              "chest": [
+                57.6972,
+                53.976
+              ],
+              "belly": [
+                53.57,
+                64.58
+              ],
+              "legs": [
+                68.75,
+                83.33
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/guard-hit-arms-lost.webp",
+            "anchors": {
+              "head": [
+                49.51840000000001,
+                36.2412
+              ],
+              "eyes": [
+                51.34,
+                41.67
+              ],
+              "arms": [
+                67.86,
+                55.95
+              ],
+              "chest": [
+                55.5904,
+                54.3372
+              ],
+              "belly": [
+                58.93,
+                64.29
+              ],
+              "legs": [
+                73.66,
+                81.55
+              ]
+            }
+          }
+        }
+      }
+    },
+    "awakened": {
+      "idle": "art/characters/awakened-sd.png",
+      "poses": {
+        "attack": "art/characters/motion/awakened-attack.png",
+        "hit": "art/characters/motion/awakened-hit.png",
+        "guard": "art/characters/motion/awakened-guard.webp",
+        "defeat": "art/characters/motion/awakened-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            58.2,
+            14.52
+          ],
+          "eyes": [
+            57,
+            21
+          ],
+          "arms": [
+            40.63,
+            41.67
+          ],
+          "chest": [
+            54.2,
+            36.120000000000005
+          ],
+          "belly": [
+            52,
+            48
+          ],
+          "legs": [
+            66,
+            75
+          ]
+        },
+        "attack": {
+          "head": [
+            56.36,
+            26.72
+          ],
+          "eyes": [
+            53,
+            32
+          ],
+          "arms": [
+            34.38,
+            46.61
+          ],
+          "chest": [
+            45.16,
+            44.32
+          ],
+          "belly": [
+            39,
+            54
+          ],
+          "legs": [
+            65,
+            78
+          ]
+        },
+        "hit": {
+          "head": [
+            46.32,
+            30.240000000000002
+          ],
+          "eyes": [
+            48,
+            36
+          ],
+          "arms": [
+            41.41,
+            47.14
+          ],
+          "chest": [
+            51.92,
+            49.44
+          ],
+          "belly": [
+            55,
+            60
+          ],
+          "legs": [
+            73,
+            78
+          ]
+        },
+        "guard": {
+          "head": [
+            61.2,
+            15.8
+          ],
+          "eyes": [
+            60,
+            23
+          ],
+          "arms": [
+            33.59,
+            39.84
+          ],
+          "chest": [
+            57.2,
+            39.8
+          ],
+          "belly": [
+            55,
+            53
+          ],
+          "legs": [
+            70,
+            79
+          ]
+        },
+        "defeat": {
+          "head": [
+            86.4,
+            71.04
+          ],
+          "eyes": [
+            78,
+            72
+          ],
+          "arms": [
+            51.84,
+            79.07
+          ],
+          "chest": [
+            58.4,
+            74.24
+          ],
+          "belly": [
+            43,
+            76
+          ],
+          "legs": [
+            27,
+            87
+          ]
+        }
+      },
+      "armLoss": {
+        "idle": "art/characters/conditions/arms-lost/awakened-idle.webp",
+        "hit": "art/characters/conditions/arms-lost/awakened-hit.webp",
+        "attack": "art/characters/conditions/arms-lost/awakened-attack.webp",
+        "guard": "art/characters/conditions/arms-lost/awakened-guard.webp",
+        "defeat": "art/characters/conditions/arms-lost/awakened-defeat.webp"
+      },
+      "kneeling": {
+        "legsOnly": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/awakened-idle.webp",
+            "anchors": {
+              "head": [
+                60.344800000000006,
+                30.6432
+              ],
+              "eyes": [
+                59.38,
+                37.5
+              ],
+              "arms": [
+                39.73,
+                57.44
+              ],
+              "chest": [
+                57.1288,
+                53.4992
+              ],
+              "belly": [
+                55.36,
+                66.07
+              ],
+              "legs": [
+                71.88,
+                82.44
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/awakened-attack.webp",
+            "anchors": {
+              "head": [
+                70.1736,
+                36.2456
+              ],
+              "eyes": [
+                66.96,
+                41.96
+              ],
+              "arms": [
+                38.84,
+                54.76
+              ],
+              "chest": [
+                59.4616,
+                55.2936
+              ],
+              "belly": [
+                53.57,
+                65.77
+              ],
+              "legs": [
+                68.3,
+                80.95
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/awakened-guard.webp",
+            "anchors": {
+              "head": [
+                58.12520000000001,
+                30.871199999999995
+              ],
+              "eyes": [
+                57.59,
+                37.8
+              ],
+              "arms": [
+                46.88,
+                55.36
+              ],
+              "chest": [
+                56.3412,
+                53.967200000000005
+              ],
+              "belly": [
+                55.36,
+                66.67
+              ],
+              "legs": [
+                68.75,
+                81.55
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/awakened-hit.webp",
+            "anchors": {
+              "head": [
+                55.123599999999996,
+                30.8568
+              ],
+              "eyes": [
+                54.91,
+                37.5
+              ],
+              "arms": [
+                43.75,
+                54.17
+              ],
+              "chest": [
+                54.4116,
+                53.000800000000005
+              ],
+              "belly": [
+                54.02,
+                65.18
+              ],
+              "legs": [
+                74.11,
+                82.14
+              ]
+            }
+          }
+        },
+        "armsAndLegs": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/awakened-idle-arms-lost.webp",
+            "anchors": {
+              "head": [
+                62.12479999999999,
+                29.6116
+              ],
+              "eyes": [
+                61.16,
+                36.61
+              ],
+              "arms": [
+                44.64,
+                55.65
+              ],
+              "chest": [
+                58.9088,
+                52.9396
+              ],
+              "belly": [
+                57.14,
+                65.77
+              ],
+              "legs": [
+                71.88,
+                85.42
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/awakened-attack-arms-lost.webp",
+            "anchors": {
+              "head": [
+                64.7284,
+                36.1016
+              ],
+              "eyes": [
+                62.05,
+                41.96
+              ],
+              "arms": [
+                42.86,
+                56.85
+              ],
+              "chest": [
+                55.800399999999996,
+                55.6296
+              ],
+              "belly": [
+                50.89,
+                66.37
+              ],
+              "legs": [
+                65.63,
+                83.93
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/awakened-guard-arms-lost.webp",
+            "anchors": {
+              "head": [
+                60.6768,
+                31.389200000000002
+              ],
+              "eyes": [
+                59.82,
+                38.39
+              ],
+              "arms": [
+                44.2,
+                55.65
+              ],
+              "chest": [
+                57.8208,
+                54.7252
+              ],
+              "belly": [
+                56.25,
+                67.56
+              ],
+              "legs": [
+                70.98,
+                84.82
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/awakened-hit-arms-lost.webp",
+            "anchors": {
+              "head": [
+                51.951600000000006,
+                31.6748
+              ],
+              "eyes": [
+                53.13,
+                38.39
+              ],
+              "arms": [
+                44.64,
+                53.87
+              ],
+              "chest": [
+                55.8796,
+                54.058800000000005
+              ],
+              "belly": [
+                58.04,
+                66.37
+              ],
+              "legs": [
+                73.66,
+                82.14
+              ]
+            }
+          }
+        }
+      }
+    },
+    "archer": {
+      "idle": "art/characters/archer-sd-v5.png",
+      "poses": {
+        "attack": "art/characters/motion/archer-attack.png",
+        "hit": "art/characters/motion/archer-hit.png",
+        "guard": "art/characters/motion/archer-guard.webp",
+        "defeat": "art/characters/motion/archer-defeat.webp",
+        "release": "art/characters/motion/archer-release.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            58.92,
+            13.8
+          ],
+          "eyes": [
+            57,
+            21
+          ],
+          "arms": [
+            66.15,
+            39.24
+          ],
+          "chest": [
+            52.519999999999996,
+            37.8
+          ],
+          "belly": [
+            49,
+            51
+          ],
+          "legs": [
+            54,
+            75
+          ]
+        },
+        "attack": {
+          "head": [
+            43.68,
+            16.28
+          ],
+          "eyes": [
+            42,
+            23
+          ],
+          "arms": [
+            52.34,
+            39.84
+          ],
+          "chest": [
+            38.08,
+            38.68
+          ],
+          "belly": [
+            35,
+            51
+          ],
+          "legs": [
+            59,
+            75
+          ]
+        },
+        "hit": {
+          "head": [
+            40.12,
+            22.28
+          ],
+          "eyes": [
+            43,
+            29
+          ],
+          "arms": [
+            57.42,
+            42.71
+          ],
+          "chest": [
+            49.72,
+            44.68
+          ],
+          "belly": [
+            55,
+            57
+          ],
+          "legs": [
+            60,
+            79
+          ]
+        },
+        "guard": {
+          "head": [
+            52.72,
+            18.52
+          ],
+          "eyes": [
+            52,
+            25
+          ],
+          "arms": [
+            61.33,
+            40.36
+          ],
+          "chest": [
+            50.32,
+            40.120000000000005
+          ],
+          "belly": [
+            49,
+            52
+          ],
+          "legs": [
+            65,
+            77
+          ]
+        },
+        "defeat": {
+          "head": [
+            80.68,
+            74.28
+          ],
+          "eyes": [
+            73,
+            75
+          ],
+          "arms": [
+            55.51,
+            82.25
+          ],
+          "chest": [
+            55.08,
+            76.68
+          ],
+          "belly": [
+            41,
+            78
+          ],
+          "legs": [
+            18,
+            84
+          ]
+        },
+        "release": {
+          "head": [
+            42.96,
+            16.759999999999998
+          ],
+          "eyes": [
+            42,
+            23
+          ],
+          "arms": [
+            54.69,
+            39.58
+          ],
+          "chest": [
+            39.76,
+            37.56
+          ],
+          "belly": [
+            38,
+            49
+          ],
+          "legs": [
+            59,
+            75
+          ]
+        }
+      },
+      "armLoss": {
+        "idle": "art/characters/conditions/arms-lost/archer-idle.webp",
+        "hit": "art/characters/conditions/arms-lost/archer-hit.webp",
+        "attack": "art/characters/conditions/arms-lost/archer-attack.webp",
+        "guard": "art/characters/conditions/arms-lost/archer-guard.webp",
+        "release": "art/characters/conditions/arms-lost/archer-release.webp",
+        "defeat": "art/characters/conditions/arms-lost/archer-defeat.webp"
+      },
+      "kneeling": {
+        "legsOnly": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/archer-idle.webp",
+            "anchors": {
+              "head": [
+                59.3904,
+                32.0304
+              ],
+              "eyes": [
+                59.82,
+                38.1
+              ],
+              "arms": [
+                73.21,
+                61.9
+              ],
+              "chest": [
+                60.8224,
+                52.2624
+              ],
+              "belly": [
+                61.61,
+                63.39
+              ],
+              "legs": [
+                66.07,
+                82.74
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/archer-attack.webp",
+            "anchors": {
+              "head": [
+                60.1312,
+                34.0216
+              ],
+              "eyes": [
+                59.38,
+                39.88
+              ],
+              "arms": [
+                75,
+                51.79
+              ],
+              "chest": [
+                57.6272,
+                53.549600000000005
+              ],
+              "belly": [
+                56.25,
+                64.29
+              ],
+              "legs": [
+                64.29,
+                81.25
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/archer-guard.webp",
+            "anchors": {
+              "head": [
+                64.2364,
+                31.658399999999997
+              ],
+              "eyes": [
+                62.95,
+                37.8
+              ],
+              "arms": [
+                71.88,
+                52.98
+              ],
+              "chest": [
+                59.94840000000001,
+                52.1304
+              ],
+              "belly": [
+                57.59,
+                63.39
+              ],
+              "legs": [
+                68.3,
+                82.44
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/archer-hit.webp",
+            "anchors": {
+              "head": [
+                53.592800000000004,
+                32.172000000000004
+              ],
+              "eyes": [
+                54.02,
+                38.1
+              ],
+              "arms": [
+                70.54,
+                58.63
+              ],
+              "chest": [
+                55.0168,
+                51.932
+              ],
+              "belly": [
+                55.8,
+                62.8
+              ],
+              "legs": [
+                65.18,
+                80.06
+              ]
+            }
+          }
+        },
+        "armsAndLegs": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/archer-idle-arms-lost.webp",
+            "anchors": {
+              "head": [
+                62.7136,
+                33.364
+              ],
+              "eyes": [
+                62.5,
+                39.58
+              ],
+              "arms": [
+                71.88,
+                57.74
+              ],
+              "chest": [
+                62.001599999999996,
+                54.084
+              ],
+              "belly": [
+                61.61,
+                65.48
+              ],
+              "legs": [
+                68.75,
+                82.44
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/archer-attack-arms-lost.webp",
+            "anchors": {
+              "head": [
+                64.558,
+                36.0996
+              ],
+              "eyes": [
+                62.95,
+                41.67
+              ],
+              "arms": [
+                71.43,
+                57.14
+              ],
+              "chest": [
+                59.198,
+                54.6676
+              ],
+              "belly": [
+                56.25,
+                64.88
+              ],
+              "legs": [
+                66.07,
+                84.23
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/archer-guard-arms-lost.webp",
+            "anchors": {
+              "head": [
+                63.1204,
+                33.59440000000001
+              ],
+              "eyes": [
+                62.05,
+                39.88
+              ],
+              "arms": [
+                72.32,
+                54.76
+              ],
+              "chest": [
+                59.5524,
+                54.5464
+              ],
+              "belly": [
+                57.59,
+                66.07
+              ],
+              "legs": [
+                69.64,
+                82.44
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/archer-hit-arms-lost.webp",
+            "anchors": {
+              "head": [
+                56.358000000000004,
+                32.7044
+              ],
+              "eyes": [
+                56.25,
+                38.99
+              ],
+              "arms": [
+                70.54,
+                55.36
+              ],
+              "chest": [
+                55.998,
+                53.656400000000005
+              ],
+              "belly": [
+                55.8,
+                65.18
+              ],
+              "legs": [
+                69.64,
+                81.55
+              ]
+            }
+          }
+        }
+      }
+    },
+    "shaman": {
+      "idle": "art/characters/shaman-sd-v5.png",
+      "poses": {
+        "attack": "art/characters/motion/shaman-attack.png",
+        "hit": "art/characters/motion/shaman-hit.png",
+        "guard": "art/characters/motion/shaman-guard.webp",
+        "defeat": "art/characters/motion/shaman-defeat.webp",
+        "heal": "art/characters/motion/shaman-heal.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            58.92,
+            18.759999999999998
+          ],
+          "eyes": [
+            57,
+            25
+          ],
+          "arms": [
+            38.02,
+            44.44
+          ],
+          "chest": [
+            52.519999999999996,
+            39.56
+          ],
+          "belly": [
+            49,
+            51
+          ],
+          "legs": [
+            63,
+            78
+          ]
+        },
+        "attack": {
+          "head": [
+            45.92,
+            32.72
+          ],
+          "eyes": [
+            44,
+            38
+          ],
+          "arms": [
+            28.13,
+            50.26
+          ],
+          "chest": [
+            39.519999999999996,
+            50.32
+          ],
+          "belly": [
+            36,
+            60
+          ],
+          "legs": [
+            56,
+            82
+          ]
+        },
+        "hit": {
+          "head": [
+            40.08,
+            21.04
+          ],
+          "eyes": [
+            42,
+            28
+          ],
+          "arms": [
+            32.03,
+            44.27
+          ],
+          "chest": [
+            46.480000000000004,
+            44.24
+          ],
+          "belly": [
+            50,
+            57
+          ],
+          "legs": [
+            65,
+            80
+          ]
+        },
+        "guard": {
+          "head": [
+            55.44,
+            20.8
+          ],
+          "eyes": [
+            54,
+            28
+          ],
+          "arms": [
+            37.5,
+            43.23
+          ],
+          "chest": [
+            50.64,
+            44.8
+          ],
+          "belly": [
+            48,
+            58
+          ],
+          "legs": [
+            73,
+            78
+          ]
+        },
+        "defeat": {
+          "head": [
+            93.08,
+            74.04
+          ],
+          "eyes": [
+            83,
+            75
+          ],
+          "arms": [
+            50.73,
+            80.29
+          ],
+          "chest": [
+            59.48,
+            77.24
+          ],
+          "belly": [
+            41,
+            79
+          ],
+          "legs": [
+            23,
+            87
+          ]
+        },
+        "heal": {
+          "head": [
+            53.96,
+            19.04
+          ],
+          "eyes": [
+            53,
+            26
+          ],
+          "arms": [
+            43.75,
+            44.01
+          ],
+          "chest": [
+            50.76,
+            42.24
+          ],
+          "belly": [
+            49,
+            55
+          ],
+          "legs": [
+            61,
+            79
+          ]
+        }
+      },
+      "armLoss": {
+        "idle": "art/characters/conditions/arms-lost/shaman-idle.webp",
+        "hit": "art/characters/conditions/arms-lost/shaman-hit.webp",
+        "attack": "art/characters/conditions/arms-lost/shaman-attack.webp",
+        "guard": "art/characters/conditions/arms-lost/shaman-guard.webp",
+        "heal": "art/characters/conditions/arms-lost/shaman-heal.webp",
+        "defeat": "art/characters/conditions/arms-lost/shaman-defeat.webp"
+      },
+      "kneeling": {
+        "legsOnly": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/shaman-idle.webp",
+            "anchors": {
+              "head": [
+                56.16480000000001,
+                33.4504
+              ],
+              "eyes": [
+                56.7,
+                39.88
+              ],
+              "arms": [
+                43.75,
+                61.31
+              ],
+              "chest": [
+                57.9488,
+                54.882400000000004
+              ],
+              "belly": [
+                58.93,
+                66.67
+              ],
+              "legs": [
+                64.73,
+                81.55
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/shaman-attack.webp",
+            "anchors": {
+              "head": [
+                59.733200000000004,
+                41.9632
+              ],
+              "eyes": [
+                57.59,
+                47.32
+              ],
+              "arms": [
+                37.95,
+                60.71
+              ],
+              "chest": [
+                52.5892,
+                59.8192
+              ],
+              "belly": [
+                48.66,
+                69.64
+              ],
+              "legs": [
+                60.27,
+                81.55
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/shaman-guard.webp",
+            "anchors": {
+              "head": [
+                56.7104,
+                36.56
+              ],
+              "eyes": [
+                57.14,
+                42.56
+              ],
+              "arms": [
+                34.38,
+                61.9
+              ],
+              "chest": [
+                58.1424,
+                56.56
+              ],
+              "belly": [
+                58.93,
+                67.56
+              ],
+              "legs": [
+                68.3,
+                81.85
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/shaman-hit.webp",
+            "anchors": {
+              "head": [
+                53.837199999999996,
+                32.404399999999995
+              ],
+              "eyes": [
+                54.91,
+                38.69
+              ],
+              "arms": [
+                43.75,
+                57.44
+              ],
+              "chest": [
+                57.4132,
+                53.356399999999994
+              ],
+              "belly": [
+                59.38,
+                64.88
+              ],
+              "legs": [
+                69.64,
+                79.46
+              ]
+            }
+          }
+        },
+        "armsAndLegs": {
+          "idle": {
+            "src": "art/characters/conditions/legs-lost/shaman-idle-arms-lost.webp",
+            "anchors": {
+              "head": [
+                58.7164,
+                34.3548
+              ],
+              "eyes": [
+                58.93,
+                41.07
+              ],
+              "arms": [
+                45.54,
+                61.31
+              ],
+              "chest": [
+                59.4284,
+                56.7388
+              ],
+              "belly": [
+                59.82,
+                69.05
+              ],
+              "legs": [
+                69.64,
+                85.12
+              ]
+            }
+          },
+          "attack": {
+            "src": "art/characters/conditions/legs-lost/shaman-attack-arms-lost.webp",
+            "anchors": {
+              "head": [
+                58.416000000000004,
+                44.3984
+              ],
+              "eyes": [
+                56.7,
+                49.4
+              ],
+              "arms": [
+                38.84,
+                61.31
+              ],
+              "chest": [
+                52.696,
+                61.0704
+              ],
+              "belly": [
+                49.55,
+                70.24
+              ],
+              "legs": [
+                58.48,
+                84.52
+              ]
+            }
+          },
+          "guard": {
+            "src": "art/characters/conditions/legs-lost/shaman-guard-arms-lost.webp",
+            "anchors": {
+              "head": [
+                53.8168,
+                37.59160000000001
+              ],
+              "eyes": [
+                54.46,
+                43.45
+              ],
+              "arms": [
+                41.07,
+                58.93
+              ],
+              "chest": [
+                55.9608,
+                57.119600000000005
+              ],
+              "belly": [
+                57.14,
+                67.86
+              ],
+              "legs": [
+                68.3,
+                84.23
+              ]
+            }
+          },
+          "hit": {
+            "src": "art/characters/conditions/legs-lost/shaman-hit-arms-lost.webp",
+            "anchors": {
+              "head": [
+                57.2456,
+                36.332
+              ],
+              "eyes": [
+                57.14,
+                42.26
+              ],
+              "arms": [
+                41.52,
+                59.23
+              ],
+              "chest": [
+                56.8936,
+                56.092
+              ],
+              "belly": [
+                56.7,
+                66.96
+              ],
+              "legs": [
+                74.11,
+                82.14
+              ]
+            }
+          }
+        }
+      }
+    },
+    "janitor": {
+      "idle": "art/characters/janitor-idle.webp",
+      "poses": {
+        "attack": "art/characters/motion/janitor-attack.png",
+        "hit": "art/characters/motion/janitor-hit.png",
+        "guard": "art/characters/motion/janitor-guard.webp",
+        "defeat": "art/characters/motion/janitor-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            33,
+            11
+          ],
+          "eyes": [
+            57,
+            20
+          ],
+          "arms": [
+            73,
+            43
+          ],
+          "chest": [
+            48,
+            37
+          ],
+          "belly": [
+            56,
+            60
+          ],
+          "legs": [
+            51,
+            83
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "crawler": {
+      "idle": "art/characters/crawler-idle.webp",
+      "poses": {
+        "attack": "art/characters/motion/crawler-attack.png",
+        "hit": "art/characters/motion/crawler-hit.png",
+        "guard": "art/characters/motion/crawler-guard.webp",
+        "defeat": "art/characters/motion/crawler-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            28,
+            26
+          ],
+          "eyes": [
+            51,
+            23
+          ],
+          "arms": [
+            63,
+            50
+          ],
+          "chest": [
+            45,
+            43
+          ],
+          "belly": [
+            72,
+            65
+          ],
+          "legs": [
+            53,
+            85
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "medic": {
+      "idle": "art/characters/medic-idle.webp",
+      "poses": {
+        "attack": "art/characters/motion/medic-attack.png",
+        "hit": "art/characters/motion/medic-hit.png",
+        "guard": "art/characters/motion/medic-guard.webp",
+        "defeat": "art/characters/motion/medic-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            36,
+            12
+          ],
+          "eyes": [
+            58,
+            22
+          ],
+          "arms": [
+            68,
+            47
+          ],
+          "chest": [
+            46,
+            39
+          ],
+          "belly": [
+            57,
+            61
+          ],
+          "legs": [
+            49,
+            84
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "sentinel": {
+      "idle": "art/characters/sentinel-idle.webp",
+      "poses": {
+        "attack": "art/characters/motion/sentinel-attack.png",
+        "hit": "art/characters/motion/sentinel-hit.png",
+        "guard": "art/characters/motion/sentinel-guard.webp",
+        "defeat": "art/characters/motion/sentinel-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            36,
+            12
+          ],
+          "eyes": [
+            60,
+            21
+          ],
+          "arms": [
+            72,
+            46
+          ],
+          "chest": [
+            49,
+            37
+          ],
+          "belly": [
+            57,
+            61
+          ],
+          "legs": [
+            46,
+            83
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "bellboy": {
+      "idle": "art/characters/bellboy/idle.webp",
+      "poses": {
+        "idle": "art/characters/bellboy/idle.webp",
+        "bell": "art/characters/bellboy/bell.webp",
+        "attack": "art/characters/bellboy/attack.webp",
+        "staggered": "art/characters/bellboy/staggered.webp",
+        "hit": "art/characters/bellboy/hit.webp",
+        "defeat": "art/characters/bellboy/defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            43,
+            28
+          ],
+          "eyes": [
+            40,
+            31
+          ],
+          "arms": [
+            60,
+            46
+          ],
+          "chest": [
+            51,
+            48
+          ],
+          "belly": [
+            54,
+            62
+          ],
+          "legs": [
+            56,
+            83
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    }
+  },
+  "map": {
+    "threshold": {
+      "name": "격리문",
+      "col": 1,
+      "row": 2,
+      "type": "battle",
+      "next": [
+        "duct",
+        "infirmary",
+        "corridor"
+      ],
+      "foe": "janitor",
+      "arena": "art/arena/prison-backdrop.webp",
+      "recruits": [
+        "guard"
+      ]
+    },
+    "duct": {
+      "name": "환기 통로",
+      "col": 2,
+      "row": 1,
+      "type": "battle",
+      "next": [
+        "lift"
+      ],
+      "foe": "crawler",
+      "arena": "art/arena/ventilation.webp",
+      "recruits": [
+        "archer"
+      ]
+    },
+    "infirmary": {
+      "name": "의무실",
+      "col": 2,
+      "row": 2,
+      "type": "battle",
+      "next": [
+        "lift"
+      ],
+      "foe": "medic",
+      "arena": "art/arena/infirmary.webp",
+      "recruits": [
+        "awakened",
+        "shaman"
+      ]
+    },
+    "corridor": {
+      "name": "정비 계단",
+      "col": 2,
+      "row": 3,
+      "type": "rest",
+      "next": [
+        "landing"
+      ],
+      "foe": "",
+      "arena": "art/arena/prison-backdrop.webp",
+      "recruits": []
+    },
+    "landing": {
+      "name": "계단참",
+      "col": 3,
+      "row": 3,
+      "type": "battle",
+      "next": [
+        "lift"
+      ],
+      "foe": "sentinel",
+      "arena": "art/arena/landing.webp",
+      "recruits": [
+        "archer"
+      ]
+    },
+    "lift": {
+      "name": "승강기실",
+      "col": 4,
+      "row": 2,
+      "type": "boss",
+      "next": [
+        "exit"
+      ],
+      "foe": "bellboy",
+      "arena": "art/arena/lift.webp",
+      "recruits": []
+    },
+    "exit": {
+      "name": "지상 출구",
+      "col": 5,
+      "row": 2,
+      "type": "exit",
+      "next": [],
+      "foe": "",
+      "arena": "art/arena/prison-backdrop.webp",
+      "recruits": []
+    }
+  },
+  "distance": 5,
+  "loadout": [
+    "guard",
+    "heavy",
+    "strike"
+  ],
+  "prepSkills": [
+    "strike",
+    "heavy",
+    "guard",
+    "prayer"
+  ],
+  "rarities": {
+    "common": {
+      "name": "일반",
+      "weight": 65
+    },
+    "uncommon": {
+      "name": "고급",
+      "weight": 28
+    },
+    "rare": {
+      "name": "희귀",
+      "weight": 7
+    }
+  },
+  "maxSkillLevel": 3,
+  "cards": [
+    {
+      "name": "기본 공격",
+      "type": "attack",
+      "cost": 1,
+      "copies": 2,
+      "target": "enemy",
+      "power": 2,
+      "id": "strike",
+      "cooldown": 2000,
+      "description": "한 부위 피해 2",
+      "art": "art/skills/emotes/strike.webp",
+      "emote": "art/skills/emotes/strike.webp"
+    },
+    {
+      "name": "강타",
+      "type": "attack",
+      "part": "arms",
+      "cost": 2,
+      "target": "enemy",
+      "power": 4,
+      "bonus": 1,
+      "id": "heavy",
+      "cooldown": 6000,
+      "description": "한 부위 피해 5",
+      "art": "art/skills/emotes/heavy.webp",
+      "emote": "art/skills/emotes/heavy.webp"
+    },
+    {
+      "name": "정밀 타격",
+      "type": "attack",
+      "part": "eyes",
+      "cost": 1,
+      "target": "enemy",
+      "power": 1,
+      "bonus": 1,
+      "id": "aim",
+      "description": "한 부위 피해 2\n관통 2 · 가드 무시",
+      "art": "art/skills/emotes/aim.webp",
+      "emote": null
+    },
+    {
+      "name": "가드 깨기",
+      "type": "attack",
+      "part": "chest",
+      "cost": 1,
+      "target": "enemy",
+      "power": 2,
+      "bonus": 1,
+      "id": "break",
+      "description": "가드 3 제거\n한 부위 피해 1",
+      "art": "art/skills/emotes/break.webp",
+      "emote": null
+    },
+    {
+      "name": "부위 가드",
+      "type": "defense",
+      "cost": 1,
+      "copies": 2,
+      "target": "self",
+      "power": 3,
+      "id": "guard",
+      "cooldown": 3000,
+      "description": "한 부위 가드 +3",
+      "art": "art/skills/emotes/guard.webp",
+      "emote": "art/skills/emotes/guard.webp"
+    },
+    {
+      "name": "두 부위 가드",
+      "type": "defense",
+      "part": "legs",
+      "cost": 2,
+      "target": "pair",
+      "power": 2,
+      "bonus": 1,
+      "id": "split",
+      "description": "두 부위에 각각 가드 +3",
+      "art": "art/skills/emotes/split.webp",
+      "emote": null
+    },
+    {
+      "name": "반격 자세",
+      "type": "defense",
+      "part": "arms",
+      "cost": 1,
+      "target": "self",
+      "power": 1,
+      "bonus": 1,
+      "id": "counter",
+      "description": "한 부위 가드 +1\n해당 부위 피격 시 반격 2",
+      "art": "art/skills/emotes/counter.webp",
+      "emote": null
+    },
+    {
+      "name": "응급처치",
+      "type": "skill",
+      "cost": 1,
+      "copies": 2,
+      "target": "heal",
+      "power": 2,
+      "id": "aid",
+      "description": "한 부위 내구도 최대 2 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "art": "art/skills/emotes/aid.webp",
+      "emote": null
+    },
+    {
+      "name": "회복 기도",
+      "character": "nun",
+      "effect": "aid",
+      "art": "art/skills/prayer.webp",
+      "type": "skill",
+      "target": "heal",
+      "power": 3,
+      "id": "prayer",
+      "cooldown": 5000,
+      "description": "한 부위 내구도 최대 3 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "emote": "art/skills/emotes/prayer.webp"
+    },
+    {
+      "name": "조준 사격",
+      "weapon": "bow",
+      "ranks": [
+        2
+      ],
+      "effect": "aim",
+      "art": "art/skills/emotes/aimedShot.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 2,
+      "bonus": 1,
+      "id": "aimedShot",
+      "cooldown": 4000,
+      "description": "한 부위 피해 2\n관통 3 · 가드 무시",
+      "emote": "art/skills/emotes/aimedShot.webp"
+    },
+    {
+      "name": "속사",
+      "character": "archer",
+      "weapon": "bow",
+      "ranks": [
+        1,
+        2
+      ],
+      "effect": "heavy",
+      "art": "art/skills/snapShot-v5.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 2,
+      "bonus": 1,
+      "id": "snapShot",
+      "cooldown": 3000,
+      "description": "한 부위 피해 3",
+      "emote": "art/skills/emotes/snapShot.webp"
+    },
+    {
+      "name": "치유 주문",
+      "character": "shaman",
+      "effect": "aid",
+      "art": "art/skills/mending-v5.webp",
+      "type": "skill",
+      "target": "heal",
+      "power": 2,
+      "id": "mending",
+      "cooldown": 4300,
+      "description": "한 부위 내구도 최대 2 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "emote": "art/skills/emotes/mending.webp"
+    },
+    {
+      "name": "봉인 해제",
+      "character": "shaman",
+      "effect": "break",
+      "art": "art/skills/unseal-v5.webp",
+      "type": "attack",
+      "target": "enemy",
+      "power": 3,
+      "id": "unseal",
+      "cooldown": 3500,
+      "description": "가드 3 제거\n한 부위 피해 1",
+      "emote": "art/skills/emotes/unseal.webp"
+    },
+    {
+      "name": "족쇄 강타",
+      "character": "awakened",
+      "ranks": [
+        0,
+        1
+      ],
+      "effect": "heavy",
+      "art": "art/skills/irons.webp",
+      "type": "attack",
+      "part": "arms",
+      "cost": 2,
+      "target": "enemy",
+      "power": 4,
+      "bonus": 2,
+      "id": "irons",
+      "cooldown": 4000,
+      "description": "한 부위 피해 4",
+      "emote": "art/skills/emotes/irons.webp"
+    },
+    {
+      "name": "쇠사슬 걸기",
+      "character": "awakened",
+      "effect": "break",
+      "art": "art/skills/hook.webp",
+      "type": "attack",
+      "part": "arms",
+      "cost": 1,
+      "target": "enemy",
+      "power": 3,
+      "bonus": 1,
+      "id": "hook",
+      "cooldown": 2000,
+      "description": "가드 3 제거\n한 부위 피해 1",
+      "emote": "art/skills/emotes/hook.webp"
+    },
+    {
+      "name": "진압봉 타격",
+      "character": "guard",
+      "ranks": [
+        0,
+        1
+      ],
+      "effect": "heavy",
+      "art": "art/skills/baton.webp",
+      "type": "attack",
+      "part": "arms",
+      "cost": 2,
+      "target": "enemy",
+      "power": 4,
+      "bonus": 2,
+      "id": "baton",
+      "cooldown": 4000,
+      "description": "한 부위 피해 4",
+      "emote": "art/skills/emotes/baton.webp"
+    },
+    {
+      "name": "호위 방패",
+      "character": "guard",
+      "effect": "guard",
+      "art": "art/skills/escort.webp",
+      "type": "defense",
+      "part": "arms",
+      "cost": 1,
+      "target": "self",
+      "power": 3,
+      "bonus": 1,
+      "id": "escort",
+      "cooldown": 3000,
+      "description": "한 부위 가드 +3",
+      "emote": "art/skills/emotes/escort.webp"
+    },
+    {
+      "name": "틈새 강습",
+      "reward": true,
+      "effect": "heavy",
+      "art": "art/skills/emotes/force.webp",
+      "type": "attack",
+      "part": "arms",
+      "cost": 1,
+      "target": "enemy",
+      "power": 3,
+      "bonus": 1,
+      "id": "force",
+      "cooldown": 3500,
+      "description": "한 부위 피해 4",
+      "emote": "art/skills/emotes/force.webp"
+    },
+    {
+      "name": "봉쇄 관통",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "aim",
+      "art": "art/skills/emotes/pierce.webp",
+      "type": "attack",
+      "part": "eyes",
+      "cost": 1,
+      "target": "enemy",
+      "power": 3,
+      "bonus": 2,
+      "id": "pierce",
+      "cooldown": 3000,
+      "description": "한 부위 피해 2\n관통 5 · 가드 무시",
+      "emote": "art/skills/emotes/pierce.webp"
+    },
+    {
+      "name": "결사의 일격",
+      "reward": true,
+      "rarity": "rare",
+      "effect": "heavy",
+      "art": "art/skills/emotes/crush.webp",
+      "type": "attack",
+      "part": "arms",
+      "cost": 2,
+      "target": "enemy",
+      "power": 6,
+      "bonus": 1,
+      "id": "crush",
+      "cooldown": 6500,
+      "description": "한 부위 피해 7",
+      "emote": "art/skills/emotes/crush.webp"
+    },
+    {
+      "name": "철문 방패",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "guard",
+      "art": "art/skills/emotes/shelter.webp",
+      "type": "defense",
+      "part": "chest",
+      "cost": 1,
+      "target": "self",
+      "power": 5,
+      "bonus": 1,
+      "id": "shelter",
+      "cooldown": 4000,
+      "description": "한 부위 가드 +6",
+      "emote": "art/skills/emotes/shelter.webp"
+    },
+    {
+      "name": "퇴로 엄호",
+      "reward": true,
+      "effect": "split",
+      "art": "art/skills/emotes/cover.webp",
+      "type": "defense",
+      "part": "legs",
+      "cost": 1,
+      "target": "pair",
+      "power": 2,
+      "bonus": 1,
+      "id": "cover",
+      "cooldown": 3500,
+      "description": "두 부위에 각각 가드 +3",
+      "emote": "art/skills/emotes/cover.webp"
+    },
+    {
+      "name": "의무실 붕대",
+      "reward": true,
+      "effect": "aid",
+      "art": "art/skills/emotes/dressing.webp",
+      "type": "skill",
+      "cost": 1,
+      "target": "heal",
+      "power": 4,
+      "id": "dressing",
+      "cooldown": 5000,
+      "description": "한 부위 내구도 최대 4 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "emote": "art/skills/emotes/dressing.webp"
+    },
+    {
+      "name": "축성 타격",
+      "character": "nun",
+      "reward": true,
+      "effect": "heavy",
+      "art": "art/skills/votiveStrike.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 3,
+      "bonus": 1,
+      "id": "votiveStrike",
+      "cooldown": 4000,
+      "description": "한 부위 피해 4",
+      "emote": "art/skills/emotes/votiveStrike.webp"
+    },
+    {
+      "name": "수호 기도",
+      "character": "nun",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "split",
+      "art": "art/skills/litanyGuard.webp",
+      "type": "defense",
+      "part": "chest",
+      "target": "pair",
+      "power": 2,
+      "bonus": 1,
+      "id": "litanyGuard",
+      "cooldown": 4400,
+      "description": "두 부위에 각각 가드 +3",
+      "emote": "art/skills/emotes/litanyGuard.webp"
+    },
+    {
+      "name": "방패 밀치기",
+      "character": "guard",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "break",
+      "art": "art/skills/shieldRam.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 4,
+      "bonus": 1,
+      "ranks": [
+        0,
+        1
+      ],
+      "id": "shieldRam",
+      "cooldown": 3200,
+      "description": "가드 4 제거\n한 부위 피해 1",
+      "emote": "art/skills/emotes/shieldRam.webp"
+    },
+    {
+      "name": "철벽 호위",
+      "character": "guard",
+      "reward": true,
+      "effect": "guard",
+      "art": "art/skills/brace.webp",
+      "type": "defense",
+      "part": "chest",
+      "target": "self",
+      "power": 4,
+      "bonus": 1,
+      "id": "brace",
+      "cooldown": 4500,
+      "description": "한 부위 가드 +5",
+      "emote": "art/skills/emotes/brace.webp"
+    },
+    {
+      "name": "사슬 내리치기",
+      "character": "awakened",
+      "reward": true,
+      "effect": "heavy",
+      "art": "art/skills/chainSwing.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 3,
+      "bonus": 1,
+      "woundBonus": 1,
+      "ranks": [
+        0,
+        1
+      ],
+      "id": "chainSwing",
+      "cooldown": 3400,
+      "description": "한 부위 피해 3\n부상 부위 피해 +1",
+      "emote": "art/skills/emotes/chainSwing.webp"
+    },
+    {
+      "name": "사슬 방벽",
+      "character": "awakened",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "split",
+      "art": "art/skills/chainWard.webp",
+      "type": "defense",
+      "part": "arms",
+      "target": "pair",
+      "power": 2,
+      "bonus": 1,
+      "id": "chainWard",
+      "cooldown": 4200,
+      "description": "두 부위에 각각 가드 +2",
+      "emote": "art/skills/emotes/chainWard.webp"
+    },
+    {
+      "name": "갈고리 화살",
+      "character": "archer",
+      "weapon": "bow",
+      "reward": true,
+      "effect": "break",
+      "art": "art/skills/barbedArrow.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 3,
+      "bonus": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "id": "barbedArrow",
+      "cooldown": 3600,
+      "description": "가드 4 제거\n한 부위 피해 1",
+      "emote": "art/skills/emotes/barbedArrow.webp"
+    },
+    {
+      "name": "장거리 사격",
+      "character": "archer",
+      "weapon": "bow",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "heavy",
+      "art": "art/skills/longShot.webp",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 4,
+      "bonus": 1,
+      "ranks": [
+        2
+      ],
+      "id": "longShot",
+      "cooldown": 4800,
+      "description": "한 부위 피해 5",
+      "emote": "art/skills/emotes/longShot.webp"
+    },
+    {
+      "name": "주박",
+      "character": "shaman",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "aim",
+      "art": "art/skills/hexBolt.webp",
+      "type": "attack",
+      "part": "eyes",
+      "target": "enemy",
+      "power": 2,
+      "bonus": 1,
+      "id": "hexBolt",
+      "cooldown": 3100,
+      "description": "한 부위 피해 2\n관통 3 · 가드 무시",
+      "emote": "art/skills/emotes/hexBolt.webp"
+    },
+    {
+      "name": "부적 방호",
+      "character": "shaman",
+      "reward": true,
+      "effect": "guard",
+      "art": "art/skills/shamanWard.webp",
+      "type": "defense",
+      "part": "eyes",
+      "target": "self",
+      "power": 3,
+      "bonus": 1,
+      "id": "shamanWard",
+      "cooldown": 3800,
+      "description": "한 부위 가드 +4",
+      "emote": "art/skills/emotes/shamanWard.webp"
+    },
+    {
+      "name": "등불 축원",
+      "character": "nun",
+      "reward": true,
+      "rarity": "rare",
+      "effect": "aid",
+      "type": "skill",
+      "target": "heal",
+      "power": 5,
+      "id": "lanternWash",
+      "cooldown": 5600,
+      "description": "한 부위 내구도 최대 5 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "art": "art/skills/lanternWash.webp",
+      "emote": "art/skills/emotes/lanternWash.webp"
+    },
+    {
+      "name": "방패 반격",
+      "character": "guard",
+      "reward": true,
+      "rarity": "rare",
+      "effect": "counter",
+      "type": "defense",
+      "part": "arms",
+      "target": "self",
+      "power": 2,
+      "bonus": 1,
+      "ranks": [
+        0
+      ],
+      "id": "shieldCounter",
+      "cooldown": 4400,
+      "description": "한 부위 가드 +2\n해당 부위 피격 시 반격 2",
+      "art": "art/skills/shieldCounter.webp",
+      "emote": "art/skills/emotes/shieldCounter.webp"
+    },
+    {
+      "name": "족쇄 파쇄",
+      "character": "awakened",
+      "reward": true,
+      "rarity": "rare",
+      "effect": "break",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 3,
+      "bonus": 1,
+      "hitPower": 3,
+      "ranks": [
+        0,
+        1
+      ],
+      "id": "chainRend",
+      "cooldown": 5100,
+      "description": "가드 3 제거\n한 부위 피해 3",
+      "art": "art/skills/chainRend.webp",
+      "emote": "art/skills/emotes/chainRend.webp"
+    },
+    {
+      "name": "송곳 화살",
+      "character": "archer",
+      "weapon": "bow",
+      "reward": true,
+      "rarity": "rare",
+      "effect": "aim",
+      "type": "attack",
+      "part": "arms",
+      "target": "enemy",
+      "power": 2,
+      "bonus": 1,
+      "hitPower": 3,
+      "ranks": [
+        2
+      ],
+      "id": "needleShot",
+      "cooldown": 4700,
+      "description": "한 부위 피해 3\n관통 3 · 가드 무시",
+      "art": "art/skills/needleShot.webp",
+      "emote": "art/skills/emotes/needleShot.webp"
+    },
+    {
+      "name": "쌍부적",
+      "character": "shaman",
+      "reward": true,
+      "effect": "aid",
+      "type": "skill",
+      "target": "heal",
+      "power": 2,
+      "part": "eyes",
+      "healAllies": 2,
+      "id": "runeWard",
+      "cooldown": 3400,
+      "description": "아군 최대 2명 · 각각 한 부위 내구도 최대 2 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "art": "art/skills/runeWard.webp",
+      "emote": "art/skills/emotes/runeWard.webp"
+    },
+    {
+      "name": "안식 기도",
+      "character": "nun",
+      "reward": true,
+      "effect": "aid",
+      "type": "skill",
+      "target": "heal",
+      "power": 3,
+      "healMode": "vitals",
+      "id": "sharedPrayer",
+      "cooldown": 5100,
+      "description": "머리·가슴 한 곳 3 회복 · 그 외 2 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "art": "art/skills/sharedPrayer.webp",
+      "emote": "art/skills/emotes/sharedPrayer.webp"
+    },
+    {
+      "name": "후미 엄호",
+      "character": "guard",
+      "reward": true,
+      "effect": "split",
+      "type": "defense",
+      "target": "rear",
+      "part": "arms",
+      "power": 2,
+      "bonus": 1,
+      "ranks": [
+        0,
+        1
+      ],
+      "id": "rearEscort",
+      "cooldown": 3900,
+      "description": "맨 뒤 아군 두 부위에 각각 가드 +2",
+      "art": "art/skills/rearEscort.webp",
+      "emote": "art/skills/emotes/rearEscort.webp"
+    },
+    {
+      "name": "사슬 휩쓸기",
+      "character": "awakened",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "heavy",
+      "type": "attack",
+      "target": "enemy",
+      "part": "arms",
+      "power": 2,
+      "bonus": 1,
+      "hits": 2,
+      "ranks": [
+        0,
+        1
+      ],
+      "id": "chainSweep",
+      "cooldown": 5100,
+      "description": "두 부위에 각각 피해 2",
+      "art": "art/skills/chainSweep.webp",
+      "emote": "art/skills/emotes/chainSweep.webp"
+    },
+    {
+      "name": "상처 노리기",
+      "character": "archer",
+      "weapon": "bow",
+      "reward": true,
+      "effect": "heavy",
+      "type": "attack",
+      "target": "enemy",
+      "part": "arms",
+      "power": 2,
+      "bonus": 0,
+      "woundBonus": 2,
+      "ranks": [
+        1,
+        2
+      ],
+      "id": "woundShot",
+      "cooldown": 3500,
+      "description": "한 부위 피해 2\n부상 부위 피해 +2",
+      "art": "art/skills/woundShot.webp",
+      "emote": "art/skills/emotes/woundShot.webp"
+    },
+    {
+      "name": "균열 표식",
+      "character": "shaman",
+      "reward": true,
+      "rarity": "uncommon",
+      "effect": "heavy",
+      "type": "attack",
+      "target": "enemy",
+      "part": "eyes",
+      "power": 1,
+      "bonus": 0,
+      "mark": 2,
+      "ranks": [
+        1,
+        2
+      ],
+      "id": "exposeHex",
+      "cooldown": 3800,
+      "description": "한 부위 피해 1\n적중 시 표식 · 다음 아군 피해 +2",
+      "art": "art/skills/exposeHex.webp",
+      "emote": "art/skills/emotes/exposeHex.webp"
+    },
+    {
+      "name": "응급 봉합",
+      "effect": "aid",
+      "healMode": "limbs",
+      "power": 3,
+      "ranks": [
+        1,
+        2
+      ],
+      "cooldown": 4700,
+      "artFrom": "lanternWash",
+      "lines": [
+        "부상한 팔·다리 한 곳 3 회복",
+        "정상으로 회복 가능한 부위 우선"
+      ],
+      "character": "nun",
+      "reward": true,
+      "type": "skill",
+      "target": "heal",
+      "bonus": 0,
+      "id": "emergencyStitch",
+      "description": "부상한 팔·다리 한 곳 3 회복\n정상으로 회복 가능한 부위 우선",
+      "art": "art/skills/lanternWash.webp",
+      "emote": "art/skills/emotes/lanternWash.webp"
+    },
+    {
+      "name": "상처 덮기",
+      "effect": "guard",
+      "guardMode": "recovery",
+      "power": 3,
+      "ranks": [
+        1,
+        2
+      ],
+      "cooldown": 3900,
+      "artFrom": "litanyGuard",
+      "lines": [
+        "부상에서 정상으로 회복한 부위에 가드 3"
+      ],
+      "character": "nun",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "woundCover",
+      "description": "부상에서 정상으로 회복한 부위에 가드 3",
+      "art": "art/skills/litanyGuard.webp",
+      "emote": "art/skills/emotes/litanyGuard.webp"
+    },
+    {
+      "name": "참회 기도",
+      "effect": "aid",
+      "healMode": "self",
+      "power": 3,
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 4400,
+      "artFrom": "prayer",
+      "lines": [
+        "자신의 손상 부위 3 회복"
+      ],
+      "character": "nun",
+      "reward": true,
+      "type": "skill",
+      "target": "heal",
+      "bonus": 0,
+      "id": "penance",
+      "description": "자신의 손상 부위 3 회복",
+      "art": "art/skills/prayer.webp",
+      "emote": "art/skills/emotes/prayer.webp"
+    },
+    {
+      "name": "촛대 내려치기",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 3,
+      "recoveryBonus": 2,
+      "ranks": [
+        0
+      ],
+      "cooldown": 5100,
+      "artFrom": "votiveStrike",
+      "rarity": "uncommon",
+      "lines": [
+        "피해 3 · 스스로 회복한 뒤 첫 타격 +2"
+      ],
+      "character": "nun",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "candleCrash",
+      "description": "피해 3 · 스스로 회복한 뒤 첫 타격 +2",
+      "art": "art/skills/votiveStrike.webp",
+      "emote": "art/skills/emotes/votiveStrike.webp"
+    },
+    {
+      "name": "등불의 맹세",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "onHitHeal": 1,
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 4500,
+      "artFrom": "lanternWash",
+      "lines": [
+        "피해 2 · 적중하면 자신의 손상 부위 1 회복"
+      ],
+      "character": "nun",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "lanternVow",
+      "description": "피해 2 · 적중하면 자신의 손상 부위 1 회복",
+      "art": "art/skills/lanternWash.webp",
+      "emote": "art/skills/emotes/lanternWash.webp"
+    },
+    {
+      "name": "등잔 불꽃",
+      "effect": "aim",
+      "power": 1,
+      "hitPower": 2,
+      "targetOrder": "visibleGuard",
+      "cooldown": 3500,
+      "artFrom": "votiveStrike",
+      "character": "nun",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "lanternSpark",
+      "description": "한 부위 피해 2\n관통 1 · 가드 무시",
+      "art": "art/skills/votiveStrike.webp",
+      "emote": "art/skills/emotes/votiveStrike.webp"
+    },
+    {
+      "name": "짧은 찬송",
+      "effect": "aid",
+      "power": 1,
+      "cooldown": 4300,
+      "artFrom": "prayer",
+      "character": "nun",
+      "reward": true,
+      "type": "skill",
+      "target": "heal",
+      "bonus": 0,
+      "id": "shortHymn",
+      "description": "한 부위 내구도 최대 1 회복\n대상의 배 부상 시 회복량 절반\n결손 부위는 회복 불가",
+      "art": "art/skills/prayer.webp",
+      "emote": "art/skills/emotes/prayer.webp"
+    },
+    {
+      "name": "발 디디기",
+      "effect": "guard",
+      "guardMode": "selfLegs",
+      "part": "legs",
+      "power": 2,
+      "cooldown": 3300,
+      "artFrom": "litanyGuard",
+      "lines": [
+        "자신의 다리에 가드 2"
+      ],
+      "character": "nun",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "plantFeet",
+      "description": "자신의 다리에 가드 2",
+      "art": "art/skills/litanyGuard.webp",
+      "emote": "art/skills/emotes/litanyGuard.webp"
+    },
+    {
+      "name": "방패 버티기",
+      "effect": "guard",
+      "guardMode": "self",
+      "part": "arms",
+      "power": 4,
+      "ranks": [
+        0
+      ],
+      "cooldown": 3000,
+      "artFrom": "brace",
+      "lines": [
+        "자신의 예고 부위에 가드 4 · 예고 없으면 머리"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "holdShield",
+      "description": "자신의 예고 부위에 가드 4 · 예고 없으면 머리",
+      "art": "art/skills/brace.webp",
+      "emote": "art/skills/emotes/brace.webp"
+    },
+    {
+      "name": "되받아 밀치기",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "blockedRemoval": 3,
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 4300,
+      "artFrom": "shieldRam",
+      "lines": [
+        "피해 2",
+        "자신이 가드로 막은 뒤 첫 타격은 가드 3 제거"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "shoveBack",
+      "description": "피해 2\n자신이 가드로 막은 뒤 첫 타격은 가드 3 제거",
+      "art": "art/skills/shieldRam.webp",
+      "emote": "art/skills/emotes/shieldRam.webp"
+    },
+    {
+      "name": "철제 턱받이",
+      "effect": "guard",
+      "guardMode": "selfVitals",
+      "power": 2,
+      "injuredGuard": 1,
+      "ranks": [
+        0
+      ],
+      "cooldown": 4100,
+      "artFrom": "brace",
+      "lines": [
+        "자신의 머리·가슴에 각각 가드 2 · 부상 부위 +1"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "ironGorget",
+      "description": "자신의 머리·가슴에 각각 가드 2 · 부상 부위 +1",
+      "art": "art/skills/brace.webp",
+      "emote": "art/skills/emotes/brace.webp"
+    },
+    {
+      "name": "등 뒤 지키기",
+      "effect": "setup",
+      "setup": "intercept",
+      "power": 0,
+      "ranks": [
+        1
+      ],
+      "cooldown": 4200,
+      "artFrom": "rearEscort",
+      "rarity": "uncommon",
+      "lines": [
+        "뒤 아군을 노리는 다음 정밀 타격을 대신 받음"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "skill",
+      "target": "setup",
+      "bonus": 0,
+      "id": "takeAimHit",
+      "description": "뒤 아군을 노리는 다음 정밀 타격을 대신 받음",
+      "art": "art/skills/rearEscort.webp",
+      "emote": "art/skills/emotes/rearEscort.webp"
+    },
+    {
+      "name": "등 가리기",
+      "effect": "guard",
+      "guardMode": "rearWound",
+      "part": "arms",
+      "power": 4,
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 3800,
+      "artFrom": "rearEscort",
+      "lines": [
+        "맨 뒤의 부상한 아군 한 부위에 가드 4"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "coverBack",
+      "description": "맨 뒤의 부상한 아군 한 부위에 가드 4",
+      "art": "art/skills/rearEscort.webp",
+      "emote": "art/skills/emotes/rearEscort.webp"
+    },
+    {
+      "name": "진압봉 견제",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "targetOrder": "injuredArms",
+      "cooldown": 3000,
+      "artFrom": "baton",
+      "lines": [
+        "피해 2 · 적의 부상한 팔 우선"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "batonCheck",
+      "description": "피해 2 · 적의 부상한 팔 우선",
+      "art": "art/skills/baton.webp",
+      "emote": "art/skills/emotes/baton.webp"
+    },
+    {
+      "name": "어깨 버티기",
+      "effect": "guard",
+      "guardMode": "selfHead",
+      "power": 2,
+      "cooldown": 3700,
+      "artFrom": "brace",
+      "lines": [
+        "자신의 머리에 가드 2 · 팔 결손에도 발동"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "shoulderHold",
+      "description": "자신의 머리에 가드 2 · 팔 결손에도 발동",
+      "art": "art/skills/brace.webp",
+      "emote": "art/skills/emotes/brace.webp"
+    },
+    {
+      "name": "무릎받이",
+      "effect": "guard",
+      "guardMode": "selfLegs",
+      "power": 1,
+      "cooldown": 3000,
+      "artFrom": "escort",
+      "lines": [
+        "자신의 다리에 가드 1"
+      ],
+      "character": "guard",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "kneePad",
+      "description": "자신의 다리에 가드 1",
+      "art": "art/skills/escort.webp",
+      "emote": "art/skills/emotes/escort.webp"
+    },
+    {
+      "name": "상처 죄기",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "woundBonus": 2,
+      "targetOrder": "wounded",
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 3500,
+      "artFrom": "chainSwing",
+      "character": "awakened",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "tightenWound",
+      "description": "한 부위 피해 2\n부상 부위 피해 +2",
+      "art": "art/skills/chainSwing.webp",
+      "emote": "art/skills/emotes/chainSwing.webp"
+    },
+    {
+      "name": "관절 조르기",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "woundBonus": 3,
+      "woundParts": [
+        "arms",
+        "legs"
+      ],
+      "targetOrder": "woundedLimbs",
+      "ranks": [
+        0
+      ],
+      "cooldown": 4600,
+      "artFrom": "chainRend",
+      "lines": [
+        "피해 2 · 부상한 팔·다리면 +3"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "seizeJoint",
+      "description": "피해 2 · 부상한 팔·다리면 +3",
+      "art": "art/skills/chainRend.webp",
+      "emote": "art/skills/emotes/chainRend.webp"
+    },
+    {
+      "name": "상처 파고들기",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "woundBonus": 3,
+      "minimumWounds": 2,
+      "targetOrder": "wounded",
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 4500,
+      "artFrom": "chainSwing",
+      "rarity": "uncommon",
+      "lines": [
+        "피해 2 · 부상 부위가 둘 이상이면 부상 부위에 +3"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "digDeep",
+      "description": "피해 2 · 부상 부위가 둘 이상이면 부상 부위에 +3",
+      "art": "art/skills/chainSwing.webp",
+      "emote": "art/skills/emotes/chainSwing.webp"
+    },
+    {
+      "name": "고리 비틀기",
+      "effect": "setup",
+      "setup": "strip",
+      "part": "arms",
+      "power": 4,
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 3100,
+      "artFrom": "chainRend",
+      "lines": [
+        "가장 두꺼운 부위 가드 최대 4 제거",
+        "가드가 생길 때 발동"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "skill",
+      "target": "setup",
+      "bonus": 0,
+      "id": "twistRing",
+      "description": "가장 두꺼운 부위 가드 최대 4 제거\n가드가 생길 때 발동",
+      "art": "art/skills/chainRend.webp",
+      "emote": "art/skills/emotes/chainRend.webp"
+    },
+    {
+      "name": "벌어진 틈",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "stripBonus": 2,
+      "targetOrder": "stripped",
+      "ranks": [
+        0,
+        1
+      ],
+      "cooldown": 4200,
+      "artFrom": "chainSwing",
+      "lines": [
+        "피해 2 · 최근 가드를 제거한 부위 첫 타격 +2"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "openGap",
+      "description": "피해 2 · 최근 가드를 제거한 부위 첫 타격 +2",
+      "art": "art/skills/chainSwing.webp",
+      "emote": "art/skills/emotes/chainSwing.webp"
+    },
+    {
+      "name": "찢긴 쇠고리",
+      "effect": "break",
+      "part": "arms",
+      "power": 2,
+      "hitPower": 2,
+      "stripFinish": 1,
+      "targetOrder": "healthyGuardedLimbs",
+      "ranks": [
+        0
+      ],
+      "cooldown": 4400,
+      "artFrom": "chainRend",
+      "rarity": "uncommon",
+      "lines": [
+        "가드 2 제거 · 피해 2",
+        "그 부위의 가드를 0으로 만들면 피해 +1"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "tornRing",
+      "description": "가드 2 제거 · 피해 2\n그 부위의 가드를 0으로 만들면 피해 +1",
+      "art": "art/skills/chainRend.webp",
+      "emote": "art/skills/emotes/chainRend.webp"
+    },
+    {
+      "name": "족쇄 발차기",
+      "effect": "heavy",
+      "part": "legs",
+      "power": 1,
+      "cooldown": 2900,
+      "artFrom": "irons",
+      "lines": [
+        "피해 1 · 팔 결손에도 발동"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "shackleKick",
+      "description": "피해 1 · 팔 결손에도 발동",
+      "art": "art/skills/irons.webp",
+      "emote": "art/skills/emotes/irons.webp"
+    },
+    {
+      "name": "해진 천 감기",
+      "effect": "guard",
+      "guardMode": "selfChest",
+      "power": 1,
+      "cooldown": 3000,
+      "artFrom": "chainWard",
+      "lines": [
+        "자신의 가슴에 가드 1 · 팔 결손에도 발동"
+      ],
+      "character": "awakened",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "roughWrap",
+      "description": "자신의 가슴에 가드 1 · 팔 결손에도 발동",
+      "art": "art/skills/chainWard.webp",
+      "emote": "art/skills/emotes/chainWard.webp"
+    },
+    {
+      "name": "숨 참기",
+      "effect": "setup",
+      "setup": "aim",
+      "part": "arms",
+      "power": 2,
+      "ranks": [
+        2
+      ],
+      "cooldown": 3300,
+      "artFrom": "longShot",
+      "lines": [
+        "다음 단일 사격 한 발에 피해 +2"
+      ],
+      "character": "archer",
+      "reward": true,
+      "type": "skill",
+      "target": "setup",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "holdBreath",
+      "description": "다음 단일 사격 한 발에 피해 +2",
+      "art": "art/skills/longShot.webp",
+      "emote": "art/skills/emotes/longShot.webp"
+    },
+    {
+      "name": "처형 화살",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 6,
+      "bonus": 1,
+      "ranks": [
+        2
+      ],
+      "cooldown": 6900,
+      "artFrom": "needleShot",
+      "rarity": "rare",
+      "character": "archer",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "weapon": "bow",
+      "id": "executionArrow",
+      "description": "한 부위 피해 7",
+      "art": "art/skills/needleShot.webp",
+      "emote": "art/skills/emotes/needleShot.webp"
+    },
+    {
+      "name": "갈래 사격",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 2,
+      "hits": 2,
+      "targetOrder": "limbs",
+      "ranks": [
+        1
+      ],
+      "cooldown": 4800,
+      "artFrom": "barbedArrow",
+      "lines": [
+        "서로 다른 두 부위에 피해 2 · 팔·다리 우선"
+      ],
+      "character": "archer",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "forkShot",
+      "description": "서로 다른 두 부위에 피해 2 · 팔·다리 우선",
+      "art": "art/skills/barbedArrow.webp",
+      "emote": "art/skills/emotes/barbedArrow.webp"
+    },
+    {
+      "name": "부채꼴 화살",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 1,
+      "hits": 3,
+      "targetOrder": "unguarded",
+      "ranks": [
+        1
+      ],
+      "cooldown": 3800,
+      "artFrom": "longShot",
+      "lines": [
+        "최대 세 부위에 각각 피해 1 · 가드 없는 부위 우선"
+      ],
+      "character": "archer",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "fanShot",
+      "description": "최대 세 부위에 각각 피해 1 · 가드 없는 부위 우선",
+      "art": "art/skills/longShot.webp",
+      "emote": "art/skills/emotes/longShot.webp"
+    },
+    {
+      "name": "흩날리는 쇠촉",
+      "effect": "break",
+      "part": "arms",
+      "power": 1,
+      "hitPower": 1,
+      "hits": 2,
+      "targetOrder": "guarded",
+      "ranks": [
+        1
+      ],
+      "cooldown": 4200,
+      "artFrom": "barbedArrow",
+      "rarity": "uncommon",
+      "lines": [
+        "서로 다른 두 부위에 가드 1 제거 후 피해 1"
+      ],
+      "character": "archer",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "scatteringTips",
+      "description": "서로 다른 두 부위에 가드 1 제거 후 피해 1",
+      "art": "art/skills/barbedArrow.webp",
+      "emote": "art/skills/emotes/barbedArrow.webp"
+    },
+    {
+      "name": "파편 화살",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 3,
+      "hits": 2,
+      "followupPower": 1,
+      "ranks": [
+        1
+      ],
+      "cooldown": 5300,
+      "artFrom": "woundShot",
+      "rarity": "uncommon",
+      "lines": [
+        "한 부위 피해 3 · 적중 시 다른 부위 피해 1"
+      ],
+      "character": "archer",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "fragmentArrow",
+      "description": "한 부위 피해 3 · 적중 시 다른 부위 피해 1",
+      "art": "art/skills/woundShot.webp",
+      "emote": "art/skills/emotes/woundShot.webp"
+    },
+    {
+      "name": "활대로 막기",
+      "effect": "guard",
+      "guardMode": "self",
+      "part": "arms",
+      "power": 2,
+      "ranks": [
+        0
+      ],
+      "cooldown": 3200,
+      "artFrom": "aimedShot",
+      "lines": [
+        "자신의 예고 부위에 가드 2 · 예고 없으면 머리"
+      ],
+      "character": "archer",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "bowBlock",
+      "description": "자신의 예고 부위에 가드 2 · 예고 없으면 머리",
+      "art": "art/skills/aimedShot.webp",
+      "emote": "art/skills/emotes/aimedShot.webp"
+    },
+    {
+      "name": "짧은 화살",
+      "effect": "heavy",
+      "part": "arms",
+      "power": 1,
+      "cooldown": 1900,
+      "artFrom": "snapShot",
+      "character": "archer",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "weapon": "bow",
+      "id": "shortArrow",
+      "description": "한 부위 피해 1",
+      "art": "art/skills/snapShot-v5.webp",
+      "emote": "art/skills/emotes/snapShot.webp"
+    },
+    {
+      "name": "향 연기",
+      "effect": "aid",
+      "power": 1,
+      "healAllies": 3,
+      "ranks": [
+        1
+      ],
+      "cooldown": 3500,
+      "artFrom": "mending",
+      "lines": [
+        "다친 출전 대원 모두의 부위를 하나씩 1 회복"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "skill",
+      "target": "heal",
+      "bonus": 0,
+      "id": "incenseSmoke",
+      "description": "다친 출전 대원 모두의 부위를 하나씩 1 회복",
+      "art": "art/skills/mending-v5.webp",
+      "emote": "art/skills/emotes/mending.webp"
+    },
+    {
+      "name": "약연 매듭",
+      "effect": "aid",
+      "healMode": "others",
+      "healAllies": 2,
+      "healGuard": 1,
+      "power": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "cooldown": 4100,
+      "artFrom": "runeWard",
+      "lines": [
+        "자신 외 아군 최대 2명 · 각각 회복 1과 가드 1"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "skill",
+      "target": "heal",
+      "bonus": 0,
+      "id": "medicinalKnot",
+      "description": "자신 외 아군 최대 2명 · 각각 회복 1과 가드 1",
+      "art": "art/skills/runeWard.webp",
+      "emote": "art/skills/emotes/runeWard.webp"
+    },
+    {
+      "name": "진혼의 숨",
+      "effect": "aid",
+      "healMode": "injured",
+      "healAllies": 3,
+      "minimumPatients": 2,
+      "power": 2,
+      "ranks": [
+        1,
+        2
+      ],
+      "cooldown": 6100,
+      "artFrom": "mending",
+      "rarity": "uncommon",
+      "lines": [
+        "부상한 대원이 둘 이상일 때 각자 부상 부위 2 회복"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "skill",
+      "target": "heal",
+      "bonus": 0,
+      "id": "requiemBreath",
+      "description": "부상한 대원이 둘 이상일 때 각자 부상 부위 2 회복",
+      "art": "art/skills/mending-v5.webp",
+      "emote": "art/skills/emotes/mending.webp"
+    },
+    {
+      "name": "눌린 숨",
+      "effect": "setup",
+      "setup": "weaken",
+      "part": "eyes",
+      "power": 2,
+      "ranks": [
+        1,
+        2
+      ],
+      "cooldown": 4300,
+      "artFrom": "hexBolt",
+      "lines": [
+        "적의 다음 공격 피해 −2"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "skill",
+      "target": "setup",
+      "bonus": 0,
+      "id": "stifleBreath",
+      "description": "적의 다음 공격 피해 −2",
+      "art": "art/skills/hexBolt.webp",
+      "emote": "art/skills/emotes/hexBolt.webp"
+    },
+    {
+      "name": "기세 매듭",
+      "effect": "setup",
+      "setup": "empower",
+      "power": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "cooldown": 2700,
+      "artFrom": "runeWard",
+      "rarity": "uncommon",
+      "lines": [
+        "다른 아군의 다음 첫 적중 피해 +1"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "skill",
+      "target": "setup",
+      "bonus": 0,
+      "id": "battleKnot",
+      "description": "다른 아군의 다음 첫 적중 피해 +1",
+      "art": "art/skills/runeWard.webp",
+      "emote": "art/skills/emotes/runeWard.webp"
+    },
+    {
+      "name": "연막 부적",
+      "effect": "guard",
+      "guardMode": "wounded",
+      "power": 2,
+      "cooldown": 3700,
+      "artFrom": "shamanWard",
+      "lines": [
+        "가장 내구도가 낮은 부상 부위에 가드 2"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "smokeWard",
+      "description": "가장 내구도가 낮은 부상 부위에 가드 2",
+      "art": "art/skills/shamanWard.webp",
+      "emote": "art/skills/emotes/shamanWard.webp"
+    },
+    {
+      "name": "작은 호신부",
+      "effect": "guard",
+      "guardMode": "self",
+      "guardFallback": "chest",
+      "power": 1,
+      "cooldown": 2700,
+      "artFrom": "shamanWard",
+      "lines": [
+        "자신의 예고 부위에 가드 1 · 예고 없으면 가슴"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "defense",
+      "target": "self",
+      "bonus": 0,
+      "id": "smallCharm",
+      "description": "자신의 예고 부위에 가드 1 · 예고 없으면 가슴",
+      "art": "art/skills/shamanWard.webp",
+      "emote": "art/skills/emotes/shamanWard.webp"
+    },
+    {
+      "name": "돌멩이 주문",
+      "effect": "heavy",
+      "power": 1,
+      "cooldown": 2400,
+      "artFrom": "hexBolt",
+      "lines": [
+        "피해 1 · 눈 결손에도 발동"
+      ],
+      "character": "shaman",
+      "reward": true,
+      "type": "attack",
+      "target": "enemy",
+      "bonus": 0,
+      "id": "pebbleSpell",
+      "description": "피해 1 · 눈 결손에도 발동",
+      "art": "art/skills/hexBolt.webp",
+      "emote": "art/skills/emotes/hexBolt.webp"
+    }
+  ]
+}

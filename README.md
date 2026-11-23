@@ -23,6 +23,7 @@
 
 | 실험 | 실행 방법 |
 | --- | --- |
+| [붕괴 통로 · Godot](prototypes/collapsed-passage-godot/README.md) | Godot 4.7.2에서 `prototypes/collapsed-passage-godot/project.godot`을 가져와 F5로 실행합니다. 오프닝과 첫 플레이 튜토리얼을 거쳐 시드 지도에서 격리문부터 지상 출구까지 플레이합니다. |
 | [HEX War Lobby](prototypes/hex-war-lobby/README.md) | `cd prototypes/hex-war-lobby` 후 `npm ci`, `npm start`. 브라우저에서 `http://localhost:4173`을 엽니다. |
 | [Dungeon Chronicle](prototypes/dungeon-chronicle/README.md) | Node.js 18 이상에서 `cd prototypes/dungeon-chronicle` 후 `npm start`. `http://127.0.0.1:4173`에서 플레이하고 `npm test`로 검증합니다. |
 | [Limbus Check Panel](prototypes/limbus-check-panel/사용법.txt) | Windows x64와 Node.js가 필요합니다. 한국어 OCR을 설치하고 폴더의 `Start.cmd`를 실행합니다. |
