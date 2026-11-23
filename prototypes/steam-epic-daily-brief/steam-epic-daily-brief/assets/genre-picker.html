@@ -25,13 +25,18 @@
     <button class="btn" type="button" data-genre="플랫포머·메트로배니아" aria-pressed="false">플랫포머·메트로배니아</button>
     <button class="btn" type="button" data-genre="스포츠·레이싱" aria-pressed="false">스포츠·레이싱</button>
     <button class="btn" type="button" data-genre="리듬·음악" aria-pressed="false">리듬·음악</button>
-    <button class="btn" type="button" data-genre="방치형" aria-pressed="false">방치형</button>
-    <button class="btn" type="button" data-genre="덱빌딩·자동 전투" aria-pressed="false">덱빌딩·자동 전투</button>
+    <button class="btn" type="button" data-genre="증분" aria-pressed="false">증분</button>
+      <button class="btn" type="button" data-genre="방치형" aria-pressed="false">방치형</button>
+    <button class="btn" type="button" data-genre="자동화·공장" aria-pressed="false">자동화·공장</button>
+    <button class="btn" type="button" data-genre="타워 디펜스" aria-pressed="false">타워 디펜스</button>
+    <button class="btn" type="button" data-genre="도시 건설" aria-pressed="false">도시 건설</button>
+    <button class="btn" type="button" data-genre="덱빌딩" aria-pressed="false">덱빌딩</button>
+    <button class="btn" type="button" data-genre="오토배틀러" aria-pressed="false">오토배틀러</button>
   </div>
   <div class="picker-options">
     <label class="form-check form-switch">
       <input class="form-check-input" type="checkbox" data-mature checked>
-      <span class="form-check-label">성인등급 게임 포함</span>
+      <span class="form-check-label">성적 콘텐츠 태그 게임 포함</span>
     </label>
     <label class="form-label">추가 조건 · 선택 사항
       <input class="form-control" data-extra type="text" maxlength="300" placeholder="예: 한국어 지원, 2만원 이하, 공포 제외">
@@ -68,7 +73,7 @@
   function restore(snapshot) {
     const saved = snapshot && snapshot.modelContent;
     if (!saved || saved.day !== day || !Array.isArray(saved.genres)) return;
-    const genres = Array.from(new Set(saved.genres.filter(item => allowed.has(item))));
+    const genres = Array.from(new Set(saved.genres.flatMap(item => item === '덱빌딩·자동 전투' ? ['덱빌딩', '오토배틀러'] : [item]).filter(item => allowed.has(item))));
     state = { day, genres: genres.includes('전체') ? ['전체'] : genres,
       includeMature: saved.includeMature !== false,
       extra: typeof saved.extra === 'string' ? saved.extra.slice(0, 300) : '' };
@@ -101,7 +106,7 @@
   extra.addEventListener('input', () => { state.extra = extra.value; save(); });
   submit.addEventListener('click', async () => {
     if (!state.genres.length || sending) return;
-    const prompt = `Steam 브리핑의 추가 조사 장르를 제출합니다. 장르: ${state.genres.join(', ')} (여러 장르는 OR). 성인등급 게임: ${state.includeMature ? '포함' : '제외'}. 추가 조건: ${state.extra || '없음'}. 지금 Steam만 새로 조사해서 신작·할인·무료 배포를 한국어로 보기 좋게 정리해 주세요. 선택은 이번 조사에만 적용하며 매일 오전 9시의 전체 장르별 정기 보고 설정은 유지해 주세요. $steam-epic-daily-brief 스킬을 사용해 주세요.`;
+    const prompt = `Steam 브리핑의 추가 조사 장르를 제출합니다. 장르: ${state.genres.join(', ')} (여러 장르는 OR). 성적 콘텐츠 태그 게임: ${state.includeMature ? '포함' : '제외'}. 추가 조건: ${state.extra || '없음'}. 지금 Steam만 새로 조사해서 신작·할인·무료 배포를 한국어로 보기 좋게 정리해 주세요. 선택은 이번 조사에만 적용하며 매일 오전 9시의 전체 장르별 정기 보고 설정은 유지해 주세요. $steam-epic-daily-brief 스킬을 사용해 주세요.`;
     if (!window.openai || typeof window.openai.sendFollowUpMessage !== 'function') {
       fallback.value = prompt; fallbackLabel.hidden = false;
       status.textContent = '채팅에 요청을 보내면 조사가 시작됩니다.';

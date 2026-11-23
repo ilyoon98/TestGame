@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const { parseHTML } = require('linkedom');
-const html = fs.readFileSync(path.join(__dirname, 'steam-epic-daily-brief/assets/genre-picker.html'), 'utf8');
+const html = fs.readFileSync(path.join(process.env.STEAM_BRIEF_SKILL_ROOT || path.join(__dirname, 'steam-epic-daily-brief'), 'assets/genre-picker.html'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 new vm.Script(script);
 
@@ -47,10 +47,15 @@ function mount({ saved, bridge = true, reject = false } = {}) {
   ui.get('[data-submit]').click();
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(ui.sent.length, 1);
-  for (const expected of ['방치형', 'RPG', 'Steam만', '성인등급 게임: 제외', '공포 제외, 2만원 이하']) assert.ok(ui.sent[0].prompt.includes(expected));
+  for (const expected of ['방치형', 'RPG', 'Steam만', '성적 콘텐츠 태그 게임: 제외', '공포 제외, 2만원 이하']) assert.ok(ui.sent[0].prompt.includes(expected));
 
   const restored = mount({ saved: ui.snapshots.at(-1) });
   assert.deepEqual(new Set(restored.selected()), new Set(['방치형', 'RPG']));
+  const splitSaved=structuredClone(ui.snapshots.at(-1));splitSaved.modelContent.genres=['덱빌딩·자동 전투'];
+  const migrated=mount({saved:splitSaved});
+  assert.deepEqual(new Set(migrated.selected()),new Set(['덱빌딩','오토배틀러']),'Old combined selection migrates to both independent genres');
+  for(const name of ['자동화·공장','타워 디펜스','도시 건설']){migrated.click(name);assert.ok(migrated.selected().includes(name));}
+  assert.equal(migrated.get('[data-genre="덱빌딩·자동 전투"]'),null,'Combined genre is no longer offered');
   const old = structuredClone(ui.snapshots.at(-1)); old.modelContent.day = '2000-01-01';
   assert.deepEqual(mount({ saved: old }).selected(), [], 'Previous day cannot preselect today');
 
@@ -64,7 +69,7 @@ function mount({ saved, bridge = true, reject = false } = {}) {
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(failed.get('[data-fallback-label]').hidden, false);
   assert.equal(failed.get('[data-submit]').disabled, false);
-  const reportPath = path.join(__dirname, 'steam-epic-daily-brief/assets/report.html');
+  const reportPath = path.join(process.env.STEAM_BRIEF_SKILL_ROOT || path.join(__dirname, 'steam-epic-daily-brief'), 'assets/report.html');
   const fixture = { asOf: '2000-01-01 09:00', genres: ['RPG', '전략'], includeMature: true,
     highlights: ['표시 검증용 자료'], free: [], new: [], deals: [{ title: '<b>표시 검증</b>',
       url: 'https://store.steampowered.com/app/123/', description: '표시 검증용', price: '123원',

@@ -28,7 +28,34 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5445740/3a4b37f0c26090a2b102457177727f0190a8cfb6/header.jpg?t=1794900433",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5445740/4fe7ea8cd1288c1013f78d93f27de77dd7973e4a/capsule_231x87.jpg?t=1794900433"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-16",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 15,
+          "priceValue": 285000,
+          "originalPriceValue": 335000,
+          "priceVerified": true,
+          "steamTags": [
+            "시간 관리",
+            "전략",
+            "RPG",
+            "로그라이트",
+            "무술",
+            "전략 RPG",
+            "로그라이크",
+            "2D",
+            "선택의 중요성",
+            "양식화된",
+            "다크 판타지",
+            "인디",
+            "분위기 있는",
+            "초자연",
+            "전투",
+            "자원관리",
+            "싱글 플레이어"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5445740/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -51,7 +78,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/header.jpg?t=1777975568",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1771300/93e28946c46f09d761bbfab1e17e8c1c4a8323a0/capsule_231x87.jpg?t=1777975568"
           ],
-          "matureContent": true
+          "matureContent": true,
+          "releaseDate": "2025-02-04",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 67,
+          "priceValue": 2006000,
+          "originalPriceValue": 6080000,
+          "priceVerified": true,
+          "steamTags": [
+            "RPG",
+            "중세",
+            "오픈 월드",
+            "싱글 플레이어",
+            "풍부한 스토리",
+            "1인칭",
+            "현실적",
+            "어드벤처",
+            "액션",
+            "역사",
+            "칼싸움",
+            "전투",
+            "몰입형",
+            "선택의 중요성",
+            "분위기 있는",
+            "대체 역사",
+            "액션 어드벤처",
+            "3D",
+            "LGBTQ+",
+            "선정적 콘텐츠"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/1771300/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -83,7 +140,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4927030/af75e73122fae7958c0c496f3734b5db37d19f5d/header.jpg?t=1794962072",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4927030/0f5341cc8980178dc857adea004890d5df835759/capsule_231x87.jpg?t=1794962072"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "early_access",
+          "isNewRelease": true,
+          "discountPercent": 15,
+          "priceValue": 476000,
+          "originalPriceValue": 560000,
+          "priceVerified": true,
+          "steamTags": [
+            "앞서 해보기",
+            "파티 게임",
+            "멀티플레이어",
+            "잠입",
+            "협동",
+            "생존",
+            "유머",
+            "코미디",
+            "사냥",
+            "팀 기반",
+            "1인칭 슈팅",
+            "PvP",
+            "슈팅",
+            "1인칭",
+            "3인칭",
+            "동물",
+            "3D",
+            "양식화된",
+            "캐주얼",
+            "온라인 협동"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/4927030/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -106,7 +193,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627720/header.jpg?t=1794963244",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627720/capsule_231x87.jpg?t=1794963244"
           ],
-          "matureContent": true
+          "matureContent": true,
+          "releaseDate": "2023-09-18",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 50,
+          "priceValue": 3240000,
+          "originalPriceValue": 6480000,
+          "priceVerified": true,
+          "steamTags": [
+            "소울라이크",
+            "다크 판타지",
+            "액션",
+            "싱글 플레이어",
+            "풍부한 스토리",
+            "액션 RPG",
+            "스팀펑크",
+            "3인칭",
+            "탐험",
+            "어두운",
+            "어드벤처",
+            "분위기 있는",
+            "초고난도",
+            "3D",
+            "RPG",
+            "선택의 중요성",
+            "복수 결말",
+            "고딕",
+            "폭력",
+            "리플레이 가치"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/1627720/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -138,7 +255,33 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5450130/e1ca7f013bdcef019551ebe0ba5dfa8a695dd43a/header.jpg?t=1794927129",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5450130/12ab9696a214cfa8dbae209652e206a94fab469e/capsule_231x87.jpg?t=1794927129"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 0,
+          "priceValue": 1100000,
+          "originalPriceValue": 1100000,
+          "priceVerified": true,
+          "steamTags": [
+            "어드벤처",
+            "캐주얼",
+            "RPG",
+            "걷기 시뮬레이션",
+            "컬렉터톤",
+            "탐험",
+            "픽셀 그래픽",
+            "분위기 있는",
+            "역사",
+            "미스터리",
+            "인디",
+            "자연",
+            "릴랙싱",
+            "초자연",
+            "풍부한 스토리",
+            "싱글 플레이어"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5450130/?cc=kr&l=koreana"
         }
       ],
       "deals": [],
@@ -171,7 +314,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2396130/539d31e1e3a5c49971cae9fdeb7fc0a79a4bc5d4/header.jpg?t=1794938777",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2396130/56599b697fbab2a02c9cb69fe844ea354b905e84/capsule_231x87.jpg?t=1794938777"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 10,
+          "priceValue": 1530000,
+          "originalPriceValue": 1700000,
+          "priceVerified": true,
+          "steamTags": [
+            "타워 디펜스",
+            "탄막 지옥",
+            "액션 로그라이크",
+            "턴제 전술",
+            "기차",
+            "탑다운",
+            "전략",
+            "턴제 전략",
+            "로그라이트",
+            "픽셀 그래픽",
+            "액션",
+            "포스트아포칼립스",
+            "그리드 기반 움직임",
+            "복고풍",
+            "생존",
+            "전술",
+            "싱글 플레이어",
+            "3D",
+            "대체 역사",
+            "로그라이크"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/2396130/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -194,7 +367,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1147560/header.jpg?t=1774420210",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1147560/capsule_231x87.jpg?t=1774420210"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2021-01-20",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 50,
+          "priceValue": 1025000,
+          "originalPriceValue": 2050000,
+          "priceVerified": true,
+          "steamTags": [
+            "인디",
+            "액션",
+            "액션 로그라이크",
+            "픽셀 그래픽",
+            "로그라이크",
+            "2D",
+            "로그라이트",
+            "싱글 플레이어",
+            "플랫폼",
+            "메트로배니아",
+            "초고난도",
+            "횡스크롤",
+            "핵 앤 슬래시",
+            "악당 주인공",
+            "어드벤처",
+            "액션 어드벤처",
+            "판타지",
+            "풍부한 스토리",
+            "귀여운",
+            "소울라이크"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/1147560/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -226,7 +429,30 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5509420/b4e57ab3702de9e82f64711338e17bd58a0b0c40/header.jpg?t=1794935529",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5509420/bbb92f5d805946c128784b4c5425e60ae0e08973/capsule_231x87.jpg?t=1794935529"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 25,
+          "priceValue": 334000,
+          "originalPriceValue": 445000,
+          "priceVerified": true,
+          "steamTags": [
+            "오토 배틀러",
+            "전략",
+            "로그라이크",
+            "덱빌딩",
+            "중세",
+            "판타지",
+            "로그라이크 덱빌딩",
+            "귀여운",
+            "2D",
+            "인디",
+            "시뮬레이션",
+            "PvE",
+            "싱글 플레이어"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5509420/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -249,7 +475,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1142710/header.jpg?t=1790321531",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1142710/capsule_231x87.jpg?t=1790321531"
           ],
-          "matureContent": true
+          "matureContent": true,
+          "releaseDate": "2022-02-16",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 85,
+          "priceValue": 900000,
+          "originalPriceValue": 6000000,
+          "priceVerified": true,
+          "steamTags": [
+            "전략",
+            "턴제 전략",
+            "대전략",
+            "실시간 전략",
+            "판타지",
+            "실시간 전술",
+            "전쟁",
+            "다크 판타지",
+            "드워프",
+            "액션",
+            "전술",
+            "멀티플레이어",
+            "분위기 있는",
+            "협동",
+            "다채로운",
+            "PvP",
+            "싱글 플레이어",
+            "온라인 협동",
+            "풍부한 스토리",
+            "타워 디펜스"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/1142710/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -281,7 +537,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5459010/13018b9685696daa1d5b9ddda7c9cb2acc1f6817/header.jpg?t=1794950462",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5459010/51ccf222b37a493b1ef4a9ad76702679d9259c50/capsule_231x87.jpg?t=1794950462"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "early_access",
+          "isNewRelease": true,
+          "discountPercent": 10,
+          "priceValue": 1305000,
+          "originalPriceValue": 1450000,
+          "priceVerified": true,
+          "steamTags": [
+            "시뮬레이션",
+            "직업 시뮬레이션",
+            "취미 시뮬레이션",
+            "캐주얼",
+            "교육",
+            "크래프팅",
+            "릴랙싱",
+            "아늑함",
+            "현실적",
+            "3D",
+            "싱글 플레이어",
+            "앞서 해보기",
+            "경영",
+            "전체 이용가",
+            "인디",
+            "건전함",
+            "샌드박스",
+            "경제",
+            "시간 관리",
+            "컨트롤러"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5459010/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -304,7 +590,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/949230/header.jpg?t=1794506466",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/949230/2b264fcfffbdc89083c626e70d8e5f0b352672a9/capsule_231x87.jpg?t=1794506466"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2023-10-24",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 30,
+          "priceValue": 3850000,
+          "originalPriceValue": 5500000,
+          "priceVerified": true,
+          "steamTags": [
+            "도시 건설",
+            "시뮬레이션",
+            "건설",
+            "샌드박스",
+            "경영",
+            "싱글 플레이어",
+            "경제",
+            "전략",
+            "현실적",
+            "모드 가능",
+            "자원관리",
+            "릴랙싱",
+            "교통 수단",
+            "캐주얼",
+            "분위기 있는",
+            "앞서 해보기",
+            "오픈 월드",
+            "모드",
+            "웅장한 사운드트랙",
+            "심리적 공포"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/949230/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -336,7 +652,32 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322420/37d7f7f03c9bae92585c975db24ae40a3358e4e1/header.jpg?t=1794933748",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2322420/b5e80c188710dab7a492e1e27503b9fc6654930b/capsule_231x87.jpg?t=1794933748"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 0,
+          "priceValue": 1050000,
+          "originalPriceValue": 1050000,
+          "priceVerified": true,
+          "steamTags": [
+            "시뮬레이션",
+            "카드 게임",
+            "생존",
+            "크래프팅",
+            "퍼즐",
+            "캐주얼",
+            "싱글 플레이어",
+            "자신이 선택하는 모험",
+            "탐험",
+            "인디",
+            "전략",
+            "어드벤처",
+            "자연",
+            "2D",
+            "솔리테어"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/2322420/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -359,7 +700,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1211600/aac7446006d1fb3898eccf697406d0c357cf20a3/header_alt_assets_2.jpg?t=1794911298",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1211600/efa28f2c599298ab7049bb994e6ef7ead9109076/capsule_231x87_alt_assets_2.jpg?t=1794911298"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-05",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 40,
+          "priceValue": 810000,
+          "originalPriceValue": 1350000,
+          "priceVerified": true,
+          "steamTags": [
+            "생존",
+            "좀비",
+            "온라인 협동",
+            "픽셀 그래픽",
+            "오픈 월드",
+            "샌드박스",
+            "건설",
+            "포스트아포칼립스",
+            "크래프팅",
+            "탑다운",
+            "액션",
+            "시뮬레이션",
+            "RPG",
+            "로그라이크",
+            "걷기 시뮬레이션",
+            "2D",
+            "아웃브레이크 시뮬레이션",
+            "로그라이트",
+            "정통 로그라이크",
+            "2.5D"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/1211600/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -391,7 +762,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5524120/d03140a1931665e21ba0744b14e4b570ce4314d5/header.jpg?t=1794948979",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5524120/d1521546c04a4ff730b46d6202e3c12eae975e08/capsule_231x87.jpg?t=1794948979"
           ],
-          "matureContent": true
+          "matureContent": true,
+          "releaseDate": "2026-11-17",
+          "releaseState": "early_access",
+          "isNewRelease": true,
+          "discountPercent": 0,
+          "priceValue": 895000,
+          "originalPriceValue": 895000,
+          "priceVerified": true,
+          "steamTags": [
+            "공포",
+            "온라인 협동",
+            "심리적 공포",
+            "생존 공포",
+            "초자연",
+            "협동",
+            "수사",
+            "멀티플레이어",
+            "1인칭",
+            "어드벤처",
+            "액션",
+            "분위기 있는",
+            "깜놀",
+            "팀 기반",
+            "미스터리",
+            "인디",
+            "앞서 해보기",
+            "어두운",
+            "탐험",
+            "PvP"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5524120/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -414,7 +815,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3314790/8ba81356b84aa937573fa29fdd708dbd96b01537/header.jpg?t=1794909983",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3314790/708aa35adb8f17727284204955531d3ca237b6a4/capsule_231x87.jpg?t=1794909983"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2025-09-26",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 30,
+          "priceValue": 770000,
+          "originalPriceValue": 1100000,
+          "priceVerified": true,
+          "steamTags": [
+            "도박",
+            "로그라이크",
+            "로그라이트",
+            "심리적 공포",
+            "전략",
+            "1인칭",
+            "공포",
+            "3D",
+            "블랙 유머",
+            "싱글 플레이어",
+            "심리적",
+            "어두운",
+            "인디",
+            "자원관리",
+            "복수 결말",
+            "초현실",
+            "시뮬레이션",
+            "복고풍",
+            "어드벤처",
+            "액션"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/3314790/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -446,7 +877,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4959760/64e2040bf481a6154f8b0c9156583f0bead4f145/header.jpg?t=1794953542",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4959760/038747bca408f25973c0aac3435fe8d7a0a8fc93/capsule_231x87.jpg?t=1794953542"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 15,
+          "priceValue": 935000,
+          "originalPriceValue": 1100000,
+          "priceVerified": true,
+          "steamTags": [
+            "방 탈출",
+            "숨은 그림 및 물체",
+            "포인트 앤드 클릭",
+            "미스터리",
+            "퍼즐",
+            "탐험",
+            "1인칭",
+            "분위기 있는",
+            "싱글 플레이어",
+            "수사",
+            "스팀펑크",
+            "풍부한 스토리",
+            "캐주얼",
+            "어드벤처",
+            "3D",
+            "논리",
+            "추리",
+            "걷기 시뮬레이션",
+            "공상과학",
+            "인디"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/4959760/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -469,7 +930,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/499170/deda420d9e42288f4734a068c707f4c156203969/header.jpg?t=1793039241",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/499170/6932c737232e6b2ba967b37509f3d38c6e063706/capsule_231x87.jpg?t=1793039241"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-10-08",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 20,
+          "priceValue": 2480000,
+          "originalPriceValue": 3100000,
+          "priceVerified": true,
+          "steamTags": [
+            "퍼즐",
+            "어드벤처",
+            "창고지기",
+            "탐험",
+            "3D",
+            "탑다운",
+            "판타지",
+            "공상과학",
+            "컨트롤러",
+            "비선형",
+            "다이내믹 내레이션",
+            "싱글 플레이어",
+            "인디",
+            "오픈 월드",
+            "풍부한 스토리",
+            "시간 조작",
+            "그리드 기반 움직임",
+            "초고난도",
+            "초현실",
+            "다채로운"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/499170/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -501,7 +992,31 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669160/29632fba27d3242444a366769903007368de7a1f/header.jpg?t=1794828713",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669160/31726e4bd084c86d185483e7766deec63e335f4e/capsule_231x87.jpg?t=1794828713"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-16",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 10,
+          "priceValue": 504000,
+          "originalPriceValue": 560000,
+          "priceVerified": true,
+          "steamTags": [
+            "퍼즐 플랫폼",
+            "2D 플랫폼",
+            "퍼즐",
+            "플랫폼",
+            "메트로배니아",
+            "비선형",
+            "유머",
+            "탐험",
+            "물리",
+            "어드벤처",
+            "싱글 플레이어",
+            "인디",
+            "2D",
+            "양식화된"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/3669160/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -524,7 +1039,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725260/header.jpg?t=1740447961",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725260/capsule_231x87.jpg?t=1740447961"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2025-01-22",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 45,
+          "priceValue": 1485000,
+          "originalPriceValue": 2700000,
+          "priceVerified": true,
+          "steamTags": [
+            "메트로배니아",
+            "2D",
+            "여주인공",
+            "다크 판타지",
+            "싱글 플레이어",
+            "소울라이크",
+            "액션 RPG",
+            "RPG",
+            "웅장한 사운드트랙",
+            "액션",
+            "판타지",
+            "애니메이션",
+            "풍부한 스토리",
+            "분위기 있는",
+            "중세",
+            "귀여운",
+            "횡스크롤",
+            "플랫폼",
+            "초고난도",
+            "인디"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/2725260/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -556,7 +1101,30 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5434480/2ff52ef4da8456d08184d51154be89e971402d92/header.jpg?t=1794845185",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5434480/bc4ae4862c4219c31ba30cae39248eb5431d833e/capsule_231x87.jpg?t=1794845185"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-16",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 10,
+          "priceValue": 2025000,
+          "originalPriceValue": 2250000,
+          "priceVerified": true,
+          "steamTags": [
+            "경영",
+            "전략",
+            "레이싱",
+            "시뮬레이션",
+            "스포츠",
+            "자동차 시뮬레이션",
+            "경제",
+            "자원관리",
+            "일시 정지 가능한 실시간",
+            "싱글 플레이어",
+            "인디",
+            "3D",
+            "양식화된"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5434480/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -579,7 +1147,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2698940/715d1f1e53a55a46ca00e689a1b7651c17fa592f/header.jpg?t=1791551745",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2698940/b10d861da7e81ea1ad0af0283e047c5d08ec86d7/capsule_231x87.jpg?t=1791551745"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2024-04-18",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 80,
+          "priceValue": 1380000,
+          "originalPriceValue": 6900000,
+          "priceVerified": true,
+          "steamTags": [
+            "레이싱",
+            "오픈 월드",
+            "운전",
+            "멀티플레이어",
+            "아케이드",
+            "샌드박스",
+            "싱글 플레이어",
+            "PvP",
+            "스포츠",
+            "온라인 협동",
+            "협동",
+            "3D",
+            "오토바이",
+            "자동차 시뮬레이션",
+            "컨트롤러",
+            "시뮬레이션",
+            "전체 이용가",
+            "MMO",
+            "현실적",
+            "제트"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/2698940/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -611,7 +1209,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4866510/5380388116eeb22986375e66536e2d5d1fdfc180/header.jpg?t=1794510976",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4866510/acbed1bef8d028291e90cce744d70e3bf3ad880c/capsule_231x87.jpg?t=1794510976"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-12",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 20,
+          "priceValue": 536000,
+          "originalPriceValue": 670000,
+          "priceVerified": true,
+          "steamTags": [
+            "리듬",
+            "음악",
+            "1980년대",
+            "복고풍",
+            "고양이",
+            "픽셀 그래픽",
+            "귀여운",
+            "미니멀리스트",
+            "액션",
+            "아케이드",
+            "캐주얼",
+            "싱글 플레이어",
+            "2D",
+            "스코어 어택",
+            "인디",
+            "동물",
+            "만화 같은",
+            "유머",
+            "코미디",
+            "선형"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/4866510/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -634,7 +1262,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1761390/header_koreana.jpg?t=1763684613",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1761390/capsule_231x87_koreana.jpg?t=1763684613"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2022-05-26",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 60,
+          "priceValue": 1792000,
+          "originalPriceValue": 4480000,
+          "priceVerified": true,
+          "steamTags": [
+            "리듬",
+            "애니메이션",
+            "아케이드",
+            "귀여운",
+            "3D",
+            "음악",
+            "액션",
+            "여주인공",
+            "캐릭터 커스터마이즈",
+            "전체 이용가",
+            "싱글 플레이어",
+            "미래적",
+            "웅장한 사운드트랙",
+            "현대",
+            "빠른 진행",
+            "스코어 어택",
+            "리플레이 가치",
+            "하드웨어",
+            "초고난도",
+            "LGBTQ+"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/1761390/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -666,7 +1324,30 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5340870/fa63a0fdbf38c83c6482fc148073c806df6507e6/header.jpg?t=1794940251",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5340870/33438890a6cc234016b92d5cb628580fc771b819/capsule_231x87.jpg?t=1794940251"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 40,
+          "priceValue": 198000,
+          "originalPriceValue": 330000,
+          "priceVerified": true,
+          "steamTags": [
+            "캐주얼",
+            "인크리멘탈",
+            "아이들러",
+            "픽셀 그래픽",
+            "아늑함",
+            "시뮬레이션",
+            "릴랙싱",
+            "2D",
+            "단편",
+            "싱글 플레이어",
+            "인디",
+            "자연",
+            "귀여운"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5340870/?cc=kr&l=koreana"
         },
         {
           "title": "Only Sheep",
@@ -687,7 +1368,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5506410/3d27f470e53d6c9885ed389680693a2e65efe8ea/header.jpg?t=1794951568",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5506410/abeaadd0aad4658ae833fefc0f50a5747c92d450/capsule_231x87.jpg?t=1794951568"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-17",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 25,
+          "priceValue": 671000,
+          "originalPriceValue": 895000,
+          "priceVerified": true,
+          "steamTags": [
+            "캐주얼",
+            "인크리멘탈",
+            "시뮬레이션",
+            "동물",
+            "자동화",
+            "경영",
+            "자원관리",
+            "농장 시뮬레이션",
+            "탐험",
+            "시간 관리",
+            "싱글 플레이어",
+            "3D",
+            "만화",
+            "다채로운",
+            "인디",
+            "귀여운",
+            "양식화된",
+            "3인칭",
+            "릴랙싱",
+            "아늑함"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5506410/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -710,7 +1421,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3948120/dc726b9c35076bb0bfbf63a664bbf61638cbc2ab/header_alt_assets_0.jpg?t=1794326919",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3948120/3d9dad2f02502bbe5c3d4b1566e5ee250d4a327f/capsule_231x87_alt_assets_0.jpg?t=1794326919"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-03-18",
+          "releaseState": "released",
+          "isNewRelease": false,
+          "discountPercent": 35,
+          "priceValue": 374000,
+          "originalPriceValue": 575000,
+          "priceVerified": true,
+          "steamTags": [
+            "인크리멘탈",
+            "도박",
+            "아이들러",
+            "자원관리",
+            "로그라이트",
+            "아케이드",
+            "릴랙싱",
+            "시뮬레이션",
+            "경영",
+            "경제",
+            "자본주의",
+            "미니멀리스트",
+            "복고풍",
+            "캐주얼",
+            "올드 스쿨",
+            "픽셀 그래픽",
+            "로그라이크",
+            "인디",
+            "단편",
+            "실험적"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/3948120/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
@@ -742,7 +1483,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5200620/b3a32d9086038acf42c9457c2bc062f93d90ea3e/header.jpg?t=1794917663",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5200620/e30d65018c1956b58d1664ed7e52fdd799a84197/capsule_231x87.jpg?t=1794917663"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-16",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 10,
+          "priceValue": 1215000,
+          "originalPriceValue": 1350000,
+          "priceVerified": true,
+          "steamTags": [
+            "오토 배틀러",
+            "비동기 멀티플레이어",
+            "판타지",
+            "던전 크롤러",
+            "로그라이크",
+            "초고난도",
+            "마법",
+            "멀티플레이어",
+            "전략",
+            "리플레이 가치",
+            "턴제 전투",
+            "2D",
+            "인크리멘탈",
+            "전술",
+            "PvP",
+            "인벤토리 관리",
+            "중세",
+            "약탈",
+            "픽셀 그래픽",
+            "로그라이트"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/5200620/?cc=kr&l=koreana"
         }
       ],
       "deals": [
@@ -765,7 +1536,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/b0958d387dc366211e0f353443710cfcf9fdb020/header.jpg?t=1787169309",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/fb0ad136e9eaa4297a1ab3440d88ecb7209f44a2/capsule_231x87.jpg?t=1787169309"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-03-05",
+          "releaseState": "early_access",
+          "isNewRelease": false,
+          "discountPercent": 20,
+          "priceValue": 2160000,
+          "originalPriceValue": 2700000,
+          "priceVerified": true,
+          "steamTags": [
+            "로그라이크",
+            "카드 게임",
+            "덱빌딩",
+            "협동",
+            "전략",
+            "로그라이크 덱빌딩",
+            "멀티플레이어",
+            "턴제 전투",
+            "카드 배틀",
+            "인디",
+            "초고난도",
+            "로그라이트",
+            "앞서 해보기",
+            "2D",
+            "싱글 플레이어",
+            "리플레이 가치",
+            "던전 크롤러",
+            "판타지",
+            "절차적 생성",
+            "마우스 전용"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/2868840/?cc=kr&l=koreana"
         },
         {
           "title": "9 Kings 나인 킹즈",
@@ -786,7 +1587,37 @@
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2784470/432782f54e92648a38696ace5fde4924814cfc2e/header_koreana.jpg?t=1794803229",
             "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2784470/1fe9b65362ae25d8f86e743fc37c1e71bc2e46e1/capsule_231x87_koreana.jpg?t=1794803229"
           ],
-          "matureContent": false
+          "matureContent": false,
+          "releaseDate": "2026-11-12",
+          "releaseState": "released",
+          "isNewRelease": true,
+          "discountPercent": 50,
+          "priceValue": 995000,
+          "originalPriceValue": 1990000,
+          "priceVerified": true,
+          "steamTags": [
+            "전략",
+            "RPG",
+            "로그라이크",
+            "멀티플레이어",
+            "카드 게임",
+            "덱빌딩",
+            "로그라이크 덱빌딩",
+            "로그라이트",
+            "턴제 전투",
+            "카드 배틀",
+            "2D",
+            "턴제 전략",
+            "판타지",
+            "오토 배틀러",
+            "싱글 플레이어",
+            "초고난도",
+            "리플레이 가치",
+            "던전 크롤러",
+            "절차적 생성",
+            "인디"
+          ],
+          "tagSourceUrl": "https://store.steampowered.com/app/2784470/?cc=kr&l=koreana"
         }
       ],
       "emptyMessages": {
