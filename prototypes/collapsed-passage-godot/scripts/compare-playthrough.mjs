@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { engine } from "../../collapsed-passage/tests/helpers/game-engine.mjs";
 
@@ -47,17 +47,37 @@ const expected = JSON.parse(run("JSON.stringify((" + playWeb + ")(" + JSON.strin
 assert.equal(expected.at(-1).phase, "won");
 const directory = mkdtempSync(join(tmpdir(), "passage-playthrough-"));
 const input = join(directory, "playthrough.json");
-const capture = process.argv[3];
+const log = join(directory, "standalone.log");
+const exported = process.argv.includes("--exported");
+const [executable = "godot", capture] = process.argv.slice(2).filter(arg => arg !== "--exported");
+const isolatedExe = join(directory, "CollapsedPassage.exe");
+const override = join(directory, "override.cfg");
 try {
-  writeFileSync(input, JSON.stringify({ seed, steps }));
-  const result = spawnSync(process.argv[2] || "godot", [
-    ...(capture ? [] : ["--headless"]), "--path", fileURLToPath(new URL("../", import.meta.url)),
-    "--script", "res://tests/play_full_run.gd", "--", input, ...(capture ? [capture] : []),
-  ], { encoding: "utf8", timeout: 60000, windowsHide: true });
+  writeFileSync(input, JSON.stringify({ seed, steps, exported }));
+  if (exported) {
+    copyFileSync(executable, isolatedExe);
+    const runner = fileURLToPath(new URL("../tests/play_full_run.gd", import.meta.url)).replaceAll("\\", "/");
+    writeFileSync(override, [
+      "[application]",
+      "config/use_custom_user_dir=true",
+      "config/custom_user_dir_name=" + JSON.stringify(basename(directory)),
+      "",
+      "[autoload]",
+      "PlaythroughVerifier=" + JSON.stringify("*" + runner),
+      "",
+    ].join("\n"));
+  }
+  const result = spawnSync(exported ? isolatedExe : executable, [
+    ...(capture ? [] : ["--headless"]),
+    ...(exported ? ["--log-file", log] :
+      ["--path", fileURLToPath(new URL("../", import.meta.url)), "--script", "res://tests/run_playthrough.gd"]),
+    "--", input, ...(capture ? [capture] : []),
+  ], { cwd: exported ? directory : undefined, encoding: "utf8", timeout: 60000, windowsHide: true });
   if (result.error) throw result.error;
-  if (result.status !== 0 || /SCRIPT ERROR|Parse Error/.test(result.stderr)) throw Error(result.stderr);
-  const line = result.stdout.split("\n").find(value => value.startsWith("PLAYTHROUGH "));
-  assert.ok(line, result.stdout);
+  const output = existsSync(log) ? readFileSync(log, "utf8") : result.stdout;
+  if (result.status !== 0 || /ERROR:|Parse Error/.test(result.stderr + output)) throw Error(result.stderr + output);
+  const line = output.split("\n").find(value => value.startsWith("PLAYTHROUGH "));
+  assert.ok(line, output);
   const actual = JSON.parse(line.slice(12));
   assert.equal(actual.length, expected.length);
   for (const [i, checkpoint] of actual.entries()) {
@@ -67,6 +87,8 @@ try {
   const { phase, time, distance, coins, allies } = actual.at(-1);
   console.log(JSON.stringify({ phase, time, distance, coins, nunHp: allies.player.hp, guardHp: allies.companion.hp }));
 } finally {
-  unlinkSync(input);
+  for (const file of [log, input, override, isolatedExe]) {
+    if (existsSync(file)) unlinkSync(file);
+  }
   rmdirSync(directory);
 }

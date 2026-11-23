@@ -19,6 +19,18 @@ godot --headless --path . --import
 godot --path .
 ```
 
+### Windows 실행파일
+
+Godot 4.7.2 Standard의 Windows x64 내보내기 템플릿이 있으면 다음 명령으로 게임 데이터가 포함된 실행파일을 만든다.
+
+```powershell
+New-Item -ItemType Directory -Force dist/windows-x64 | Out-Null
+godot --headless --path . --export-release "Windows x64" dist/windows-x64/CollapsedPassage.exe
+node scripts/compare-playthrough.mjs dist/windows-x64/CollapsedPassage.exe --exported
+```
+
+비교 스크립트는 실행파일을 임시 폴더에 복사해 별도의 사용자 데이터로 검증한다. 실행파일 경로 뒤에 스크린샷 저장 폴더를 추가하면 실제 창에서 시작부터 탈출까지 진행한다.
+
 타이틀과 게임 화면의 ‘도감’에서는 대원 다섯 명의 기본 제원, 전용 기술, 공용 카드를 확인할 수 있다. 전체·일반·고급·희귀 필터는 선택한 대원 또는 공용 카드에 적용된다. ‘닫기’나 Esc로 돌아간다. 전투 중에는 전투·추격 시계와 진행 중인 연출이 멈추며, 닫으면 열기 전 재생 또는 일시정지 상태가 이어진다.
 
 타이틀의 ‘QA 훈련장’에서는 동료 네 명을 바로 사용할 수 있다. 대원을 선택해 출전 위치나 대기 상태를 바꾸고, 각 장착 칸에서 사용할 기술을 고른다. 편성 화면에서는 적 행동을 켜고 끄거나 적이 주는 피해를 1~5배로 설정한다.
