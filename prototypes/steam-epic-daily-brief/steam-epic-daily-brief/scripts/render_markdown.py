@@ -33,6 +33,12 @@ def official_url(value, image=False, app_id=None):
         return None
 
 
+def is_always_free(game):
+    return game.get("priceVerified") is True and game.get("priceValue") == 0 and (
+        game.get("freeType") == "always" or (game.get("price") or "").startswith("상시 무료")
+    )
+
+
 def render(data):
     lines = [
         "**STEAM DAILY · 오늘의 게임 브리핑**",
@@ -43,9 +49,18 @@ def render(data):
     for highlight in data.get("highlights", [])[:3]:
         lines.append(f"- {inline(highlight)}")
     lines.append("")
-    for key, label in [("free", "무료 배포"), ("new", "주목할 신작·출시 예정"), ("deals", "살펴볼 할인")]:
+    groups = data.get("groups", [data])
+    for key, label in [
+        ("free", "100% 할인 · 영구 소장"), ("alwaysFree", "상시 무료"),
+        ("new", "주목할 신작·출시 예정"), ("deals", "살펴볼 할인"),
+    ]:
         lines.extend([f"**{label}**", ""])
-        games = data.get(key, [])
+        games = [game for group in groups for game in group.get(key, [])]
+        if key == "alwaysFree":
+            games.extend(game for group in groups for game in group.get("new", []) if is_always_free(game))
+            games = list({game["url"]: game for game in games if is_always_free(game)}.values())
+        elif key == "free":
+            games = [game for game in games if not is_always_free(game)]
         if not games:
             lines.extend([inline(data.get("emptyMessages", {}).get(key, "확인 결과 미입력")), ""])
         else:

@@ -104,6 +104,48 @@ choose('all'); assert.equal(count(),'4개 게임');
 assert.equal([...doc.querySelectorAll('[data-type][aria-pressed="true"]')].length,1);
 console.log('PASS: genre/type intersection, launch sales, full-price exclusions, free distribution, empty states, no summary');
 
+const datedDeal=(id, day)=>({
+  ...makeGame(id,'−50%'), priceVerified:true, priceValue:50000, originalPriceValue:100000,
+  discountEnd:`2026-11-${day}T12:00:00+09:00`, deadline:`할인 종료 2026-11-${day} 12:00 KST`,
+});
+const freeGame={...makeGame(705),priceVerified:true,priceValue:0,price:'상시 무료(F2P)'};
+const datedDoc=mountAdult({
+  ...data,asOf:'2026-11-20 09:00',selectionLimits:{deals:3},
+  comparedAsOf:'2026-11-19 09:00',
+  groups:[{
+    name:'RPG',new:[freeGame],alwaysFree:[freeGame,{...freeGame,...makeGame(706),price:'0원',freeType:'always'}],
+    free:[{...datedDeal(704,21),freeType:'keep',priceValue:0,discountPercent:100,price:'0원'}],
+    deals:[
+      {...datedDeal(703,26),dailyChange:true},
+      {...datedDeal(702,22),dailyChange:true,reportUpdates:['price']},
+      datedDeal(701,20),datedDeal(700,19),
+    ],
+  }],
+});
+const datedCount=()=>datedDoc.querySelector('#view-count').textContent;
+assert.equal(datedDoc.querySelector('#report-scope'),null);
+assert.equal(datedCount(),'5개 게임','The main view includes unchanged deals from compared reports');
+assert.equal(datedDoc.querySelector('[data-category="deals"] .game-title a').getAttribute('href'),'https://store.steampowered.com/app/703/','Changed deals lead the curated list');
+const ribbons=[...datedDoc.querySelectorAll('.cover .new-ribbon')];
+assert.equal(ribbons.length,1,'An approaching deadline alone does not add a NEW ribbon');
+assert.equal(ribbons[0].textContent,'NEW');
+assert.equal(ribbons[0].getAttribute('aria-label'),'NEW · 가격 변경');
+datedDoc.querySelector('[data-type="deals"]').click();
+assert.equal(datedCount(),'3개 게임');
+assert.deepEqual(
+  [...datedDoc.querySelectorAll('[data-category="deals"] .deadline')].map(x=>x.textContent.split(' · ')[0]),
+  ['24시간 이내','3일 이내','7일 이내']
+);
+datedDoc.querySelector('[data-type="free"]').click();
+assert.equal(datedCount(),'1개 게임');
+datedDoc.querySelector('[data-free-type="alwaysFree"]').click();
+assert.equal(datedCount(),'2개 게임','A free new release and its duplicate in the free catalog share one card');
+datedDoc.querySelector('[data-type="new"]').click();
+assert.equal(datedCount(),'1개 게임','A free new release still appears in the new release tab');
+datedDoc.querySelector('[data-type="all"]').click();
+assert.equal(datedDoc.querySelector('[data-category="deals"] .game-title a').getAttribute('href'),'https://store.steampowered.com/app/703/','Return to the curated order after sorting by deadline');
+console.log('PASS: deadline tiers sorted earliest first, expired deals hidden, free-to-keep and always-free separated');
+
 const adultData={...data,groups:[
   {name:'RPG',new:[{...makeGame(10,'−10%'),mature:false,steamTags:[{id:'12095',name:'선정적 콘텐츠'}]}],deals:[{...makeGame(11,'−50%'),mature:true,matureContent:true,steamTags:['폭력','감성적']}],free:[],emptyMessages:{}},
   {name:'공포',new:[{...makeGame(12),matureContent:false,steamTags:[{id:'6650',name:'신체 노출'}]}],deals:[],free:[{...makeGame(13),steamTags:['Nudity']}],emptyMessages:{}},
@@ -146,7 +188,7 @@ assert.equal(typedRows[3].querySelector('.badge-new'),null);
 assert.equal(typedRows[3].querySelector('.badge-sale'),null,'Equal prices cannot be advertised as discounted');
 typedDoc.querySelector('[data-type="deals"]').click();
 assert.equal(typedDoc.querySelector('#view-count').textContent,'1개 게임');
-assert.equal(adultDoc.querySelector('.steam-tags .badge-sexual').getAttribute('href'),'https://store.steampowered.com/app/10/');
+assert.equal(adultDoc.querySelector('.steam-tags .badge-sexual').localName,'button');
 console.log('PASS: visible separate release/sale badges, upcoming/EA states, exact dates, contradictory price exclusion and tag provenance');
 
 const metadataGame={...makeGame(30),koreanSupported:true,koreanDetails:'인터페이스 · 자막',reviewCount:6906,reviewSummary:'압도적으로 긍정적',reviewScore:9,reviewPositivePercent:96,reviewScope:'최근 30일',note:'Steam 사용자 태그와 한국 지역 본편 가격을 확인했습니다.',steamTags:Array.from({length:7},(_,i)=>({id:String(i),name:'태그'+i}))};
@@ -155,15 +197,15 @@ const metadataRow=metadataDoc.querySelector('.game');
 assert.ok(metadataRow.querySelector('.metadata').textContent.includes('한국어 O'));
 assert.ok(metadataRow.querySelector('.metadata').textContent.includes('최근 리뷰 5,000↑'));
 assert.equal(metadataRow.querySelector('.badge-positive').textContent,'압도적으로 긍정적');
+assert.deepEqual([...metadataRow.querySelectorAll('.review-meta a')].map(a=>a.getAttribute('href')),
+  ['https://store.steampowered.com/app/30/#app_reviews_hash','https://store.steampowered.com/app/30/#app_reviews_hash']);
 assert.ok([...metadataRow.querySelectorAll('.metadata .badge')].some(x=>x.title.includes('6,906개')&&x.title.includes('96%')));
 assert.equal(metadataRow.querySelector('.game-details'),null);
 assert.equal(metadataRow.textContent.includes('확인했습니다.'),false);
-assert.equal([...metadataRow.querySelectorAll('.steam-tag')].filter(x=>!x.hidden).length,3);
-metadataRow.querySelector('.tag-toggle').click();
-assert.equal([...metadataRow.querySelectorAll('.steam-tag')].filter(x=>!x.hidden).length,7);
-assert.equal(metadataRow.querySelector('.tag-toggle').getAttribute('aria-expanded'),'true');
-metadataRow.querySelector('.tag-toggle').click();
-assert.equal([...metadataRow.querySelectorAll('.steam-tag')].filter(x=>!x.hidden).length,3);
+assert.equal(metadataRow.querySelectorAll('.steam-tag').length,2);
+assert.equal(metadataRow.querySelector('.tag-toggle'),null);
+assert.equal([...metadataDoc.querySelectorAll('.tag-option')].filter(x=>!x.hidden).length,6);
+assert.equal(metadataDoc.querySelector('#tag-more'),null);
 const noReviewsDoc=mountAdult({...data,new:[{...makeGame(31),koreanSupported:false,reviewCount:0,reviewSummary:'평가 없음',reviewScore:0}],deals:[]});
 assert.ok(noReviewsDoc.querySelector('.metadata').textContent.includes('한국어 X'));
 assert.ok(noReviewsDoc.querySelector('.metadata').textContent.includes('리뷰 0'));
@@ -176,7 +218,7 @@ assert.equal(quotaDoc.querySelector('#view-count').textContent,'3개 게임');
 quotaDoc.querySelector('[data-type="deals"]').click();
 assert.equal(quotaDoc.querySelector('#view-count').textContent,'3개 게임');
 assert.deepEqual([...quotaDoc.querySelectorAll('.game')].filter(x=>!x.hidden).map(x=>x.querySelector('.game-title a').getAttribute('href')), [43,44,45].map(id=>`https://store.steampowered.com/app/${id}/`));
-console.log('PASS: hover release dates, metadata badges, review buckets, zero vs unknown reviews, visible expandable tags, no boilerplate, separate 3+3 quotas');
+console.log('PASS: hover release dates, metadata badges, review buckets, zero vs unknown reviews, compact tags, no boilerplate, separate 3+3 quotas');
 
 assert.ok(metadataRow.querySelector('.language-supported'),'Korean support has a distinct highlighted badge');
 assert.equal(noReviewsDoc.querySelector('.language-supported'),null,'Unsupported Korean must not be highlighted');
@@ -217,10 +259,23 @@ assert.ok(copyOrder.indexOf(typedRows[0].querySelector('.price'))<copyOrder.inde
 assert.equal(groupedDOM.document.querySelector('#genre-tabs').parentElement.id,'sidebar');
 assert.equal(groupedDOM.document.querySelector('#genre-tabs').getAttribute('aria-orientation'),'vertical');
 const facetData={...data,groups:[
- {name:'RPG',new:[{...makeGame(70),steamTags:[{id:'9',name:'전략'},{id:'122',name:'RPG'}]}],deals:[{...makeGame(71,'−40%'),isIndie:true,steamTags:[{id:'9',name:'전략'}]}],free:[]},
- {name:'전략',new:[{...makeGame(72),isIndie:true,steamTags:[{id:'560542',name:'인크리멘탈'}]}],deals:[],free:[]}
+ {name:'RPG',new:[{...makeGame(70),koreanSupported:true,steamTags:[{id:'9',name:'전략'},{id:'122',name:'RPG'}]}],deals:[{...makeGame(71,'−40%'),isIndie:true,koreanSupported:false,steamTags:[{id:'9',name:'전략'}]}],free:[]},
+ {name:'전략',new:[{...makeGame(72),isIndie:true,korean:'한국어 미확인',steamTags:[{id:'560542',name:'인크리멘탈'}]}],deals:[],free:[]}
 ]};
 const facetDoc=mountAdult(facetData);
+const cardTag=[...facetDoc.querySelectorAll('button.steam-tag')].find(tag=>tag.textContent==='전략');
+cardTag.click();
+assert.equal(facetDoc.querySelector('#view-count').textContent,'2개 게임');
+assert.equal(facetDoc.querySelector('input[data-tag="id:9"]').checked,true);
+const koreanButton=facetDoc.querySelector('button.language-supported');
+koreanButton.click();
+assert.equal(facetDoc.querySelector('#view-count').textContent,'1개 게임');
+assert.equal(koreanButton.getAttribute('aria-pressed'),'true');
+cardTag.click();
+assert.equal(facetDoc.querySelector('#view-count').textContent,'1개 게임','Unknown and unsupported Korean are excluded');
+facetDoc.querySelector('[aria-label="한국어 지원 필터 해제"]').click();
+assert.equal(facetDoc.querySelector('#view-count').textContent,'3개 게임');
+assert.equal(koreanButton.getAttribute('aria-pressed'),'false');
 function toggleFacet(key,checked){const input=facetDoc.querySelector(`input[data-tag="${key}"]`);input.checked=checked;input.dispatchEvent(new window.Event('change'));}
 assert.equal(facetDoc.querySelector('#view-count').textContent,'3개 게임');
 toggleFacet('id:9',true);assert.equal(facetDoc.querySelector('#view-count').textContent,'2개 게임');

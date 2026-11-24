@@ -6,6 +6,7 @@
 - 할인: https://store.steampowered.com/specials/
 - 할인 검색 대안: https://store.steampowered.com/search/?specials=1
 - 공식 뉴스: https://store.steampowered.com/news/
+- 상시 무료 후보: https://store.steampowered.com/genre/Free%20to%20Play/
 - 개별 상품: 스토어 목록에서 실제 `https://store.steampowered.com/app/숫자/` 링크를 찾아 연다. 상품 ID를 임의로 만들지 않는다.
 
 가능하면 URL에 `cc=kr`와 `l=koreana`를 사용한다. 이미 쿼리가 있으면 `&`로 추가한다. 이 매개변수만으로 KRW가 보장되지는 않으므로 반환된 페이지의 통화·지역을 확인한다. 한국 매개변수 URL이 열리지 않으면 기본 URL에서 후보를 찾고 개별 상품의 한국 지역 페이지를 확인한다.
