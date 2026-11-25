@@ -24,6 +24,9 @@ const ALLY := FieldUI.ALLY
 const FOE := FieldUI.DANGER
 const INJURY_LEVELS := {"healthy": "정상", "injured": "부상", "lost": "결손"}
 const COMBAT_BOARD_MIN := 262.0
+const PREP_CARD_WIDTH := 184.0
+const PREP_CARD_COLUMNS := 6
+const REWARD_CARD_WIDTH := 220
 const QA_ACTIONS := {"win": "전투 승리 (K)", "heal": "아군 회복 (H)", "margin": "도망 여유 +5 (J)"}
 
 var run: RefCounted
@@ -271,7 +274,7 @@ func _build_prep(focus_key: String) -> void:
 	_bind_hotkey(start, KEY_B)
 	if focus_key.is_empty() and not start.disabled:
 		start.grab_focus()
-	var board := _arena(174 if run.training else 184, "res://" + run.data.map[run.area].arena)
+	var board := _arena(174 if run.training else 164, "res://" + run.data.map[run.area].arena)
 	_page.add_child(board)
 	var ranks := _row(10)
 	ranks.name = "PrepRanks"
@@ -354,8 +357,15 @@ func _build_run_skills(loadout: Array, equipped: int, focus_key: String) -> void
 	choices.add_theme_constant_override("h_separation", FieldUI.CARD_GAP)
 	choices.add_theme_constant_override("v_separation", FieldUI.CARD_GAP)
 	_page.add_child(choices)
+	# 카드가 화면 폭을 꽉 채우며 커지지 않게, 폭을 상한 안에 두고 한 줄에 더 많이 놓는다.
 	var fit_cards := func():
-		choices.columns = FieldUI.card_columns(_scroll.size.x - _scroll.get_v_scroll_bar().size.x, 4)
+		var width := _scroll.size.x - _scroll.get_v_scroll_bar().size.x
+		choices.columns = FieldUI.card_columns(width, PREP_CARD_COLUMNS)
+		var card_width := clampf(floorf((width - (choices.columns - 1) * FieldUI.CARD_GAP) / choices.columns),
+			FieldUI.CARD_SIZE.x, PREP_CARD_WIDTH)
+		for stack: Control in choices.get_children():
+			stack.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			stack.get_child(0).custom_minimum_size.x = card_width
 	_scroll.resized.connect(fit_cards)
 	choices.tree_exiting.connect(func(): _scroll.resized.disconnect(fit_cards), CONNECT_ONE_SHOT)
 	fit_cards.call()
@@ -371,6 +381,7 @@ func _build_run_skills(loadout: Array, equipped: int, focus_key: String) -> void
 			button.tooltip_text = "현재 대열 또는 부위 상태에서 발동 불가"
 		if focus_key == id and not button.disabled:
 			button.grab_focus()
+	fit_cards.call()
 
 
 func _build_training_reserves(focus_key: String) -> void:
@@ -539,7 +550,8 @@ func _build_combat() -> void:
 		groups[side] = slots
 	for slot: Dictionary in run.slots:
 		var id: String = slot.id
-		var box := _panel(FieldUI.IRON, FieldUI.RIM, 5)
+		var box := PanelContainer.new()
+		box.add_theme_stylebox_override("panel", FieldUI.framed("slot.png", 7))
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		groups[slot.side].add_child(box)
 		var content := _column(3)
@@ -1666,7 +1678,12 @@ func _style(fill: Color, edge: Color, pad := 11) -> StyleBoxFlat:
 
 func _panel(color: Color, edge := FieldUI.RIM, padding := 11) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _style(color, edge, padding))
+	if color == FieldUI.IRON:
+		# 철판 패널은 생성한 틀을 쓴다. 강조 테두리는 틀을 조금 밝혀서 표시한다.
+		var tint := Color.WHITE if edge == FieldUI.RIM else Color(1.25, 1.12, 0.95)
+		panel.add_theme_stylebox_override("panel", FieldUI.framed("panel.png", padding, tint))
+	else:
+		panel.add_theme_stylebox_override("panel", _style(color, edge, padding))
 	return panel
 
 
@@ -1758,7 +1775,8 @@ func _arena(height: int, image_path: String) -> Control:
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay(board, shade, 0)
 	var surround := Panel.new()
-	var rim := FieldUI.plate(Color.TRANSPARENT, FieldUI.RIM, 0)
+	surround.name = "ArenaFrame"
+	var rim := FieldUI.framed("frame.png", 0)
 	rim.draw_center = false
 	surround.add_theme_stylebox_override("panel", rim)
 	surround.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1790,10 +1808,10 @@ func _card_button(parent: Container, card: Dictionary, action: Callable, number:
 	var stack := _column(5)
 	stack.size_flags_horizontal = Control.SIZE_FILL if reward_from >= 0 else Control.SIZE_EXPAND_FILL
 	parent.add_child(stack)
-	var panel := FieldUI.card_shell(card, run.data)
+	var panel := FieldUI.card_shell(card, run.data, reward_from < 0)
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	if reward_from >= 0:
-		panel.custom_minimum_size.x = 252
+		panel.custom_minimum_size.x = REWARD_CARD_WIDTH
 	stack.add_child(panel)
 	var owned_level := int(run.levels.get(card.id, 1))
 	var displayed_level := reward_from + 1 if reward_from >= 0 else owned_level
@@ -1806,6 +1824,8 @@ func _card_button(parent: Container, card: Dictionary, action: Callable, number:
 	var body := column.get_node("Details/CardBody") as VBoxContainer
 	var description := FieldUI.card_effect_text(card.description)
 	description.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if reward_from < 0:
+		FieldUI.clamp_effect_lines(description, FieldUI.COMPACT_EFFECT_LINES)
 	body.add_child(description)
 	var action_text := "획득" if reward_from == 0 else "강화" if reward_from > 0 else "해제" if active else "장착"
 	var button := _button(action_text, action, active)

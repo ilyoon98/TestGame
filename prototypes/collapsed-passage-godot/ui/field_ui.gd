@@ -28,9 +28,16 @@ const CARD_SIZE := Vector2(176, 204)
 const CARD_HEIGHT_PER_WIDTH := 1.38
 const CARD_GAP := 10
 const CARD_UI := "res://art/ui/cards/"
+const FRAME_UI := "res://art/ui/frames/"
+# 생성한 철판·황동 틀. 값은 9-slice로 늘릴 때 모서리로 남길 픽셀 수다.
+const FRAME_INSETS := {"panel.png": 10, "button.png": 10, "primary.png": 11, "frame.png": 18, "slot.png": 8}
+const BUTTON_TINTS := {"normal": Color.WHITE, "hover": Color(1.45, 1.25, 1.05),
+	"pressed": Color(1.3, 1.12, 0.85), "disabled": Color(0.62, 0.58, 0.6, 0.9)}
 const CARD_ART_SIZE := Vector2i(392, 306)
 const ART_HEIGHT_PER_WIDTH := float(CARD_ART_SIZE.y) / CARD_ART_SIZE.x
 const ART_INSET := 7
+const COMPACT_ART_HEIGHT := 80
+const COMPACT_EFFECT_LINES := 3
 const DIAL_SIZE := 46
 const ART_HEADER_GAP := 4
 const ROLE_HANG := 14
@@ -69,20 +76,18 @@ static func make_theme() -> Theme:
 	result.default_font = BODY_FONT
 	result.default_font_size = 16
 	result.set_color("font_color", "Label", TEXT)
-	result.set_stylebox("panel", "PanelContainer", plate(IRON, RIM))
+	result.set_stylebox("panel", "PanelContainer", framed("panel.png", 10))
 	for type in ["Button", "OptionButton", "CheckButton"]:
 		result.set_color("font_color", type, TEXT)
 		result.set_color("font_hover_color", type, Color.WHITE)
 		result.set_color("font_pressed_color", type, BRASS)
 		result.set_color("font_disabled_color", type, Color("#afa196"))
-		result.set_stylebox("normal", type, plate(Color("#2a2327"), RIM, 9))
-		result.set_stylebox("hover", type, plate(Color("#43312e"), BRASS, 9))
-		result.set_stylebox("pressed", type, plate(Color("#51372c"), BRASS, 9))
-		result.set_stylebox("disabled", type, plate(Color("#241e20"), Color("#483939"), 9))
+		for state: String in BUTTON_TINTS:
+			result.set_stylebox(state, type, framed("button.png", 9, BUTTON_TINTS[state]))
 		result.set_stylebox("focus", type, focus_outline())
 	result.set_type_variation("CompactButton", "Button")
 	for state in ["normal", "hover", "pressed", "disabled"]:
-		var compact := result.get_stylebox(state, "Button").duplicate() as StyleBoxFlat
+		var compact := result.get_stylebox(state, "Button").duplicate() as StyleBox
 		compact.content_margin_top = 3
 		compact.content_margin_bottom = 3
 		result.set_stylebox(state, "CompactButton", compact)
@@ -102,6 +107,16 @@ static func plate(fill: Color, edge: Color, padding := 10) -> StyleBoxFlat:
 	box.corner_radius_top_right = 5
 	box.corner_radius_bottom_left = 5
 	for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+		box.set_content_margin(side, padding)
+	return box
+
+
+static func framed(asset: String, padding: int, tint := Color.WHITE) -> StyleBoxTexture:
+	var box := StyleBoxTexture.new()
+	box.texture = load(FRAME_UI + asset)
+	box.modulate_color = tint
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		box.set_texture_margin(side, FRAME_INSETS[asset])
 		box.set_content_margin(side, padding)
 	return box
 
@@ -161,14 +176,16 @@ static func card_columns(width: float, limit: int) -> int:
 	return clampi(int((width + CARD_GAP) / (CARD_SIZE.x + CARD_GAP)), 1, limit)
 
 
-static func card_shell(card: Dictionary, data: Dictionary) -> PanelContainer:
+# compact는 준비 화면처럼 카드를 여러 장 한눈에 보여야 할 때 쓴다. 그림을 낮추고 세로 비율을 강제하지 않는다.
+static func card_shell(card: Dictionary, data: Dictionary, compact := false) -> PanelContainer:
 	var grade: String = card.get("rarity", "common")
 	var rarity: Array = RARITIES[grade]
 	var tile := PanelContainer.new()
 	tile.custom_minimum_size = CARD_SIZE
 	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tile.resized.connect(func():
-		tile.custom_minimum_size.y = maxf(CARD_SIZE.y, ceilf(tile.size.x * CARD_HEIGHT_PER_WIDTH)))
+	if not compact:
+		tile.resized.connect(func():
+			tile.custom_minimum_size.y = maxf(CARD_SIZE.y, ceilf(tile.size.x * CARD_HEIGHT_PER_WIDTH)))
 	var border := _textured_box("frame-%s.png" % grade, 18, 10)
 	border.content_margin_top = 11
 	border.content_margin_bottom = 16
@@ -182,13 +199,14 @@ static func card_shell(card: Dictionary, data: Dictionary) -> PanelContainer:
 	art.name = "CardArt"
 	var face_path: String = CARD_UI + card.id + ".webp"
 	art.texture = load(face_path if ResourceLoader.exists(face_path) else "res://" + card.art)
-	art.custom_minimum_size.y = 110
+	var art_range := Vector2(COMPACT_ART_HEIGHT, COMPACT_ART_HEIGHT) if compact else Vector2(110, 222)
+	art.custom_minimum_size.y = art_range.x
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_child(art)
 	art.resized.connect(func():
-		art.custom_minimum_size.y = clampf(roundf(art.size.x * ART_HEIGHT_PER_WIDTH), 110, 222))
+		art.custom_minimum_size.y = clampf(roundf(art.size.x * ART_HEIGHT_PER_WIDTH), art_range.x, art_range.y))
 	_card_art_badges(art, card, data)
 	_card_art_foot(art, card)
 
@@ -206,7 +224,7 @@ static func card_shell(card: Dictionary, data: Dictionary) -> PanelContainer:
 	var title := RichTextLabel.new()
 	title.name = "CardTitle"
 	title.add_theme_font_override("normal_font", DISPLAY_FONT)
-	title.add_theme_font_size_override("normal_font_size", 19)
+	title.add_theme_font_size_override("normal_font_size", 17 if compact else 19)
 	title.add_theme_color_override("default_color", PAPER_INK)
 	title.fit_content = true
 	title.scroll_active = false
@@ -409,6 +427,17 @@ static func card_effect_text(value: String) -> RichTextLabel:
 	return rich
 
 
+# 작은 카드의 효과 문구는 정해진 줄 수까지만 보이고, 전체 문구는 툴팁으로 읽는다.
+static func clamp_effect_lines(rich: RichTextLabel, lines: int) -> void:
+	var full := rich.get_parsed_text()
+	rich.fit_content = false
+	rich.clip_contents = true
+	rich.custom_minimum_size.y = lines * BODY_FONT.get_height(15)
+	rich.tooltip_text = full if rich.tooltip_text.is_empty() else full + "
+
+" + rich.tooltip_text
+
+
 static func _textured_box(asset: String, inset: int, padding: int) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
 	box.texture = load(CARD_UI + asset)
@@ -459,8 +488,9 @@ static func style_action(button: Button, primary: bool, compact := false) -> voi
 	if compact:
 		button.theme_type_variation = "CompactButton"
 	if primary:
-		var box := plate(Color("#4c3328"), BRASS, 8)
-		if compact:
-			box.content_margin_top = 3
-			box.content_margin_bottom = 3
-		button.add_theme_stylebox_override("normal", box)
+		for state: String in ["normal", "hover", "pressed"]:
+			var box := framed("primary.png", 8, BUTTON_TINTS[state])
+			if compact:
+				box.content_margin_top = 3
+				box.content_margin_bottom = 3
+			button.add_theme_stylebox_override(state, box)
