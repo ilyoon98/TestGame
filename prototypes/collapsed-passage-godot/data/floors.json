@@ -49,7 +49,8 @@
         "elites": 1,
         "mysteries": 2
       },
-      "arrival": "승강기가 2층 교도관 구역에 멈췄다. 사형수의 발소리가 아래에서 따라온다."
+      "arrival": "승강기가 2층 교도관 구역에 멈췄다. 사형수의 발소리가 아래에서 따라온다.",
+      "lead": 3
     },
     {
       "name": "3층 정문 구역",
@@ -80,7 +81,8 @@
         "elites": 2,
         "mysteries": 2
       },
-      "arrival": "3층 정문 구역. 창살 너머로 새벽빛이 보인다."
+      "arrival": "3층 정문 구역. 창살 너머로 새벽빛이 보인다.",
+      "lead": 3
     }
   ],
   "rooms": {
@@ -183,14 +185,14 @@
     "keeper": {
       "name": "열쇠지기 교도관",
       "hp": [
-        10,
-        5,
-        5,
+        14,
         7,
-        5,
-        5
+        7,
+        10,
+        7,
+        7
       ],
-      "vitality": 14,
+      "vitality": 38,
       "armor": {
         "head": 2
       },
@@ -225,19 +227,21 @@
             "arms"
           ]
         ]
-      ]
+      ],
+      "interval": 2800,
+      "might": 2
     },
     "hound": {
       "name": "교도소 사냥개",
       "hp": [
-        9,
-        5,
-        5,
+        12,
         6,
-        5,
-        6
+        7,
+        9,
+        7,
+        8
       ],
-      "vitality": 13,
+      "vitality": 30,
       "armor": {},
       "patterns": [
         [
@@ -266,19 +270,21 @@
             "head"
           ]
         ]
-      ]
+      ],
+      "interval": 2200,
+      "might": 1
     },
     "scalder": {
       "name": "끓는 물 세탁부",
       "hp": [
-        10,
-        5,
-        6,
+        15,
+        7,
         8,
-        6,
-        5
+        12,
+        9,
+        7
       ],
-      "vitality": 16,
+      "vitality": 42,
       "armor": {
         "head": 1
       },
@@ -313,22 +319,24 @@
             "arms"
           ]
         ]
-      ]
+      ],
+      "interval": 3200,
+      "might": 2
     },
     "halberdier": {
       "name": "미늘창 교도관",
       "hp": [
-        11,
-        5,
-        6,
+        16,
+        7,
         8,
-        5,
-        6
+        12,
+        7,
+        8
       ],
-      "vitality": 16,
+      "vitality": 42,
       "armor": {
         "head": 3,
-        "chest": 1
+        "chest": 2
       },
       "patterns": [
         [
@@ -362,19 +370,21 @@
             "chest"
           ]
         ]
-      ]
+      ],
+      "interval": 2800,
+      "might": 2
     },
     "chief": {
       "name": "교도관장",
       "hp": [
-        26,
-        6,
-        6,
+        30,
         9,
-        6,
-        6
+        10,
+        14,
+        10,
+        10
       ],
-      "vitality": 28,
+      "vitality": 70,
       "armor": {
         "head": 3
       },
@@ -396,7 +406,7 @@
           ],
           [
             "heavy",
-            "head"
+            "arms"
           ]
         ],
         [
@@ -409,22 +419,24 @@
           ],
           [
             "heavy",
-            "arms"
+            "legs"
           ]
         ]
-      ]
+      ],
+      "interval": 2500,
+      "might": 2
     },
     "informant": {
       "name": "밀고자",
       "hp": [
-        11,
-        6,
-        5,
+        16,
+        8,
         7,
-        6,
-        6
+        10,
+        8,
+        8
       ],
-      "vitality": 17,
+      "vitality": 36,
       "armor": {},
       "patterns": [
         [
@@ -457,19 +469,21 @@
             "head"
           ]
         ]
-      ]
+      ],
+      "interval": 2400,
+      "might": 2
     },
     "lookout": {
       "name": "감시탑 석궁병",
       "hp": [
-        11,
-        6,
-        6,
-        7,
-        6,
-        6
+        16,
+        8,
+        8,
+        10,
+        8,
+        8
       ],
-      "vitality": 18,
+      "vitality": 38,
       "armor": {
         "head": 1
       },
@@ -505,19 +519,21 @@
             "chest"
           ]
         ]
-      ]
+      ],
+      "interval": 2700,
+      "might": 2
     },
     "zealot": {
       "name": "타락한 교도 사제",
       "hp": [
-        12,
-        6,
-        6,
+        18,
         8,
-        7,
-        6
+        8,
+        12,
+        10,
+        8
       ],
-      "vitality": 19,
+      "vitality": 40,
       "armor": {
         "head": 1
       },
@@ -554,19 +570,21 @@
             "eyes"
           ]
         ]
-      ]
+      ],
+      "interval": 2800,
+      "might": 2
     },
     "gatekeeper": {
       "name": "정문 위병",
       "hp": [
-        13,
-        6,
-        7,
+        17,
+        8,
         9,
-        6,
-        7
+        12,
+        9,
+        9
       ],
-      "vitality": 20,
+      "vitality": 36,
       "armor": {
         "head": 3,
         "chest": 2
@@ -603,19 +621,21 @@
             "legs"
           ]
         ]
-      ]
+      ],
+      "interval": 3000,
+      "might": 2
     },
     "warden": {
       "name": "교도소장",
       "hp": [
-        30,
-        7,
-        7,
+        32,
         10,
-        7,
-        7
+        10,
+        14,
+        10,
+        10
       ],
-      "vitality": 34,
+      "vitality": 75,
       "armor": {
         "head": 3
       },
@@ -641,7 +661,7 @@
           ],
           [
             "heavy",
-            "head"
+            "arms"
           ]
         ],
         [
@@ -654,11 +674,17 @@
             "chest"
           ],
           [
+            "strike",
+            "head"
+          ],
+          [
             "heavy",
-            "arms"
+            "legs"
           ]
         ]
-      ]
+      ],
+      "interval": 2500,
+      "might": 2
     }
   },
   "visuals": {

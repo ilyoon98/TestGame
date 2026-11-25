@@ -9,6 +9,10 @@ var run: RefCounted:
 var _plan: Array = []
 var _index := 0
 var _bellboy := false
+## Milliseconds between enemy actions; upper-floor foes set their own pace in data/floors.json.
+var _interval := 0
+## Extra damage on every enemy attack; upper-floor foes set it in data/floors.json.
+var _might := 0
 var _staggered := false
 var _traits: Dictionary = {}
 var _used: Dictionary = {}
@@ -20,7 +24,9 @@ func _init(state: RefCounted) -> void:
 	_bellboy = run.enemy.kind == "bellboy"
 	for pattern: Array in run.data.foes[run.enemy.kind].patterns:
 		_plan.append_array(pattern)
-	run.enemy_ready_at = int(run.data.timing.enemyInterval)
+	_interval = int(run.data.foes[run.enemy.kind].get("interval", run.data.timing.enemyInterval))
+	run.enemy_ready_at = _interval
+	_might = int(run.data.foes[run.enemy.kind].get("might", 0))
 	_traits = run.trait_counts()
 	for side: String in run.party_sides():
 		var actor: Dictionary = run.get(side)
@@ -72,7 +78,7 @@ func step() -> Dictionary:
 		var action := intent()
 		if action.get("intercept", false):
 			_tactics.erase("intercept")
-		run.enemy_ready_at += int(run.data.timing.enemyInterval)
+		run.enemy_ready_at += _interval
 		if _bellboy:
 			_staggered = true
 		_apply(action.id, "enemy", action.get("side", "enemy"), action.targets)
@@ -123,7 +129,7 @@ func intent_power(plan: Dictionary) -> int:
 	match run.cards[id].type:
 		"attack":
 			var boss_bonus := int(run.data.bellboyTiming.damageBonus) if _bellboy and id == "heavy" else 0
-			var damage := (_base_damage(id, amount) + boss_bonus) * int(run.training_enemy_damage)
+			var damage := (_base_damage(id, amount) + boss_bonus + _might) * int(run.training_enemy_damage)
 			return maxi(0, damage - int(_tactics.get("weaken", 0)))
 		"skill": return _heal_value(run.enemy, amount)
 		_: return 1 if id == "counter" else amount
@@ -487,7 +493,8 @@ func _hit_request(id: String, from: String, target: String, index: int, prepared
 	var amount := _power(id, run.get(from))
 	var gap := int(card.get("stripBonus", 0)) if _tactics.get("strippedPart") == target else 0
 	var boss_bonus := int(run.data.bellboyTiming.damageBonus) if _bellboy and from == "enemy" and id == "heavy" else 0
-	var value := _base_damage(id, amount) + boss_bonus + int(prepared.aim + prepared.recover) + gap
+	var might := _might if from == "enemy" else 0
+	var value := _base_damage(id, amount) + boss_bonus + might + int(prepared.aim + prepared.recover) + gap
 	if index > 0 and card.has("followupPower"):
 		value = int(card.followupPower)
 	return {"damage": value, "gap": gap, "pierce": amount if effect == "aim" else 0,

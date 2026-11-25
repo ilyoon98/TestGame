@@ -46,6 +46,8 @@ func _climb(seed: String) -> void:
 				if run.floor != before:
 					_expect(run.trail.size() == 1 and run.area == run.floor_plan().start, "Arrival resets the trail to the floor start")
 					_expect(run.phase == "prep" and run.enemy.kind in ["keeper", "informant"], "Each floor opens with a fight")
+					var lead := int(run.floor_data.floors[run.floor].lead)
+					_expect(run.journal.has("승강기로 따돌림 · 도망 여유 +%d" % lead), "The lift adds its lead to the escape margin")
 					layouts.append(run.data.map.duplicate(true))
 			"won", "lost": break
 	_expect(run.phase == "won" and run.floor == 2, "%s should end escaped on floor 3, got %s floor %d" % [seed, run.phase, run.floor + 1])

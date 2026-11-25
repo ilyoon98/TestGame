@@ -147,6 +147,11 @@ func _ascend() -> void:
 	area = floor_plan().start
 	trail = [area]
 	_record(floor_data.floors[floor].arrival)
+	# The lift leaves the pursuer a floor behind.
+	var lead := int(floor_data.floors[floor].get("lead", 0))
+	if lead > 0:
+		distance += lead
+		_record("승강기로 따돌림 · 도망 여유 +%d" % lead)
 
 
 func _enter_room() -> void:
