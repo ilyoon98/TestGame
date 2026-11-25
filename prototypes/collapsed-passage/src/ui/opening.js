@@ -45,7 +45,7 @@ class OpeningView {
     const root=this.#root;
     root.dataset.screen=this.#screen;
     if(this.#screen==="home"){
-      root.innerHTML=`<div class="opening-home"><h1>붕괴 통로</h1>
+      root.innerHTML=`<div class="opening-home"><h1>루치아<small>빈콜리의 등불</small></h1>
       <div class="opening-home-actions"><button type="button" class="opening-button primary" data-opening="next">시작하기</button>
       <button type="button" class="opening-button" data-codex-open aria-haspopup="dialog" aria-controls="codex">도감</button></div></div>`;
       return;

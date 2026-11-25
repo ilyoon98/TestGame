@@ -159,7 +159,21 @@ function prepPanel(vitalsOpen=false){
     <div class="prep-picker"><div class="prep-picker-head"><h3>${actor.name} 기술</h3><b class="prep-count">장착 ${equipped}/${loadout.length}</b></div>
     ${trainingSkillSlots(side)}
     <ul class="prep-choices">${choices}</ul><p class="prep-hint" id="prep-skill-hint" role="status">${ready?"":"빈 기술 칸을 채우세요."}</p></div>
-    <div class="prep-footer"><button class="btn primary" type="button" data-action="begin-combat" ${ready?"":"disabled"}>전투 시작</button></div></section>`;
+    ${prepFooter(ready)}</section>`;
+}
+
+// 화면 아래에 붙는 출전 막대. 대원별 장착 수와 전투 시작을 스크롤 위치와 상관없이 보여 준다.
+function prepFooter(ready){
+  // 대열 칸과 같은 순서(후위 → 전위)로 놓는다.
+  const sides=partySides(), order=[...game.formation].reverse().filter(side=>sides.includes(side));
+  const members=[...order,...sides.filter(side=>!order.includes(side))].map(side=>{
+    const loadout=sideLoadout(side), filled=loadout.filter(Boolean).length, full=filled===loadout.length;
+    const current=side===game.prepSide;
+    return `<button type="button" class="prep-footer-member${full?" is-full":""}${current?" is-current":""}" data-action="prep-member" data-side="${side}" aria-current="${current}" aria-label="${game[side].name} 기술 ${filled}/${loadout.length}${full?"":" · 빈 칸 있음"}">
+      <span>${game[side].name}</span><b>${filled}/${loadout.length}</b></button>`;
+  }).join("");
+  return `<div class="prep-footer"><div class="prep-footer-members" role="group" aria-label="대원별 장착">${members}</div>
+    <button class="btn primary" type="button" data-action="begin-combat" ${ready?"":"disabled"} aria-keyshortcuts="Enter">전투 시작<kbd aria-hidden="true">Enter</kbd></button></div>`;
 }
 
 function rewardPanel(){

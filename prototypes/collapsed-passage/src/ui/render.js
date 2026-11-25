@@ -5,11 +5,16 @@
 class AutoBattleControls {
   render(){
     const pause=document.querySelector("#auto-pause");
-    pause.disabled=game.phase!=="combat";
-    pause.textContent=autoPaused?"전투 계속":"전투 일시정지";
+    const inCombat=game.phase==="combat";
+    pause.disabled=!inCombat;
+    pause.textContent=autoPaused?"전투 계속":"일시정지";
+    pause.title=autoPaused?"전투 계속 (Space)":"전투 일시정지 (Space)";
     pause.setAttribute("aria-pressed",String(autoPaused));
+    // 무대 위 '일시정지' 표시는 CSS가 이 값을 읽어 그린다. 연출 재생 중에도 바로 바뀐다.
+    document.querySelector("#game-board").setAttribute("data-paused",String(inCombat && autoPaused));
     const speed=document.querySelector("#auto-speed");
     speed.textContent=`배속 ${autoSpeed}×`;
+    speed.title="배속 바꾸기 (F)";
     speed.setAttribute("aria-label",`전투 배속 ${autoSpeed}배, 누르면 다음 배속`);
   }
 

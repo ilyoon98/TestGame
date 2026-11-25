@@ -406,3 +406,30 @@ test("no post-victory reward is offered at the exit fight",()=>{
   run("moveTo('exit');");
   assert.equal(run("game.phase"),"won");
 });
+
+test("the preparation footer keeps start and every member's loadout in formation order",()=>{
+  const run=engine();
+  run("game.enemy.hp=0; finishCombat(); recruitCompanion('guard'); chooseReward(null); moveTo('duct');");
+  assert.equal(run("game.phase"),"prep");
+  const footer=run("prepFooter(loadoutsReady())");
+  const order=run("[...game.formation].reverse().filter(Boolean).join(',')");
+  assert.deepEqual([...footer.matchAll(/class="prep-footer-member[^"]*" data-action="prep-member" data-side="(\w+)"/g)].map(match=>match[1]).join(","),order);
+  assert.match(footer,/data-side="player" aria-current="true" aria-label="수녀 기술 3\/3"/);
+  assert.match(footer,/data-action="begin-combat"  aria-keyshortcuts="Enter"/);
+  run("toggleEquippedSkill('strike')");
+  const partial=run("prepFooter(loadoutsReady())");
+  assert.match(partial,/수녀 기술 2\/3 · 빈 칸 있음/);
+  assert.match(partial,/data-action="begin-combat" disabled/);
+});
+
+test("F changes battle speed and the board exposes the paused state for the stage badge",()=>{
+  const run=engine();
+  const key=code=>run(`document.querySelector('document').listeners.keydown({key:'',code:'${code}',target:{closest:()=>null},preventDefault(){}})`);
+  const speed=run("autoSpeed");
+  key("KeyF");
+  assert.notEqual(run("autoSpeed"),speed);
+  run("toggleAutoPause()");
+  assert.equal(run("document.querySelector('#game-board')['data-paused']"),"true");
+  run("toggleAutoPause()");
+  assert.equal(run("document.querySelector('#game-board')['data-paused']"),"false");
+});

@@ -103,6 +103,8 @@ DOM, 타이머, `Math.random`을 쓰지 않는다. 판 상태(`game`)는 평범�
 | `FormationDrag` | input.js | 대원 카드 끌기와 끌기 직후 클릭 무시를 맡는다. | 캡 |
 | `MapTravel` | input.js | 지도 이동 연출을 맡는다. 연출 중에는 입력을 막고, 새 판을 시작하면 취소된다. | 캡 |
 
+`src/presentation/ui-polish.css`는 index.html 기본 스타일 뒤에 읽는 사용성 보강 스타일이다. 전투 준비 출전 막대(`prepFooter`), 일시정지 표시(`#game-board[data-paused]`, `AutoBattleControls`가 갱신), 좁은 화면의 상단 버튼 한 줄 배치를 맡는다.
+
 `src/presentation/hit-fx.js`는 클래스가 아니라 `CPHitFx` 객체다. 타격 단계(일반·치명·부상·결손)별 숫자와 컷인, 연출이 붙잡는 시간을 정한다.
 
 ## 예전 전역 이름

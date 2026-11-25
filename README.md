@@ -9,7 +9,7 @@
 | 실험 | 열 파일 | 내용 |
 | --- | --- | --- |
 | Coin Flip | [coin.html](prototypes/coin-flip/coin.html) | 동전 뒤집기 |
-| 붕괴 통로 | [index.html](prototypes/collapsed-passage/index.html) | 부위별 부상과 추격을 관리하는 턴제 카드 게임. ES 모듈을 쓰므로 위의 로컬 서버로 엽니다. [기획서](prototypes/collapsed-passage/DESIGN.md) |
+| 루치아: 빈콜리의 등불 | [index.html](prototypes/collapsed-passage/index.html) | 수녀 루치아가 동료와 함께 무너진 지하 감옥을 빠져나가는 덱빌딩 오토배틀러. 부위별 부상과 추격을 관리합니다. ES 모듈을 쓰므로 위의 로컬 서버로 엽니다. [기획서](prototypes/collapsed-passage/DESIGN.md) |
 | 붕괴 통로 연출 실험실 | [index.html](prototypes/collapsed-passage-fx-lab/index.html) | 일반·치명타·부상·결손 데미지 숫자와 부상 컷인·결손 컷신을 눌러 보고 값을 조정합니다. 붕괴 통로 원화를 상대 경로로 읽으므로 위 HTTP 서버로 엽니다. |
 | Dice | [dice2d.html](prototypes/dice/dice2d.html), [dice_land_phase7.html](prototypes/dice/dice_land_phase7.html) | 2D 주사위와 주사위 땅따먹기 |
 | Emotion Buttons | [index.html](prototypes/emotion-buttons/index.html) | 버튼으로 바꾸는 감정 표현 |
@@ -24,7 +24,7 @@
 
 | 실험 | 실행 방법 |
 | --- | --- |
-| [붕괴 통로 · Godot](prototypes/collapsed-passage-godot/README.md) | Godot 4.7.2에서 `prototypes/collapsed-passage-godot/project.godot`을 가져와 F5로 실행합니다. 오프닝과 첫 플레이 튜토리얼을 거쳐 시드 지도에서 격리문부터 지상 출구까지 플레이합니다. |
+| [루치아: 빈콜리의 등불 · Godot](prototypes/collapsed-passage-godot/README.md) | Godot 4.7.2에서 `prototypes/collapsed-passage-godot/project.godot`을 가져와 F5로 실행합니다. 오프닝과 첫 플레이 튜토리얼을 거쳐 시드 지도에서 격리문부터 지상 출구까지 플레이합니다. |
 | [HEX War Lobby](prototypes/hex-war-lobby/README.md) | `cd prototypes/hex-war-lobby` 후 `npm ci`, `npm start`. 브라우저에서 `http://localhost:4173`을 엽니다. |
 | [Dungeon Chronicle](prototypes/dungeon-chronicle/README.md) | Node.js 18 이상에서 `cd prototypes/dungeon-chronicle` 후 `npm start`. `http://127.0.0.1:4173`에서 플레이하고 `npm test`로 검증합니다. |
 | [Limbus Check Panel](prototypes/limbus-check-panel/사용법.txt) | Windows x64와 Node.js가 필요합니다. 한국어 OCR을 설치하고 폴더의 `Start.cmd`를 실행합니다. |

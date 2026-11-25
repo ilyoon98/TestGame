@@ -223,9 +223,10 @@ board.addEventListener("click",event=>{
   if(action==="move"){travelAlongMap(button);return;}
   if(action==="prep-member" && game.phase==="prep"){
     if(formationDrag.suppressClick) return;
+    const fromFooter=Boolean(button.closest(".prep-footer"));
     game.prepSide=side;
     render();
-    document.querySelector(`[data-action="prep-member"][data-side="${side}"]`)?.focus({preventScroll:true});
+    document.querySelector(`${fromFooter?".prep-footer ":""}[data-action="prep-member"][data-side="${side}"]`)?.focus({preventScroll:true});
     return;
   }
   if(action==="formation-rank"){moveFormationCard(game.prepSide,Number(value));return;}
@@ -297,7 +298,19 @@ document.addEventListener("keydown",event=>{
     toggleAutoPause();
     return;
   }
+  if(event.code==="KeyF" && ["prep","combat"].includes(game.phase)){
+    event.preventDefault();
+    unlockCombatAudio();
+    cycleAutoSpeed();
+    return;
+  }
   if(combatPresentation || routeTravel) return;
+  // 버튼·요약에 포커스가 있으면 Enter는 그 요소의 동작이므로, 빈 곳에 있을 때만 전투를 시작한다.
+  if(game.phase==="prep" && event.key==="Enter" && !event.target.closest?.("button,a,summary,[tabindex]")){
+    const begin=board.querySelector('[data-action="begin-combat"]');
+    if(begin && !begin.disabled){event.preventDefault();begin.click();}
+    return;
+  }
   if(event.key==="F8"){
     event.preventDefault();
     qaPanel.toggle();

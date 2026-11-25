@@ -1,4 +1,4 @@
-# 붕괴 통로 코드 구조
+# 루치아: 빈콜리의 등불 코드 구조
 
 웹판을 객체지향 4대 특성(캡슐화·추상화·상속·다형성)과 SOLID 원칙에 맞춰 나눈 구조다. 게임 규칙은 [DESIGN.md](DESIGN.md)를 따르고, 이 문서는 코드를 어떻게 나눴는지만 다룬다. Godot판은 범위에 넣지 않았다.
 
@@ -44,7 +44,7 @@ src/
     opening.js codex.js    OpeningView, CodexView
     input.js               FormationDrag, MapTravel, 입력 연결. 마지막에 첫 화면을 그린다.
   data/                    선언형 데이터. 호출할 때마다 새 객체를 만든다.
-  presentation/            artData.js(원화 좌표표), hit-fx.js·hit-fx.css(타격 단계 연출)
+  presentation/            artData.js(원화 좌표표), hit-fx.js·hit-fx.css(타격 단계 연출), ui-polish.css(출전 막대·일시정지 표시·좁은 화면 상단 버튼)
   application/
     createGameServices.js  규칙 객체를 만들고 연결하는 유일한 곳(조립 루트)
     AutoBattleRunner.js    자동 전투 타이머(일시정지·배속·타이머 하나)
@@ -168,7 +168,7 @@ classDiagram
 ### 남은 작업
 
 1. **테스트와 도구 이전.** 테스트 94개와 QA 스크립트 3개를 `createGameServices` 기준으로 옮긴다. `--ablate`는 `seams` 옵션으로 옛 규칙을 넘긴다.
-2. **Godot 스크립트.** `sync-web-data.mjs`와 `compare-*.mjs`는 웹판 전역 이름을 읽는다. 웹판에 `exportWebData()`를 만들고 Godot 스크립트가 그것을 import하게 바꾼다. 이 PC에는 Godot 실행 파일이 없어서 `compare-*.mjs`는 이번에 돌리지 못했다.
+2. **Godot 스크립트.** `sync-web-data.mjs`와 `compare-*.mjs`는 웹판 전역 이름을 읽는다. 웹판에 `exportWebData()`를 만들고 Godot 스크립트가 그것을 import하게 바꾼다. `compare-*.mjs` 4개는 Godot 4.7.2로 돌려 모두 통과했다(78ed0ae 기준).
 3. 1~2가 끝나면 위임 함수와 값 접근자, `bridge.js`를 지운다. 그다음 화면 클래스가 `document`와 규칙 객체를 생성자로 받게 바꾼다.
 
 ## 6. 지키는 것
