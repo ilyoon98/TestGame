@@ -12,12 +12,19 @@ var _selected := ""
 var _body: GridContainer
 var _intent: Dictionary = {}
 var _actors: Dictionary = {}
+var _actions: HBoxContainer
+
+
+# 부위 상태 버튼 줄의 남은 오른쪽 공간에 다른 표시를 붙인다.
+func add_note(note: Control) -> void:
+	_actions.add_child(note)
 
 
 func setup(run: RefCounted, sides: Array) -> void:
 	_run = run
 	add_theme_constant_override("separation", 7)
 	var actions := HBoxContainer.new()
+	_actions = actions
 	actions.add_theme_constant_override("separation", 7)
 	add_child(actions)
 	actions.add_child(_label("부위 상태", 15))

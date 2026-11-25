@@ -32,19 +32,14 @@ func _check() -> void:
 		_check_focused(vp, size, "combat")
 		if args.size() == 1 and size.x == 1100:
 			await _capture(vp, args[0], "godot-threshold-combat")
-		var veil := ui.find_child("PauseVeil", true, false) as Control
-		_expect(veil != null and not veil.visible, "The battlefield has a hidden pause veil while running")
-		_key(vp, KEY_SPACE)
-		await process_frame
-		_expect(ui.paused and veil.visible, "Space pauses and shows the pause veil on the battlefield")
-		var badge := veil.find_child("PauseBadge", true, false) as Control
-		var field := veil.get_parent() as Control
-		_expect(field.get_global_rect().encloses(badge.get_global_rect()), "The pause badge stays inside the battlefield")
-		if args.size() == 1 and size.x == 1100:
-			await _capture(vp, args[0], "godot-threshold-paused")
-		_key(vp, KEY_SPACE)
-		await process_frame
-		_expect(not ui.paused and not veil.visible, "Space resumes and hides the pause veil")
+		await _check_pause_veil(ui, vp)
+		if ui.paused:
+			if args.size() == 1 and size.x == 1100:
+				await _capture(vp, args[0], "godot-threshold-paused")
+			_key(vp, KEY_SPACE)
+			await process_frame
+			_expect(not ui.paused and not ui._pause_veil.visible, "Space resumes and hides the pause veil")
+		await _check_board_fit(ui, vp, size, "first combat")
 		# Drive the normal UI timer with a fixed delta instead of waiting in real time.
 		ui.set_process(false)
 		for i in 300:
@@ -197,6 +192,48 @@ func _finish_fight(ui: Control) -> void:
 			return
 		ui._process(0.1)
 	_expect(false, "Combat did not finish")
+
+
+func _check_pause_veil(ui: Control, vp: SubViewport) -> void:
+	var veil := ui.find_child("PauseVeil", true, false) as Control
+	_expect(veil != null and not veil.visible, "The battlefield has a hidden pause veil while running")
+	if veil == null:
+		return
+	var field := veil.get_parent() as Control
+	var fighters := (ui._fighters.values()[0].column as Control).get_parent() as Control
+	_expect(veil.get_index() < fighters.get_index(), "The pause veil dims the backdrop below names, intent and HP")
+	_key(vp, KEY_SPACE)
+	await process_frame
+	_expect(ui.paused and veil.visible, "Space pauses and shows the pause veil on the battlefield")
+	var badge := veil.find_child("PauseBadge", true, false) as Control
+	_expect(badge != null and field.get_global_rect().encloses(badge.get_global_rect()),
+		"The pause mark stays inside the battlefield")
+
+
+# 전장 높이는 기술 칸이 다 보이거나, 아니면 인물 줄이 들어가는 최소 높이까지 줄어 있어야 한다.
+# 창이 커지면 기본 높이로 돌아오고, 다시 작아지면 같은 높이로 줄어야 한다.
+func _check_board_fit(ui: Control, vp: SubViewport, size: Vector2i, screen: String) -> void:
+	await process_frame
+	var board: Control = ui._fit_board_node
+	var row: Control = ui._fit_row
+	_expect(board.size.y >= row.get_combined_minimum_size().y + 32.0,
+		"Fighters fit inside the battlefield on %s at %s" % [screen, size])
+	var scroll: Rect2 = ui._scroll.get_global_rect()
+	var bars_visible := true
+	for id: String in ui._skill_bars:
+		var bar: Control = ui._skill_bars[id].bar
+		bars_visible = bars_visible and bar.get_global_rect().end.y <= scroll.end.y + 0.5
+	var at_floor := is_equal_approx(board.custom_minimum_size.y, maxf(ui.COMBAT_BOARD_MIN, row.get_combined_minimum_size().y + 32.0))
+	_expect(bars_visible or at_floor, "Battlefield shrinks until skill bars fit on %s at %s" % [screen, size])
+	var fitted: float = board.custom_minimum_size.y
+	vp.size = Vector2i(size.x, size.y + 600)
+	await process_frame
+	await process_frame
+	_expect(is_equal_approx(board.custom_minimum_size.y, ui._fit_default), "Battlefield grows back in a taller window on " + screen)
+	vp.size = size
+	await process_frame
+	await process_frame
+	_expect(is_equal_approx(board.custom_minimum_size.y, fitted), "Battlefield shrinks again after the window returns on " + screen)
 
 
 func _press(ui: Control, button_name: String) -> void:
