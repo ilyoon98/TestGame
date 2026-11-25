@@ -1,9 +1,11 @@
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
 import {CP} from "../../src/bridge.js";
+import {scriptOrder} from "../../src/scriptOrder.js";
 
-const legacy=readFileSync(new URL("../../src/legacy.js",import.meta.url),"utf8");
-export const engine=gameEngine(legacy);
+// 브라우저처럼 화면 스크립트를 순서대로 한 전역 범위에서 실행한다.
+export const gameSource=scriptOrder.map(file=>readFileSync(new URL(`../../src/${file}`,import.meta.url),"utf8")).join("\n");
+export const engine=gameEngine(gameSource);
 
 // 게임 스크립트 본문이나 리팩터링 전 단일 index.html(기준선 비교용)을 받는다.
 export function gameEngine(input){

@@ -1,4 +1,4 @@
-// 일반 스크립트인 legacy.js(화면과 예전 전역 API)가 모듈을 쓰는 통로다.
+// 일반 스크립트인 화면 코드(src/game-api.js, src/ui/*.js)가 모듈을 쓰는 통로다.
 // 브라우저에서는 main.js가, Node에서는 tests/helpers/game-engine.mjs가 globalThis.CP로 넣는다.
 import {createGameData} from "./data/index.js";
 import {createArtData} from "./presentation/artData.js";

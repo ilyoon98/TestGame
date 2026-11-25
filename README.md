@@ -42,3 +42,7 @@ Invoke-Item prototypes/my-experiment/index.html
 ```
 
 복사한 폴더에서 화면과 동작을 수정하고 전용 에셋을 함께 넣습니다. 위 표에 새 실험 이름과 실행 방법을 추가합니다. Codex로 작업할 때는 실험별로 채팅을 열고 대상 폴더를 지정합니다.
+
+## AI 개발 문서
+
+AI에게 구조 개선이나 기능 추가를 맡길 때는 [객체지향 개발 실행 프롬프트](docs/ai/oop-development-prompt.md)를 붙여 넣습니다. 캡슐화·추상화·상속·다형성과 SOLID가 각각 어떤 역할을 하는지는 [객체지향 원칙 정리](docs/ai/oop-principles.md)에 있습니다. 루치아 웹판의 클래스별 역할은 [CLASSES.md](prototypes/collapsed-passage/CLASSES.md)를 봅니다.

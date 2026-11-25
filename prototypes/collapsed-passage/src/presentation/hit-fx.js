@@ -1,6 +1,6 @@
 // 타격 단계별 연출: 일반 · 치명타 · 부상 · 결손
 // 값은 prototypes/collapsed-passage-fx-lab 실험실의 기본값이다. 실험실에서 'JSON 복사'한 값을 CONFIG에 붙여 넣으면 된다.
-// legacy.js보다 먼저 일반 <script>로 불러와 globalThis.CPHitFx를 만든다. legacy.js는 typeof로 확인한 뒤 부른다.
+// 화면 스크립트(src/game-api.js, src/ui/*.js)보다 먼저 일반 <script>로 불러와 globalThis.CPHitFx를 만든다. 화면 스크립트는 typeof로 확인한 뒤 부른다.
 (()=>{
 "use strict";
 
@@ -36,7 +36,7 @@ function hasScene(event,tier){
   if(event.defeated) return false;   // 쓰러짐은 기존 격파 연출(1초 정지)을 쓴다
   return tier==="injury"?CONFIG.injury.cutin:tier==="loss"&&CONFIG.loss.cutscene;
 }
-/* 타격 뒤 전투 연출을 붙잡아 둘 실제 시간(ms). legacy.js는 여기에 배속을 곱해 타임라인에 더한다. */
+/* 타격 뒤 전투 연출을 붙잡아 둘 실제 시간(ms). combat-presenter.js는 여기에 배속을 곱해 타임라인에 더한다. */
 function holdFor(event,{speed=1}={}){
   const tier=tierOf(event);
   if(!tier) return 0;

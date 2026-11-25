@@ -16,25 +16,35 @@
 | 5 | `CooldownBattle`, `EnemyPlanner`, `AutoBattleRunner`, `Scheduler` | 완료 |
 | 6 | 지도, 표적, 일행, 장착, 영입, 보상, 이동, 상점, 판 생성, 이벤트 기록 | 완료 |
 | 7 | 조립을 모듈로(`createGameServices`), 원화 좌표표를 `src/presentation/`으로, 도메인 단위 테스트 | 완료 |
-| 7 | 화면 클래스 분리, `legacy.js` 제거, 테스트·도구를 새 API로 이전 | 남음(5절) |
+| 8 | 화면 분리: `legacy.js`를 `src/game-api.js`와 `src/ui/` 12개 파일로 나누고, 상태를 가진 화면 요소를 클래스로 | 완료 |
+| 9 | 테스트·도구를 새 API로 이전, 전역 API 제거 | 남음(5절) |
 
 단계마다 아래 기준선이 리팩터링 전과 같은지 확인했다.
 
 - 웹판 테스트 94개
 - `first-stage-balance`(기본, `--ablate`, `--sweep`), `archer-qa`, `reward-simulation` 출력
-- Godot판 `sync-web-data.mjs`로 만든 데이터
+- Godot판 `sync-web-data.mjs`로 만든 데이터와 `bake-combat-audio.mjs`로 구운 효과음
 
-여기에 도메인 단위 테스트 8개를 새로 더했다([tests/domain.test.mjs](tests/domain.test.mjs)).
+여기에 도메인 단위 테스트 8개를 새로 더했다([tests/domain.test.mjs](tests/domain.test.mjs)). 클래스별 역할은 [CLASSES.md](CLASSES.md)에 있다.
 
 ## 2. 구조
 
 ```
 src/
-  main.js                  진입점(모듈). CP를 전역에 넣고 legacy.js를 불러온다.
-  bridge.js                legacy.js가 쓰는 모듈 목록(CP)
-  legacy.js                화면 코드와 예전 전역 API(테스트·QA·Godot 도구가 호출)
+  main.js                  진입점(모듈). CP를 전역에 넣고 scriptOrder 순서대로 화면 스크립트를 불러온다.
+  scriptOrder.js           화면 스크립트 로드 순서(브라우저와 테스트가 함께 쓴다)
+  bridge.js                화면 스크립트가 쓰는 모듈 목록(CP)
+  game-api.js              데이터·규칙 객체 연결과 예전 전역 API(테스트·QA·Godot 도구가 호출)
+  ui/                      화면(일반 스크립트, 같은 전역 범위)
+    art.js                 스프라이트 경로, 원화 미리 불러오기
+    hud.js body-panel.js skill-cards.js map.js rooms.js   상태 없는 HTML 템플릿 함수
+    render.js              GameScreen, Screen 5종, PursuitHud, QaPanel, AutoBattleControls
+    combat-presenter.js    CombatPresenter, ActorSprites, HitEffects
+    audio.js               WebAudioSynth, CombatAudio
+    opening.js codex.js    OpeningView, CodexView
+    input.js               FormationDrag, MapTravel, 입력 연결. 마지막에 첫 화면을 그린다.
   data/                    선언형 데이터. 호출할 때마다 새 객체를 만든다.
-  presentation/artData.js  원화 좌표표와 아이콘
+  presentation/            artData.js(원화 좌표표), hit-fx.js·hit-fx.css(타격 단계 연출)
   application/
     createGameServices.js  규칙 객체를 만들고 연결하는 유일한 곳(조립 루트)
     AutoBattleRunner.js    자동 전투 타이머(일시정지·배속·타이머 하나)
@@ -53,7 +63,7 @@ src/
     random.js
 ```
 
-의존 방향은 `legacy.js → application → domain`이다. `domain`은 `data`가 만든 값만 생성자로 받고 다른 계층을 import하지 않는다. 판 상태(`game`)는 화면과 도구가 직접 읽으므로 평범한 객체로 두고, 규칙 객체는 상태를 매개변수로 받는다.
+의존 방향은 `ui → game-api.js → application → domain`이다. `domain`은 `data`가 만든 값만 생성자로 받고 다른 계층을 import하지 않는다. 판 상태(`game`)는 화면과 도구가 직접 읽으므로 평범한 객체로 두고, 규칙 객체는 상태를 매개변수로 받는다.
 
 ```mermaid
 classDiagram
@@ -117,7 +127,7 @@ classDiagram
 
 | 원칙 | 적용 |
 | --- | --- |
-| S | 예전 `start()`는 판 생성(`RunFactory`), 지도(`MapGenerator`), 화면 정리(legacy.js)로 나뉘었다. 피해 계산(`DamageCalculator`)과 적용(`HitResolver`), 전투 진행(`CooldownBattle`)과 타이머(`AutoBattleRunner`)도 분리했다. |
+| S | 예전 `start()`는 판 생성(`RunFactory`), 지도(`MapGenerator`), 화면 정리(game-api.js)로 나뉘었다. 피해 계산(`DamageCalculator`)과 적용(`HitResolver`), 전투 진행(`CooldownBattle`)과 타이머(`AutoBattleRunner`)도 분리했다. |
 | O | 피해 보정 8종이 각각 클래스이고, 순서는 `createHitModifiers`의 목록 하나로 정한다. 새 카드 효과는 `CardRegistry.register`로 추가한다. 단위 테스트가 호출부를 바꾸지 않고 새 효과를 등록해 확인한다. |
 | L | `TrainingDummy`는 `isDown()`이 항상 false이고, 머리를 잃으면 `reviveIfHeadLost()`로 회복한다. 전투 루프는 `infinite` 플래그를 보지 않는다. `NoGate`는 `BellboyGate`와 같은 계약을 지키되 아무것도 막지 않는다. |
 | I | 규칙 객체는 필요한 협력자만 생성자로 받는다(예: `EnemyPlanner`는 카드와 `Party`만). 화면용 읽기 전용 뷰(`BattleView`)는 아직 없다. |
@@ -129,25 +139,41 @@ classDiagram
 
 ### 교체 지점(seams)
 
-`first-stage-balance.mjs --ablate`는 옛 규칙의 효과를 따로 재려고 전역 함수 5개를 옛 규칙으로 바꿔 끼운다. 대상은 `timedAttackTarget`, `readyTimedSkill`, `executePartySkill`, `applyCard`, `skillRewardOptions`이다. 규칙 객체는 이 다섯 곳만 `seams`를 거쳐 부른다. legacy.js는 seams를 전역 이름으로 연결하고, 모듈만 쓰면 현재 규칙이 기본값으로 들어간다. 그 밖의 협력은 객체끼리 직접 참조한다.
+`first-stage-balance.mjs --ablate`는 옛 규칙의 효과를 따로 재려고 전역 함수 5개를 옛 규칙으로 바꿔 끼운다. 대상은 `timedAttackTarget`, `readyTimedSkill`, `executePartySkill`, `applyCard`, `skillRewardOptions`이다. 규칙 객체는 이 다섯 곳만 `seams`를 거쳐 부른다. game-api.js는 seams를 전역 이름으로 연결하고, 모듈만 쓰면 현재 규칙이 기본값으로 들어간다. 그 밖의 협력은 객체끼리 직접 참조한다.
 
-### legacy.js가 아직 있는 이유
+### 화면 분리(8단계)
 
-웹판 테스트, QA 스크립트, Godot 스크립트가 legacy.js의 전역 이름 174개를 문자열 코드로 직접 부르거나 덮어쓴다. 예를 들어 테스트는 `render=()=>…`처럼 함수를 바꿔 넣는다. 그래서 legacy.js는 다음 두 가지를 맡는다.
+화면 코드는 책임별 파일로 나눴다. 화면 요소 중 상태를 가진 것만 클래스로 만들었다.
 
-- **화면 코드:** 약 2,000줄. 패널 HTML, 전투 연출, 효과음, 도감, 오프닝이 있다.
-- **얇은 전역 API:** 각 함수는 규칙 객체를 한 줄로 부른다.
+- **오프닝·도감:** 단계, 선택 탭
+- **대열 끌기·지도 이동:** 끌기 상태, 이동 연출
+- **전투 연출:** 재생 중 타임라인
+- **효과음:** 장치, 켜고 끈 상태
+- **추격 표시:** 직전 도망 여유
+- **QA 도구:** 열림 상태
+
+`render()`는 `GameScreen`이 맡는다. `GameScreen`은 `game.phase`로 `Screen`을 골라 무대를 맡긴다.
+
+상태 없이 값을 받아 HTML을 돌려주는 템플릿 함수(`bodyPanel`, `prepPanel` 등)는 함수로 남겼다. 클래스로 감싸도 얻는 것이 없기 때문이다.
+
+화면 클래스의 메서드 본문은 다른 함수를 예전 전역 이름으로 부른다. 테스트가 `render`, `showImpact`, `layoutCombatHud` 같은 이름을 바꿔 넣어 연출을 검사하기 때문이다. 화면 클래스는 `document`를 생성자로 받지 않고 전역에서 쓴다.
+
+### 전역 API가 아직 있는 이유
+
+웹판 테스트, QA 스크립트, Godot 스크립트가 전역 이름 174개를 문자열 코드로 직접 부르거나 덮어쓴다. 그래서 다음 두 가지를 남겼다.
+
+- **위임 함수:** `game-api.js`와 각 화면 파일 끝의 한 줄짜리 함수다.
+- **값 접근자:** `autoPaused`, `combatPresentation`, `routeTravel`, `codexMember`, `audioContext` 등이다.
 
 ### 남은 작업
 
-1. **화면 클래스 분리.** `Screen` 계열, `CombatPresenter`, `WebAudioPlayer`로 나눈다. 테스트가 화면 함수를 직접 부르고 덮어쓰므로, 화면마다 해당 테스트를 새 클래스 기준으로 바꾸면서 함께 옮긴다. 다른 세션이 연출 코드(`src/presentation/hit-fx.js`)를 작업 중이므로 그 작업이 끝난 뒤 시작한다.
-2. **테스트와 도구 이전.** 테스트 94개와 QA 스크립트 3개를 `createGameServices` 기준으로 옮긴다. `--ablate`는 `seams` 옵션으로 옛 규칙을 넘긴다.
-3. **Godot 스크립트.** `sync-web-data.mjs`와 `compare-*.mjs`는 웹판 전역 이름을 읽는다. 웹판에 `exportWebData()`를 만들고 Godot 스크립트가 그것을 import하게 바꾼다. 이 PC에는 Godot 실행 파일이 없어서 `compare-*.mjs`는 이번에 돌리지 못했다.
-4. 1~3이 끝나면 `legacy.js`와 `bridge.js`를 지운다.
+1. **테스트와 도구 이전.** 테스트 94개와 QA 스크립트 3개를 `createGameServices` 기준으로 옮긴다. `--ablate`는 `seams` 옵션으로 옛 규칙을 넘긴다.
+2. **Godot 스크립트.** `sync-web-data.mjs`와 `compare-*.mjs`는 웹판 전역 이름을 읽는다. 웹판에 `exportWebData()`를 만들고 Godot 스크립트가 그것을 import하게 바꾼다. 이 PC에는 Godot 실행 파일이 없어서 `compare-*.mjs`는 이번에 돌리지 못했다.
+3. 1~2가 끝나면 위임 함수와 값 접근자, `bridge.js`를 지운다. 그다음 화면 클래스가 `document`와 규칙 객체를 생성자로 받게 바꾼다.
 
 ## 6. 지키는 것
 
-- **결정성.** 도메인은 `Math.random`을 직접 부르지 않는다. 보상과 지도는 `seededRandom`, 판 시드는 legacy.js의 `newRunSeed`가 만든다.
+- **결정성.** 도메인은 `Math.random`을 직접 부르지 않는다. 보상과 지도는 `seededRandom`, 판 시드는 game-api.js의 `newRunSeed`가 만든다.
 - **데이터는 데이터로.** 카드 60종 이상, 적, 동료, 지도는 `src/data/`의 객체다. 동작이 다른 효과만 클래스로 만든다.
 - **판마다 새 데이터.** `createGameData()`와 `createArtData()`는 호출할 때마다 새 객체를 만든다. 밸런스 도구가 판마다 값을 바꿔도 서로 섞이지 않는다.
 - **DI 컨테이너는 쓰지 않는다.** 조립은 `createGameServices`에서 `new`로 한다.
@@ -166,4 +192,4 @@ python -m http.server 8000 --bind 127.0.0.1
 node --test tests/*.test.mjs
 ```
 
-`tests/helpers/game-engine.mjs`는 `src/legacy.js`를 `vm`에서 실행하고 `CP`를 넣는다. 예전 단일 `index.html`을 넘겨도 동작하므로, `reward-simulation.mjs --baseline`으로 리팩터링 전후 보상 분포를 비교할 수 있다.
+`tests/helpers/game-engine.mjs`는 `scriptOrder` 순서대로 화면 스크립트를 이어 붙여 `vm`에서 실행하고 `CP`를 넣는다. 예전 단일 `index.html`을 넘겨도 동작하므로, `reward-simulation.mjs --baseline`으로 리팩터링 전후 보상 분포를 비교할 수 있다.
