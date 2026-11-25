@@ -18,7 +18,27 @@
           "archer"
         ]
       },
-      "arrival": "폭동 경보. 사형수가 뒤쫓는다."
+      "arrival": "폭동 경보. 사형수가 뒤쫓는다.",
+      "ramp": {
+        "start": 0.85,
+        "step": 0.14,
+        "might": 0.4,
+        "haste": 250
+      },
+      "foes": {
+        "bellboy": {
+          "vitality": 36,
+          "hp": [
+            27,
+            6,
+            6,
+            9,
+            6,
+            6
+          ],
+          "might": 2
+        }
+      }
     },
     {
       "name": "2층 교도관 구역",
@@ -50,7 +70,12 @@
         "mysteries": 2
       },
       "arrival": "승강기가 2층 교도관 구역에 멈췄다. 사형수의 발소리가 아래에서 따라온다.",
-      "lead": 3
+      "lead": 3,
+      "ramp": {
+        "start": 1.0,
+        "step": 0.08,
+        "might": 0.34
+      }
     },
     {
       "name": "3층 정문 구역",
@@ -82,7 +107,13 @@
         "mysteries": 2
       },
       "arrival": "3층 정문 구역. 창살 너머로 새벽빛이 보인다.",
-      "lead": 3
+      "lead": 4,
+      "ramp": {
+        "start": 0.9,
+        "step": 0.04,
+        "might": 0.2
+      },
+      "breather": 0.5
     }
   ],
   "rooms": {
@@ -192,7 +223,7 @@
         7,
         7
       ],
-      "vitality": 38,
+      "vitality": 34,
       "armor": {
         "head": 2
       },
@@ -229,7 +260,7 @@
         ]
       ],
       "interval": 2800,
-      "might": 2
+      "might": 3
     },
     "hound": {
       "name": "교도소 사냥개",
@@ -241,7 +272,7 @@
         7,
         8
       ],
-      "vitality": 30,
+      "vitality": 28,
       "armor": {},
       "patterns": [
         [
@@ -272,7 +303,7 @@
         ]
       ],
       "interval": 2200,
-      "might": 1
+      "might": 2
     },
     "scalder": {
       "name": "끓는 물 세탁부",
@@ -284,7 +315,7 @@
         9,
         7
       ],
-      "vitality": 42,
+      "vitality": 36,
       "armor": {
         "head": 1
       },
@@ -321,7 +352,7 @@
         ]
       ],
       "interval": 3200,
-      "might": 2
+      "might": 3
     },
     "halberdier": {
       "name": "미늘창 교도관",
@@ -333,7 +364,7 @@
         7,
         8
       ],
-      "vitality": 42,
+      "vitality": 38,
       "armor": {
         "head": 3,
         "chest": 2
@@ -372,7 +403,7 @@
         ]
       ],
       "interval": 2800,
-      "might": 2
+      "might": 3
     },
     "chief": {
       "name": "교도관장",
@@ -384,7 +415,7 @@
         10,
         10
       ],
-      "vitality": 70,
+      "vitality": 80,
       "armor": {
         "head": 3
       },
@@ -424,7 +455,7 @@
         ]
       ],
       "interval": 2500,
-      "might": 2
+      "might": 3
     },
     "informant": {
       "name": "밀고자",
@@ -436,7 +467,7 @@
         8,
         8
       ],
-      "vitality": 36,
+      "vitality": 28,
       "armor": {},
       "patterns": [
         [
@@ -483,7 +514,7 @@
         8,
         8
       ],
-      "vitality": 38,
+      "vitality": 28,
       "armor": {
         "head": 1
       },
@@ -520,7 +551,7 @@
           ]
         ]
       ],
-      "interval": 2700,
+      "interval": 2600,
       "might": 2
     },
     "zealot": {
@@ -533,7 +564,7 @@
         10,
         8
       ],
-      "vitality": 40,
+      "vitality": 30,
       "armor": {
         "head": 1
       },
@@ -571,7 +602,7 @@
           ]
         ]
       ],
-      "interval": 2800,
+      "interval": 2700,
       "might": 2
     },
     "gatekeeper": {
@@ -584,9 +615,9 @@
         9,
         9
       ],
-      "vitality": 36,
+      "vitality": 30,
       "armor": {
-        "head": 3,
+        "head": 2,
         "chest": 2
       },
       "patterns": [
@@ -622,7 +653,7 @@
           ]
         ]
       ],
-      "interval": 3000,
+      "interval": 2900,
       "might": 2
     },
     "warden": {
@@ -635,7 +666,7 @@
         10,
         10
       ],
-      "vitality": 75,
+      "vitality": 50,
       "armor": {
         "head": 3
       },
@@ -684,7 +715,7 @@
         ]
       ],
       "interval": 2500,
-      "might": 2
+      "might": 1
     }
   },
   "visuals": {

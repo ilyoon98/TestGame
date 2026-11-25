@@ -79,6 +79,10 @@ func _init(run_seed := "THRESHOLD", options: Variant = SeedMap.DEFAULT_OPTIONS, 
 	_room_catalog.merge(floor_data.rooms)
 	if map_options != null and not training:
 		floor_count = clampi(int(map_options.get("floors", 1)), 1, floor_data.floors.size())
+	if floor_count > 1:
+		# The climb retunes floor-1 foes; single-floor runs keep the web numbers.
+		for kind: String in floor_data.floors[0].get("foes", {}):
+			data.foes[kind].merge(floor_data.floors[0].foes[kind], true)
 	if map_options != null:
 		_build_floor()
 	if training:
@@ -152,6 +156,16 @@ func _ascend() -> void:
 	if lead > 0:
 		distance += lead
 		_record("승강기로 따돌림 · 도망 여유 +%d" % lead)
+	# A quiet ride lets the party mend part of every wound (lost parts stay lost).
+	var breather := float(floor_data.floors[floor].get("breather", 0.0))
+	if breather > 0.0:
+		var mended := 0
+		for side: String in party_sides():
+			for part: String in PARTS:
+				var wound: Dictionary = get(side).body[part]
+				if wound.hp > 0:
+					mended += _heal_part(get(side), part, ceili((wound.max - wound.hp) * breather))
+		_record("승강기에서 숨을 고름 · 내구도 +%d" % mended)
 
 
 func _enter_room() -> void:
@@ -175,9 +189,28 @@ func _enter_room() -> void:
 	enemy = _fighter(foe, foe.hp, int(foe.vitality) + bonus, room.foe)
 	if training:
 		enemy.infinite = true
+	_apply_ramp(room)
 	for part: String in foe.armor:
 		enemy.body[part].guard = int(foe.armor[part])
 	phase = "prep"
+
+
+## Deeper rooms on a floor field tougher foes: body and HP scale with the room's
+## column, and late rooms hit harder. Only multi-floor runs have a ramp, and bosses
+## keep their own tuned numbers.
+func _apply_ramp(room: Dictionary) -> void:
+	var ramp: Dictionary = floor_plan().get("ramp", {})
+	if ramp.is_empty() or room.type == "boss":
+		return
+	var depth := int(room.col) - 1
+	var scale := float(ramp.get("start", 1.0)) + float(ramp.get("step", 0.0)) * depth
+	enemy.maxHp = maxi(1, roundi(enemy.maxHp * scale))
+	enemy.hp = enemy.maxHp
+	for part: Dictionary in enemy.body.values():
+		part.max = maxi(1, roundi(part.max * scale))
+		part.hp = part.max
+	enemy.might = floori(float(ramp.get("might", 0.0)) * depth)
+	enemy.haste = int(ramp.get("haste", 0)) * depth
 
 
 func party_sides() -> Array:

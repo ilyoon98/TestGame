@@ -4,6 +4,8 @@ extends SceneTree
 ##   first    - monotonous: first path, accept recruits, first reward, no rest/shop use
 ##   sensible - human-limited decisions: equips learned attacks, rests when hurt,
 ##              shops with coins, avoids elites when weak, treats the worst wound
+##   builder  - sensible routing plus full deck building: every party member equips
+##              its learned cards over its lowest-level card, rewards upgrade equipped cards
 ## usage: godot --headless --path . --script res://tests/sim_balance.gd -- [runs] [policy,...] [json_out]
 
 const Run := preload("res://combat/threshold_run.gd")
@@ -35,6 +37,8 @@ func _play(seed: String, policy: String) -> Dictionary:
 			"prep":
 				if policy == "sensible":
 					_equip_learned(run)
+				elif policy == "builder":
+					_build_deck(run)
 				fights.append(_fight(run))
 			"recruit":
 				var full: bool = run.party_sides().size() == Run.RANKS.size()
@@ -48,7 +52,10 @@ func _play(seed: String, policy: String) -> Dictionary:
 					arrivals.append(run.distance)
 			_:
 				break
-	return {"seed": seed, "policy": policy, "phase": run.phase, "cause": run.loss_cause, "floor": run.floor + 1,
+	var decks := {}
+	for side: String in run.party_sides():
+		decks[run.get(side).kind] = run.side_loadout(side).map(func(id): return "%s:%d" % [id, int(run.levels.get(id, 0))] if id != null else "-")
+	return {"decks": decks, "growth": _growth(run), "seed": seed, "policy": policy, "phase": run.phase, "cause": run.loss_cause, "floor": run.floor + 1,
 		"area": run.area, "foe": run.enemy.get("kind", ""), "fights": fights, "arrivals": arrivals,
 		"party": run.party_sides().size(), "coins": run.coins}
 
@@ -106,6 +113,36 @@ func _equip_learned(run: RefCounted) -> void:
 		return
 
 
+func _growth(run: RefCounted) -> int:
+	var total := 0
+	for id: String in run.levels:
+		total += int(run.levels[id])
+	return total
+
+
+func _build_deck(run: RefCounted) -> void:
+	for side: String in run.party_sides():
+		var deck: Array = run.side_loadout(side)
+		for id: String in run.available_skills(side):
+			if not run.levels.has(id) or not run.equipped_by(id).is_empty():
+				continue
+			var weakest := -1
+			var low := 99
+			for slot in deck.size():
+				var held = deck[slot]
+				var level := 0 if held == null else int(run.levels.get(held, 1))  # starting cards are level 1
+				if level < low:
+					low = level
+					weakest = slot
+			if weakest < 0 or low > int(run.levels[id]) or (low == int(run.levels[id]) and deck[weakest] != null and not (deck[weakest] in STARTERS)):
+				continue
+			var before = deck[weakest]
+			if before != null:
+				run.toggle_skill(before, side)
+			if not run.toggle_skill(id, side) and before != null:
+				run.toggle_skill(before, side)
+
+
 func _pick_reward(run: RefCounted, policy: String) -> String:
 	if policy == "first":
 		return run.rewards[0]
@@ -117,7 +154,7 @@ func _pick_reward(run: RefCounted, policy: String) -> String:
 
 func _route(run: RefCounted, policy: String) -> void:
 	var room: Dictionary = run.data.map[run.area]
-	if policy == "sensible":
+	if policy != "first":
 		if room.type == "rest" and not run.rest_finished:
 			var wound := _worst_wound(run)
 			if not wound.is_empty() and run.can_treat(wound[0], wound[1]):
@@ -130,11 +167,11 @@ func _route(run: RefCounted, policy: String) -> void:
 				if run.shop_issue(id).is_empty() and not targets.is_empty():
 					run.buy_shop_offer(id, targets.keys()[0])
 	if not run.pending_mystery.is_empty():
-		var take: bool = policy == "sensible" and run.mystery_issue().is_empty() and run.distance + run.mystery_distance() >= 4
+		var take: bool = policy != "first" and run.mystery_issue().is_empty() and run.distance + run.mystery_distance() >= 4
 		run.resolve_mystery(take)
 	var next: Array = room.next
 	var choice: String = next[0]
-	if policy == "sensible":
+	if policy != "first":
 		var best := -INF
 		var hp := _party_hp(run)
 		for id: String in next:
@@ -182,6 +219,8 @@ func _summarize(results: Array, policies: PackedStringArray) -> void:
 				deaths[key] = deaths.get(key, 0) + 1
 		print("== %s: %d runs, escaped %d (%.0f%%), reached floor 2: %d, floor 3: %d" % [
 			policy, runs.size(), won, 100.0 * won / runs.size(), reach[1], reach[2]])
+		print("   clear rate  F1 %.0f%%  F2 %.0f%%  F3 %.0f%%" % [100.0 * reach[1] / maxi(reach[0], 1),
+			100.0 * reach[2] / maxi(reach[1], 1), 100.0 * won / maxi(reach[2], 1)])
 		print("   losses by cause: ", causes)
 		print("   losses by floor/foe: ", deaths)
 		var stats := {}

@@ -25,8 +25,9 @@ func _init(state: RefCounted) -> void:
 	for pattern: Array in run.data.foes[run.enemy.kind].patterns:
 		_plan.append_array(pattern)
 	_interval = int(run.data.foes[run.enemy.kind].get("interval", run.data.timing.enemyInterval))
+	_interval = maxi(1500, _interval - int(run.enemy.get("haste", 0)))
 	run.enemy_ready_at = _interval
-	_might = int(run.data.foes[run.enemy.kind].get("might", 0))
+	_might = int(run.data.foes[run.enemy.kind].get("might", 0)) + int(run.enemy.get("might", 0))
 	_traits = run.trait_counts()
 	for side: String in run.party_sides():
 		var actor: Dictionary = run.get(side)
