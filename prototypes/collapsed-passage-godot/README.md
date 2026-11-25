@@ -31,6 +31,8 @@ godot --headless --path . --export-release "Windows x64" dist/windows-x64/Collap
 node scripts/compare-playthrough.mjs dist/windows-x64/CollapsedPassage.exe --exported
 ```
 
+창과 작업표시줄 아이콘은 [art/icon/icon.png](art/icon/icon.png)(`config/icon`)와 [art/icon/icon.ico](art/icon/icon.ico)(`config/windows_native_icon`)이고, 실행파일과 바탕화면 아이콘은 내보내기 설정의 `application/icon`이 같은 `.ico`(16–256px)를 넣는다.
+
 비교 스크립트는 실행파일을 임시 폴더에 복사해 별도의 사용자 데이터로 검증한다. 실행파일 경로 뒤에 스크린샷 저장 폴더를 추가하면 실제 창에서 시작부터 탈출까지 진행한다.
 
 타이틀과 게임 화면의 ‘도감’에서는 대원 다섯 명의 기본 제원, 전용 기술, 공용 카드를 확인할 수 있다. 전체·일반·고급·희귀 필터는 선택한 대원 또는 공용 카드에 적용된다. ‘닫기’나 Esc로 돌아간다. 전투 중에는 전투·추격 시계와 진행 중인 연출이 멈추며, 닫으면 열기 전 재생 또는 일시정지 상태가 이어진다.
