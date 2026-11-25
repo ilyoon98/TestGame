@@ -280,7 +280,7 @@ func _toggle_qa(open: Variant = null) -> void:
 		(_display.find_child("OpenQA", true, false) as Control).grab_focus()
 
 func _read_map_options() -> Dictionary:
-	var options := {"widths": SeedMap.parse_widths(_map_widths.text)}
+	var options := {"widths": SeedMap.parse_widths(_map_widths.text), "floors": SeedMap.DEFAULT_OPTIONS.floors}
 	for key: String in _map_counts:
 		options[key] = _map_counts[key].selected
 	return options

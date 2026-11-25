@@ -1,0 +1,2096 @@
+{
+  "floors": [
+    {
+      "name": "1층 격리 구역",
+      "start": "threshold",
+      "boss": "lift",
+      "end": "ascend",
+      "battles": [
+        "duct",
+        "infirmary",
+        "landing"
+      ],
+      "elite": {
+        "name": "독방",
+        "arena": "art/arena/solitary.webp",
+        "foe": "sentinel",
+        "recruits": [
+          "archer"
+        ]
+      },
+      "arrival": "폭동 경보. 사형수가 뒤쫓는다."
+    },
+    {
+      "name": "2층 교도관 구역",
+      "start": "checkpoint",
+      "boss": "chief-office",
+      "end": "ascend",
+      "battles": [
+        "kennel",
+        "laundry",
+        "armory"
+      ],
+      "elite": {
+        "name": "징벌방",
+        "arena": "art/arena/armory.webp",
+        "foe": "halberdier",
+        "recruits": []
+      },
+      "options": {
+        "widths": [
+          2,
+          3,
+          3,
+          3,
+          2
+        ],
+        "shops": 1,
+        "rests": 2,
+        "elites": 1,
+        "mysteries": 2
+      },
+      "arrival": "승강기가 2층 교도관 구역에 멈췄다. 사형수의 발소리가 아래에서 따라온다."
+    },
+    {
+      "name": "3층 정문 구역",
+      "start": "visiting",
+      "boss": "warden-office",
+      "end": "exit",
+      "battles": [
+        "watchtower",
+        "chapel",
+        "gatehouse"
+      ],
+      "elite": {
+        "name": "정문 초소",
+        "arena": "art/arena/gatehouse.webp",
+        "foe": "gatekeeper",
+        "recruits": []
+      },
+      "options": {
+        "widths": [
+          3,
+          3,
+          2,
+          3,
+          3
+        ],
+        "shops": 1,
+        "rests": 2,
+        "elites": 2,
+        "mysteries": 2
+      },
+      "arrival": "3층 정문 구역. 창살 너머로 새벽빛이 보인다."
+    }
+  ],
+  "rooms": {
+    "ascend": {
+      "name": "위층 승강기",
+      "type": "ascend",
+      "foe": "",
+      "arena": "art/arena/lift.webp",
+      "recruits": []
+    },
+    "checkpoint": {
+      "name": "검문소",
+      "type": "battle",
+      "foe": "keeper",
+      "arena": "art/arena/checkpoint.webp",
+      "recruits": [
+        "guard"
+      ]
+    },
+    "kennel": {
+      "name": "사육장",
+      "type": "battle",
+      "foe": "hound",
+      "arena": "art/arena/kennel.webp",
+      "recruits": [
+        "archer"
+      ]
+    },
+    "laundry": {
+      "name": "세탁실",
+      "type": "battle",
+      "foe": "scalder",
+      "arena": "art/arena/laundry.webp",
+      "recruits": [
+        "awakened",
+        "shaman"
+      ]
+    },
+    "armory": {
+      "name": "무기고",
+      "type": "battle",
+      "foe": "halberdier",
+      "arena": "art/arena/armory.webp",
+      "recruits": [
+        "guard"
+      ]
+    },
+    "chief-office": {
+      "name": "교도관장실",
+      "type": "boss",
+      "foe": "chief",
+      "arena": "art/arena/chief-office.webp",
+      "recruits": []
+    },
+    "visiting": {
+      "name": "면회 복도",
+      "type": "battle",
+      "foe": "informant",
+      "arena": "art/arena/visiting.webp",
+      "recruits": [
+        "shaman"
+      ]
+    },
+    "watchtower": {
+      "name": "감시탑",
+      "type": "battle",
+      "foe": "lookout",
+      "arena": "art/arena/watchtower.webp",
+      "recruits": [
+        "archer"
+      ]
+    },
+    "chapel": {
+      "name": "예배당",
+      "type": "battle",
+      "foe": "zealot",
+      "arena": "art/arena/chapel.webp",
+      "recruits": [
+        "awakened"
+      ]
+    },
+    "gatehouse": {
+      "name": "위병소",
+      "type": "battle",
+      "foe": "gatekeeper",
+      "arena": "art/arena/gatehouse.webp",
+      "recruits": [
+        "guard"
+      ]
+    },
+    "warden-office": {
+      "name": "소장실",
+      "type": "boss",
+      "foe": "warden",
+      "arena": "art/arena/warden-office.webp",
+      "recruits": []
+    }
+  },
+  "foes": {
+    "keeper": {
+      "name": "열쇠지기 교도관",
+      "hp": [
+        10,
+        5,
+        5,
+        7,
+        5,
+        5
+      ],
+      "vitality": 14,
+      "armor": {
+        "head": 2
+      },
+      "patterns": [
+        [
+          [
+            "strike",
+            "head"
+          ],
+          [
+            "guard",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "heavy",
+            "arms"
+          ]
+        ],
+        [
+          [
+            "aim",
+            "eyes"
+          ],
+          [
+            "counter",
+            "arms"
+          ]
+        ]
+      ]
+    },
+    "hound": {
+      "name": "교도소 사냥개",
+      "hp": [
+        9,
+        5,
+        5,
+        6,
+        5,
+        6
+      ],
+      "vitality": 13,
+      "armor": {},
+      "patterns": [
+        [
+          [
+            "strike",
+            "legs"
+          ],
+          [
+            "strike",
+            "arms"
+          ]
+        ],
+        [
+          [
+            "aim",
+            "legs"
+          ]
+        ],
+        [
+          [
+            "heavy",
+            "chest"
+          ],
+          [
+            "guard",
+            "head"
+          ]
+        ]
+      ]
+    },
+    "scalder": {
+      "name": "끓는 물 세탁부",
+      "hp": [
+        10,
+        5,
+        6,
+        8,
+        6,
+        5
+      ],
+      "vitality": 16,
+      "armor": {
+        "head": 1
+      },
+      "patterns": [
+        [
+          [
+            "heavy",
+            "chest"
+          ],
+          [
+            "aid"
+          ]
+        ],
+        [
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "strike",
+            "belly"
+          ]
+        ],
+        [
+          [
+            "split",
+            "chest",
+            "belly"
+          ],
+          [
+            "heavy",
+            "arms"
+          ]
+        ]
+      ]
+    },
+    "halberdier": {
+      "name": "미늘창 교도관",
+      "hp": [
+        11,
+        5,
+        6,
+        8,
+        5,
+        6
+      ],
+      "vitality": 16,
+      "armor": {
+        "head": 3,
+        "chest": 1
+      },
+      "patterns": [
+        [
+          [
+            "guard",
+            "head"
+          ],
+          [
+            "heavy",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "aim",
+            "eyes"
+          ],
+          [
+            "split",
+            "head",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "heavy",
+            "legs"
+          ],
+          [
+            "break",
+            "chest"
+          ]
+        ]
+      ]
+    },
+    "chief": {
+      "name": "교도관장",
+      "hp": [
+        26,
+        6,
+        6,
+        9,
+        6,
+        6
+      ],
+      "vitality": 28,
+      "armor": {
+        "head": 3
+      },
+      "patterns": [
+        [
+          [
+            "heavy",
+            "chest"
+          ],
+          [
+            "guard",
+            "head"
+          ]
+        ],
+        [
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "heavy",
+            "head"
+          ]
+        ],
+        [
+          [
+            "aid"
+          ],
+          [
+            "aim",
+            "eyes"
+          ],
+          [
+            "heavy",
+            "arms"
+          ]
+        ]
+      ]
+    },
+    "informant": {
+      "name": "밀고자",
+      "hp": [
+        11,
+        6,
+        5,
+        7,
+        6,
+        6
+      ],
+      "vitality": 17,
+      "armor": {},
+      "patterns": [
+        [
+          [
+            "aim",
+            "eyes"
+          ],
+          [
+            "strike",
+            "belly"
+          ]
+        ],
+        [
+          [
+            "counter",
+            "head"
+          ],
+          [
+            "aim",
+            "arms"
+          ]
+        ],
+        [
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "aim",
+            "head"
+          ]
+        ]
+      ]
+    },
+    "lookout": {
+      "name": "감시탑 석궁병",
+      "hp": [
+        11,
+        6,
+        6,
+        7,
+        6,
+        6
+      ],
+      "vitality": 18,
+      "armor": {
+        "head": 1
+      },
+      "patterns": [
+        [
+          [
+            "aim",
+            "head"
+          ],
+          [
+            "aim",
+            "eyes"
+          ]
+        ],
+        [
+          [
+            "guard",
+            "chest"
+          ],
+          [
+            "heavy",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "aim",
+            "legs"
+          ],
+          [
+            "split",
+            "head",
+            "chest"
+          ]
+        ]
+      ]
+    },
+    "zealot": {
+      "name": "타락한 교도 사제",
+      "hp": [
+        12,
+        6,
+        6,
+        8,
+        7,
+        6
+      ],
+      "vitality": 19,
+      "armor": {
+        "head": 1
+      },
+      "patterns": [
+        [
+          [
+            "aid"
+          ],
+          [
+            "strike",
+            "head"
+          ]
+        ],
+        [
+          [
+            "counter",
+            "chest"
+          ],
+          [
+            "heavy",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "aid"
+          ],
+          [
+            "aim",
+            "eyes"
+          ]
+        ]
+      ]
+    },
+    "gatekeeper": {
+      "name": "정문 위병",
+      "hp": [
+        13,
+        6,
+        7,
+        9,
+        6,
+        7
+      ],
+      "vitality": 20,
+      "armor": {
+        "head": 3,
+        "chest": 2
+      },
+      "patterns": [
+        [
+          [
+            "heavy",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "guard",
+            "head"
+          ],
+          [
+            "heavy",
+            "arms"
+          ]
+        ],
+        [
+          [
+            "split",
+            "head",
+            "chest"
+          ],
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "heavy",
+            "legs"
+          ]
+        ]
+      ]
+    },
+    "warden": {
+      "name": "교도소장",
+      "hp": [
+        30,
+        7,
+        7,
+        10,
+        7,
+        7
+      ],
+      "vitality": 34,
+      "armor": {
+        "head": 3
+      },
+      "patterns": [
+        [
+          [
+            "aim",
+            "eyes"
+          ],
+          [
+            "heavy",
+            "chest"
+          ]
+        ],
+        [
+          [
+            "counter",
+            "head"
+          ],
+          [
+            "break",
+            "chest"
+          ],
+          [
+            "heavy",
+            "head"
+          ]
+        ],
+        [
+          [
+            "aid"
+          ],
+          [
+            "split",
+            "head",
+            "chest"
+          ],
+          [
+            "heavy",
+            "arms"
+          ]
+        ]
+      ]
+    }
+  },
+  "visuals": {
+    "keeper": {
+      "idle": "art/characters/foes/keeper-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/keeper-attack.webp",
+        "hit": "art/characters/foes/keeper-hit.webp",
+        "guard": "art/characters/foes/keeper-guard.webp",
+        "defeat": "art/characters/foes/keeper-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            44.6,
+            26.5
+          ],
+          "eyes": [
+            42.0,
+            29.5
+          ],
+          "arms": [
+            36.9,
+            49.5
+          ],
+          "chest": [
+            46.1,
+            48.0
+          ],
+          "belly": [
+            47.1,
+            60.2
+          ],
+          "legs": [
+            47.1,
+            81.7
+          ]
+        },
+        "attack": {
+          "head": [
+            47.8,
+            38.2
+          ],
+          "eyes": [
+            43.8,
+            40.7
+          ],
+          "arms": [
+            35.9,
+            57.2
+          ],
+          "chest": [
+            50.1,
+            55.9
+          ],
+          "belly": [
+            51.7,
+            66.1
+          ],
+          "legs": [
+            51.7,
+            83.9
+          ]
+        },
+        "hit": {
+          "head": [
+            45.2,
+            29.7
+          ],
+          "eyes": [
+            41.4,
+            32.7
+          ],
+          "arms": [
+            34.0,
+            51.6
+          ],
+          "chest": [
+            47.4,
+            50.2
+          ],
+          "belly": [
+            48.9,
+            61.9
+          ],
+          "legs": [
+            48.9,
+            82.3
+          ]
+        },
+        "guard": {
+          "head": [
+            48.3,
+            36.5
+          ],
+          "eyes": [
+            45.3,
+            39.1
+          ],
+          "arms": [
+            39.3,
+            56.1
+          ],
+          "chest": [
+            50.2,
+            54.8
+          ],
+          "belly": [
+            51.4,
+            65.2
+          ],
+          "legs": [
+            51.4,
+            83.6
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.7
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.3
+          ],
+          "legs": [
+            80.6,
+            58.7
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "hound": {
+      "idle": "art/characters/foes/hound-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/hound-attack.webp",
+        "hit": "art/characters/foes/hound-hit.webp",
+        "guard": "art/characters/foes/hound-guard.webp",
+        "defeat": "art/characters/foes/hound-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            23.1,
+            62.0
+          ],
+          "eyes": [
+            19.5,
+            62.0
+          ],
+          "arms": [
+            33.8,
+            82.6
+          ],
+          "chest": [
+            40.1,
+            71.2
+          ],
+          "belly": [
+            58.1,
+            75.7
+          ],
+          "legs": [
+            76.0,
+            84.9
+          ]
+        },
+        "attack": {
+          "head": [
+            25.4,
+            64.5
+          ],
+          "eyes": [
+            21.9,
+            64.5
+          ],
+          "arms": [
+            35.9,
+            83.5
+          ],
+          "chest": [
+            42.0,
+            72.9
+          ],
+          "belly": [
+            59.5,
+            77.2
+          ],
+          "legs": [
+            76.9,
+            85.6
+          ]
+        },
+        "hit": {
+          "head": [
+            26.3,
+            58.5
+          ],
+          "eyes": [
+            22.8,
+            58.5
+          ],
+          "arms": [
+            36.6,
+            81.3
+          ],
+          "chest": [
+            42.6,
+            68.7
+          ],
+          "belly": [
+            59.9,
+            73.7
+          ],
+          "legs": [
+            77.1,
+            83.9
+          ]
+        },
+        "guard": {
+          "head": [
+            22.3,
+            65.0
+          ],
+          "eyes": [
+            18.6,
+            65.0
+          ],
+          "arms": [
+            33.2,
+            83.6
+          ],
+          "chest": [
+            39.5,
+            73.3
+          ],
+          "belly": [
+            57.7,
+            77.4
+          ],
+          "legs": [
+            75.9,
+            85.7
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.6
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.3
+          ],
+          "legs": [
+            80.6,
+            58.6
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "scalder": {
+      "idle": "art/characters/foes/scalder-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/scalder-attack.webp",
+        "hit": "art/characters/foes/scalder-hit.webp",
+        "guard": "art/characters/foes/scalder-guard.webp",
+        "defeat": "art/characters/foes/scalder-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            44.5,
+            31.4
+          ],
+          "eyes": [
+            39.7,
+            34.2
+          ],
+          "arms": [
+            30.2,
+            52.7
+          ],
+          "chest": [
+            47.4,
+            51.3
+          ],
+          "belly": [
+            49.3,
+            62.7
+          ],
+          "legs": [
+            49.3,
+            82.6
+          ]
+        },
+        "attack": {
+          "head": [
+            52.3,
+            17.1
+          ],
+          "eyes": [
+            48.1,
+            20.6
+          ],
+          "arms": [
+            39.6,
+            43.3
+          ],
+          "chest": [
+            54.8,
+            41.6
+          ],
+          "belly": [
+            56.5,
+            55.6
+          ],
+          "legs": [
+            56.5,
+            80.0
+          ]
+        },
+        "hit": {
+          "head": [
+            47.5,
+            29.6
+          ],
+          "eyes": [
+            42.8,
+            32.5
+          ],
+          "arms": [
+            33.5,
+            51.5
+          ],
+          "chest": [
+            50.3,
+            50.1
+          ],
+          "belly": [
+            52.2,
+            61.8
+          ],
+          "legs": [
+            52.2,
+            82.3
+          ]
+        },
+        "guard": {
+          "head": [
+            52.5,
+            27.8
+          ],
+          "eyes": [
+            48.3,
+            30.8
+          ],
+          "arms": [
+            40.0,
+            50.4
+          ],
+          "chest": [
+            55.0,
+            48.9
+          ],
+          "belly": [
+            56.7,
+            60.9
+          ],
+          "legs": [
+            56.7,
+            82.0
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.5
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.2
+          ],
+          "legs": [
+            80.6,
+            58.5
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "halberdier": {
+      "idle": "art/characters/foes/halberdier-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/halberdier-attack.webp",
+        "hit": "art/characters/foes/halberdier-hit.webp",
+        "guard": "art/characters/foes/halberdier-guard.webp",
+        "defeat": "art/characters/foes/halberdier-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            47.2,
+            14.4
+          ],
+          "eyes": [
+            45.0,
+            18.0
+          ],
+          "arms": [
+            40.4,
+            41.6
+          ],
+          "chest": [
+            48.6,
+            39.8
+          ],
+          "belly": [
+            49.5,
+            54.2
+          ],
+          "legs": [
+            49.5,
+            79.5
+          ]
+        },
+        "attack": {
+          "head": [
+            34.6,
+            51.7
+          ],
+          "eyes": [
+            30.9,
+            53.6
+          ],
+          "arms": [
+            23.4,
+            66.1
+          ],
+          "chest": [
+            36.9,
+            65.1
+          ],
+          "belly": [
+            38.4,
+            72.8
+          ],
+          "legs": [
+            38.4,
+            86.3
+          ]
+        },
+        "hit": {
+          "head": [
+            39.3,
+            22.1
+          ],
+          "eyes": [
+            35.3,
+            25.4
+          ],
+          "arms": [
+            27.2,
+            46.6
+          ],
+          "chest": [
+            41.7,
+            45.0
+          ],
+          "belly": [
+            43.3,
+            58.1
+          ],
+          "legs": [
+            43.3,
+            80.9
+          ]
+        },
+        "guard": {
+          "head": [
+            39.9,
+            47.5
+          ],
+          "eyes": [
+            35.6,
+            49.7
+          ],
+          "arms": [
+            27.0,
+            63.4
+          ],
+          "chest": [
+            42.4,
+            62.3
+          ],
+          "belly": [
+            44.2,
+            70.8
+          ],
+          "legs": [
+            44.2,
+            85.6
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.7
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.3
+          ],
+          "legs": [
+            80.6,
+            58.7
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "chief": {
+      "idle": "art/characters/foes/chief-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/chief-attack.webp",
+        "hit": "art/characters/foes/chief-hit.webp",
+        "guard": "art/characters/foes/chief-guard.webp",
+        "defeat": "art/characters/foes/chief-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            46.8,
+            16.2
+          ],
+          "eyes": [
+            42.1,
+            19.7
+          ],
+          "arms": [
+            32.7,
+            42.7
+          ],
+          "chest": [
+            49.6,
+            40.9
+          ],
+          "belly": [
+            51.5,
+            55.1
+          ],
+          "legs": [
+            51.5,
+            79.9
+          ]
+        },
+        "attack": {
+          "head": [
+            32.3,
+            14.3
+          ],
+          "eyes": [
+            28.8,
+            17.9
+          ],
+          "arms": [
+            21.7,
+            41.4
+          ],
+          "chest": [
+            34.4,
+            39.6
+          ],
+          "belly": [
+            35.9,
+            54.1
+          ],
+          "legs": [
+            35.9,
+            79.5
+          ]
+        },
+        "hit": {
+          "head": [
+            47.2,
+            14.1
+          ],
+          "eyes": [
+            42.5,
+            17.7
+          ],
+          "arms": [
+            33.1,
+            41.3
+          ],
+          "chest": [
+            50.0,
+            39.5
+          ],
+          "belly": [
+            51.9,
+            54.0
+          ],
+          "legs": [
+            51.9,
+            79.5
+          ]
+        },
+        "guard": {
+          "head": [
+            49.3,
+            13.6
+          ],
+          "eyes": [
+            44.8,
+            17.2
+          ],
+          "arms": [
+            35.9,
+            41.0
+          ],
+          "chest": [
+            52.0,
+            39.2
+          ],
+          "belly": [
+            53.7,
+            53.8
+          ],
+          "legs": [
+            53.7,
+            79.4
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.6
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.2
+          ],
+          "legs": [
+            80.6,
+            58.6
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "informant": {
+      "idle": "art/characters/foes/informant-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/informant-attack.webp",
+        "hit": "art/characters/foes/informant-hit.webp",
+        "guard": "art/characters/foes/informant-guard.webp",
+        "defeat": "art/characters/foes/informant-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            50.2,
+            28.2
+          ],
+          "eyes": [
+            46.4,
+            31.2
+          ],
+          "arms": [
+            38.8,
+            50.6
+          ],
+          "chest": [
+            52.5,
+            49.1
+          ],
+          "belly": [
+            54.0,
+            61.1
+          ],
+          "legs": [
+            54.0,
+            82.0
+          ]
+        },
+        "attack": {
+          "head": [
+            45.2,
+            41.3
+          ],
+          "eyes": [
+            40.4,
+            43.7
+          ],
+          "arms": [
+            30.7,
+            59.3
+          ],
+          "chest": [
+            48.1,
+            58.1
+          ],
+          "belly": [
+            50.1,
+            67.7
+          ],
+          "legs": [
+            50.1,
+            84.4
+          ]
+        },
+        "hit": {
+          "head": [
+            37.5,
+            31.6
+          ],
+          "eyes": [
+            33.5,
+            34.4
+          ],
+          "arms": [
+            25.5,
+            52.9
+          ],
+          "chest": [
+            39.9,
+            51.4
+          ],
+          "belly": [
+            41.5,
+            62.8
+          ],
+          "legs": [
+            41.5,
+            82.7
+          ]
+        },
+        "guard": {
+          "head": [
+            50.9,
+            39.4
+          ],
+          "eyes": [
+            47.0,
+            41.9
+          ],
+          "arms": [
+            39.0,
+            58.0
+          ],
+          "chest": [
+            53.3,
+            56.8
+          ],
+          "belly": [
+            54.9,
+            66.7
+          ],
+          "legs": [
+            54.9,
+            84.1
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.3
+          ],
+          "eyes": [
+            13.6,
+            45.3
+          ],
+          "arms": [
+            35.6,
+            59.1
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.5
+          ],
+          "legs": [
+            80.6,
+            59.1
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "lookout": {
+      "idle": "art/characters/foes/lookout-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/lookout-attack.webp",
+        "hit": "art/characters/foes/lookout-hit.webp",
+        "guard": "art/characters/foes/lookout-guard.webp",
+        "defeat": "art/characters/foes/lookout-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            38.8,
+            26.5
+          ],
+          "eyes": [
+            34.8,
+            29.5
+          ],
+          "arms": [
+            26.8,
+            49.5
+          ],
+          "chest": [
+            41.2,
+            48.0
+          ],
+          "belly": [
+            42.9,
+            60.2
+          ],
+          "legs": [
+            42.9,
+            81.7
+          ]
+        },
+        "attack": {
+          "head": [
+            38.8,
+            32.4
+          ],
+          "eyes": [
+            34.6,
+            35.2
+          ],
+          "arms": [
+            26.3,
+            53.4
+          ],
+          "chest": [
+            41.3,
+            52.0
+          ],
+          "belly": [
+            43.0,
+            63.2
+          ],
+          "legs": [
+            43.0,
+            82.8
+          ]
+        },
+        "hit": {
+          "head": [
+            42.7,
+            26.0
+          ],
+          "eyes": [
+            38.4,
+            29.1
+          ],
+          "arms": [
+            29.6,
+            49.2
+          ],
+          "chest": [
+            45.4,
+            47.6
+          ],
+          "belly": [
+            47.1,
+            60.0
+          ],
+          "legs": [
+            47.1,
+            81.6
+          ]
+        },
+        "guard": {
+          "head": [
+            42.4,
+            36.1
+          ],
+          "eyes": [
+            38.0,
+            38.7
+          ],
+          "arms": [
+            29.3,
+            55.8
+          ],
+          "chest": [
+            45.0,
+            54.5
+          ],
+          "belly": [
+            46.8,
+            65.0
+          ],
+          "legs": [
+            46.8,
+            83.5
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.4
+          ],
+          "eyes": [
+            13.6,
+            45.4
+          ],
+          "arms": [
+            35.6,
+            58.8
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.4
+          ],
+          "legs": [
+            80.6,
+            58.8
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "zealot": {
+      "idle": "art/characters/foes/zealot-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/zealot-attack.webp",
+        "hit": "art/characters/foes/zealot-hit.webp",
+        "guard": "art/characters/foes/zealot-guard.webp",
+        "defeat": "art/characters/foes/zealot-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            45.5,
+            25.3
+          ],
+          "eyes": [
+            42.3,
+            28.4
+          ],
+          "arms": [
+            36.1,
+            48.7
+          ],
+          "chest": [
+            47.3,
+            47.2
+          ],
+          "belly": [
+            48.6,
+            59.7
+          ],
+          "legs": [
+            48.6,
+            81.5
+          ]
+        },
+        "attack": {
+          "head": [
+            33.5,
+            38.4
+          ],
+          "eyes": [
+            29.9,
+            41.0
+          ],
+          "arms": [
+            22.6,
+            57.4
+          ],
+          "chest": [
+            35.6,
+            56.1
+          ],
+          "belly": [
+            37.1,
+            66.2
+          ],
+          "legs": [
+            37.1,
+            83.9
+          ]
+        },
+        "hit": {
+          "head": [
+            41.7,
+            31.6
+          ],
+          "eyes": [
+            37.2,
+            34.5
+          ],
+          "arms": [
+            28.3,
+            52.9
+          ],
+          "chest": [
+            44.4,
+            51.5
+          ],
+          "belly": [
+            46.1,
+            62.8
+          ],
+          "legs": [
+            46.1,
+            82.7
+          ]
+        },
+        "guard": {
+          "head": [
+            47.3,
+            27.6
+          ],
+          "eyes": [
+            44.2,
+            30.6
+          ],
+          "arms": [
+            38.0,
+            50.2
+          ],
+          "chest": [
+            49.2,
+            48.7
+          ],
+          "belly": [
+            50.4,
+            60.8
+          ],
+          "legs": [
+            50.4,
+            81.9
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.7
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.3
+          ],
+          "legs": [
+            80.6,
+            58.7
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "gatekeeper": {
+      "idle": "art/characters/foes/gatekeeper-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/gatekeeper-attack.webp",
+        "hit": "art/characters/foes/gatekeeper-hit.webp",
+        "guard": "art/characters/foes/gatekeeper-guard.webp",
+        "defeat": "art/characters/foes/gatekeeper-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            41.2,
+            17.3
+          ],
+          "eyes": [
+            36.8,
+            20.8
+          ],
+          "arms": [
+            28.0,
+            43.4
+          ],
+          "chest": [
+            43.9,
+            41.7
+          ],
+          "belly": [
+            45.6,
+            55.7
+          ],
+          "legs": [
+            45.6,
+            80.1
+          ]
+        },
+        "attack": {
+          "head": [
+            48.5,
+            13.6
+          ],
+          "eyes": [
+            43.9,
+            17.2
+          ],
+          "arms": [
+            34.8,
+            41.0
+          ],
+          "chest": [
+            51.3,
+            39.2
+          ],
+          "belly": [
+            53.1,
+            53.8
+          ],
+          "legs": [
+            53.1,
+            79.4
+          ]
+        },
+        "hit": {
+          "head": [
+            34.2,
+            19.3
+          ],
+          "eyes": [
+            30.5,
+            22.7
+          ],
+          "arms": [
+            23.1,
+            44.8
+          ],
+          "chest": [
+            36.4,
+            43.1
+          ],
+          "belly": [
+            37.9,
+            56.7
+          ],
+          "legs": [
+            37.9,
+            80.4
+          ]
+        },
+        "guard": {
+          "head": [
+            46.1,
+            31.1
+          ],
+          "eyes": [
+            41.3,
+            34.0
+          ],
+          "arms": [
+            31.8,
+            52.5
+          ],
+          "chest": [
+            49.0,
+            51.1
+          ],
+          "belly": [
+            50.9,
+            62.6
+          ],
+          "legs": [
+            50.9,
+            82.6
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.5
+          ],
+          "eyes": [
+            13.6,
+            45.5
+          ],
+          "arms": [
+            35.6,
+            58.7
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.3
+          ],
+          "legs": [
+            80.6,
+            58.7
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    },
+    "warden": {
+      "idle": "art/characters/foes/warden-idle.webp",
+      "poses": {
+        "attack": "art/characters/foes/warden-attack.webp",
+        "hit": "art/characters/foes/warden-hit.webp",
+        "guard": "art/characters/foes/warden-guard.webp",
+        "defeat": "art/characters/foes/warden-defeat.webp"
+      },
+      "anchors": {
+        "idle": {
+          "head": [
+            43.3,
+            14.4
+          ],
+          "eyes": [
+            40.2,
+            18.0
+          ],
+          "arms": [
+            33.9,
+            41.6
+          ],
+          "chest": [
+            45.2,
+            39.8
+          ],
+          "belly": [
+            46.4,
+            54.2
+          ],
+          "legs": [
+            46.4,
+            79.5
+          ]
+        },
+        "attack": {
+          "head": [
+            36.7,
+            34.8
+          ],
+          "eyes": [
+            32.7,
+            37.5
+          ],
+          "arms": [
+            24.7,
+            55.0
+          ],
+          "chest": [
+            39.1,
+            53.6
+          ],
+          "belly": [
+            40.7,
+            64.4
+          ],
+          "legs": [
+            40.7,
+            83.2
+          ]
+        },
+        "hit": {
+          "head": [
+            36.6,
+            17.9
+          ],
+          "eyes": [
+            32.7,
+            21.4
+          ],
+          "arms": [
+            24.8,
+            43.9
+          ],
+          "chest": [
+            38.9,
+            42.1
+          ],
+          "belly": [
+            40.5,
+            56.0
+          ],
+          "legs": [
+            40.5,
+            80.2
+          ]
+        },
+        "guard": {
+          "head": [
+            51.0,
+            13.6
+          ],
+          "eyes": [
+            47.5,
+            17.2
+          ],
+          "arms": [
+            40.5,
+            41.0
+          ],
+          "chest": [
+            53.1,
+            39.2
+          ],
+          "belly": [
+            54.5,
+            53.8
+          ],
+          "legs": [
+            54.5,
+            79.4
+          ]
+        },
+        "defeat": {
+          "head": [
+            16.5,
+            45.6
+          ],
+          "eyes": [
+            13.6,
+            45.6
+          ],
+          "arms": [
+            35.6,
+            58.4
+          ],
+          "chest": [
+            38.5,
+            49.9
+          ],
+          "belly": [
+            57.6,
+            54.1
+          ],
+          "legs": [
+            80.6,
+            58.4
+          ]
+        }
+      },
+      "armLoss": {},
+      "kneeling": {}
+    }
+  }
+}

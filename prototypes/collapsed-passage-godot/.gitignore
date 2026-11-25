@@ -1,2 +1,10 @@
 .godot/
 /dist/
+
+# Generated art originals: keep scripts and prompts, not images, reports or run logs
+art-src/**/*.png
+art-src/**/*.json
+art-src/**/*.log
+art-src/jobs*.txt
+art-src/status*.txt
+art-src/**/logs/

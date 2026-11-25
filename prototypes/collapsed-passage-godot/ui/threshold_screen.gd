@@ -160,6 +160,10 @@ func _build_header() -> void:
 	line.add_child(title)
 	if run.training:
 		line.add_child(_label(room_name, 17, AMBER))
+	elif not run.floor_name().is_empty():
+		var floor_label := _label(run.floor_name(), 17, AMBER)
+		floor_label.name = "FloorName"
+		line.add_child(floor_label)
 	if run.map_options != null:
 		var seed_label := _label(run.seed, 15, MUTED)
 		seed_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

@@ -4,13 +4,16 @@ extends RefCounted
 const Random := preload("res://world/seed_random.gd")
 const MAX_STAGES := 4
 const MAX_STAGE_ROOMS := 3
-const DEFAULT_OPTIONS := {"widths": [3, 3], "shops": 1, "rests": 1, "elites": 1, "mysteries": 1}
+## `floors` is Godot-only: options without it (web parity fixtures) keep the single-floor run.
+const DEFAULT_OPTIONS := {"widths": [3, 3, 3, 2], "shops": 1, "rests": 1, "elites": 1, "mysteries": 1, "floors": 3}
 const SPECIAL := {
 	"shop": {"name": "암시장"},
 	"rest": {"name": "휴게소"},
 	"elite": {"name": "독방", "arena": "art/arena/solitary.webp", "foe": "sentinel", "recruits": ["archer"]},
 	"mystery": {"name": "?"},
 }
+## The first floor as the web build lays it out. Other floors come from data/floors.json.
+const FIRST_FLOOR := {"start": "threshold", "boss": "lift", "end": "exit", "battles": ["duct", "infirmary", "landing"]}
 
 
 static func parse_widths(text: String) -> Array[int]:
@@ -27,7 +30,9 @@ static func parse_widths(text: String) -> Array[int]:
 	return widths
 
 
-static func generate(seed: String, options: Dictionary, rooms: Dictionary, event_ids: Array) -> Dictionary:
+## `floor` names the start, boss and end rooms, the battle room pool and the elite room.
+static func generate(seed: String, options: Dictionary, rooms: Dictionary, event_ids: Array,
+		floor: Dictionary = FIRST_FLOOR) -> Dictionary:
 	var random := Random.new(seed)
 	var widths: Array = options.widths
 	var total := 0
@@ -36,9 +41,15 @@ static func generate(seed: String, options: Dictionary, rooms: Dictionary, event
 	var counts := {"shop": int(options.shops), "rest": int(options.rests), "elite": int(options.elites),
 		"mystery": int(options.get("mysteries", 0))}
 	counts.battle = total - counts.shop - counts.rest - counts.elite - counts.mystery
-	var result := {"threshold": rooms.threshold.duplicate()}
-	result.threshold.next = []
-	var stages := [["threshold"]]
+	var start: String = floor.start
+	var boss: String = floor.boss
+	var end: String = floor.end
+	var special := SPECIAL.duplicate(true)
+	if floor.has("elite"):
+		special.elite = floor.elite
+	var result := {start: rooms[start].duplicate()}
+	result[start].merge({"col": 1, "row": 2, "next": []}, true)
+	var stages := [[start]]
 	var candidates := []
 	for stage in widths.size():
 		var width := int(widths[stage])
@@ -51,12 +62,11 @@ static func generate(seed: String, options: Dictionary, rooms: Dictionary, event
 			layer.append(id)
 			candidates.append(id)
 		stages.append(layer)
-	stages.append(["lift"])
-	stages.append(["exit"])
-	for id in ["lift", "exit"]:
+	stages.append([boss])
+	stages.append([end])
+	for id in [boss, end]:
 		result[id] = rooms[id].duplicate()
-		result[id].col = stages.size() - (1 if id == "lift" else 0)
-		result[id].next = []
+		result[id].merge({"col": stages.size() - (1 if id == boss else 0), "row": 2, "next": []}, true)
 	_connect(result, stages, random)
 	var placement_random := Random.new(JSON.stringify(["placement", seed]))
 	var placement := _place_rooms(result, candidates, counts, int(widths[0]), placement_random)
@@ -65,13 +75,14 @@ static func generate(seed: String, options: Dictionary, rooms: Dictionary, event
 		var room: Dictionary = result[id]
 		var type: String = placement[index]
 		var room_random := Random.new(JSON.stringify(["room", seed, id]))
-		room.merge({"arena": rooms.threshold.arena, "foe": "", "recruits": [], "type": type})
+		room.merge({"arena": rooms[start].arena, "foe": "", "recruits": [], "type": type})
 		if type == "battle":
-			var source: Dictionary = rooms[["duct", "infirmary", "landing"][floori(room_random.real() * 3)]]
+			var pool: Array = floor.battles
+			var source: Dictionary = rooms[pool[floori(room_random.real() * pool.size())]]
 			for field in ["name", "arena", "foe", "recruits"]:
 				room[field] = source[field]
 		else:
-			room.merge(SPECIAL[type], true)
+			room.merge(special[type], true)
 			if type == "mystery":
 				room.event = event_ids[floori(room_random.real() * event_ids.size())]
 	return result

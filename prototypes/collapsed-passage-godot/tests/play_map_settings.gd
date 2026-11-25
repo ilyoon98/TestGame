@@ -2,6 +2,8 @@ extends SceneTree
 
 const Startup := preload("res://ui/startup.tscn")
 const OPTIONS := {"widths": [2, 1, 3, 2], "shops": 2, "rests": 1, "elites": 2, "mysteries": 1}
+## The title always climbs every floor; the widths and counts above shape floor 1.
+const RUN_OPTIONS := {"widths": [2, 1, 3, 2], "shops": 2, "rests": 1, "elites": 2, "mysteries": 1, "floors": 3}
 var _errors: Array[String] = []
 
 
@@ -29,7 +31,7 @@ func _check() -> void:
 		_expect(viewport.gui_get_focus_owner() == _control(title, "MapWidths"), "Opening settings focuses the width field")
 
 		var status := _control(title, "MapSettingsStatus") as Label
-		_expect(status.text.contains("일반 전투 2개"), "Default has six rooms and four special rooms")
+		_expect(status.text.contains("일반 전투 7개"), "Default has eleven rooms and four special rooms")
 		for invalid in ["", "0,2", "4,2", "1,1,1,1,1", "2,,3", "2.5,3"]:
 			_write(title, "MapWidths", invalid)
 			_press(title, "StartRun")
@@ -58,7 +60,7 @@ func _check() -> void:
 		var game: Control = title._display
 		game.set_process(false)
 		var run: RefCounted = game.run
-		_expect(run.seed == "격리문-04" and run.map_options == OPTIONS, "Settings and trimmed seed reach the run")
+		_expect(run.seed == "격리문-04" and run.map_options == RUN_OPTIONS, "Settings and trimmed seed reach the run")
 		var layout: Dictionary = run.data.map
 		_check_layout(layout)
 		_fight_to_route(title, game)
@@ -74,7 +76,7 @@ func _check() -> void:
 		run._lose("pursuit")
 		game._show()
 		_press(title, "Restart")
-		_expect(game.run.data.map == layout and game.run.map_options == OPTIONS, "Retry reproduces the configured layout")
+		_expect(game.run.data.map == layout and game.run.map_options == RUN_OPTIONS, "Retry reproduces the configured layout")
 		_press(title, "ReturnTitle")
 		_press(title, "OpenQA")
 		_expect(_control(title, "MapWidths").text == "2,1,3,2", "Returning to title keeps the selected widths")

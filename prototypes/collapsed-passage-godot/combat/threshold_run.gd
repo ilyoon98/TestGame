@@ -9,10 +9,16 @@ const RANKS := ["전위", "중위", "후위"]
 const COMPANION_SIDES := ["companion", "companion2", "companion3", "companion4"]
 
 var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/threshold.json"))
+## Godot-only floors 2-3; kept apart because threshold.json is regenerated from the web build.
+var floor_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/floors.json"))
 var cards: Dictionary = {}
 var phase := "prep"
 var area := "threshold"
 var trail: Array[String] = ["threshold"]
+## Zero-based floor index and how many floors this run climbs (1 keeps the web layout).
+var floor := 0
+var floor_count := 1
+var _room_catalog: Dictionary
 var steps := 0
 var player: Dictionary
 var enemy: Dictionary
@@ -67,11 +73,18 @@ func _init(run_seed := "THRESHOLD", options: Variant = SeedMap.DEFAULT_OPTIONS, 
 		if map_options == null:
 			map_options = SeedMap.DEFAULT_OPTIONS.duplicate(true)
 		map_options.merge({"shops": 0, "rests": 0, "elites": 0, "mysteries": 0}, true)
+	data.foes.merge(floor_data.foes)
+	data.visuals.merge(floor_data.visuals)
+	_room_catalog = data.map.duplicate(true)
+	_room_catalog.merge(floor_data.rooms)
+	if map_options != null and not training:
+		floor_count = clampi(int(map_options.get("floors", 1)), 1, floor_data.floors.size())
 	if map_options != null:
-		data.map = SeedMap.generate(seed, map_options, data.map, data.mysteryEvents.keys())
+		_build_floor()
 	if training:
-		data.map.erase("exit")
-		data.map.lift.next.clear()
+		var plan := floor_plan()
+		data.map.erase(plan.end)
+		data.map[plan.boss].next.clear()
 	for card: Dictionary in data.cards:
 		cards[card.id] = card
 	player = _fighter(data.nun, data.nun.health, int(data.nun.vitality), "nun")
@@ -108,6 +121,34 @@ func _make_companion(kind: String) -> Dictionary:
 	return actor
 
 
+## The floor being climbed: its start, boss and end rooms, battle pool and elite room.
+func floor_plan() -> Dictionary:
+	if floor_count == 1:
+		return SeedMap.FIRST_FLOOR
+	var plan: Dictionary = floor_data.floors[floor].duplicate()
+	if floor == floor_count - 1:
+		plan.end = "exit"
+	return plan
+
+
+func floor_name() -> String:
+	return floor_data.floors[floor].name if floor_count > 1 else ""
+
+
+func _build_floor() -> void:
+	var options: Dictionary = map_options if floor == 0 else floor_data.floors[floor].options
+	var floor_seed := seed if floor == 0 else JSON.stringify(["floor", floor + 1, seed])
+	data.map = SeedMap.generate(floor_seed, options, _room_catalog, data.mysteryEvents.keys(), floor_plan())
+
+
+func _ascend() -> void:
+	floor += 1
+	_build_floor()
+	area = floor_plan().start
+	trail = [area]
+	_record(floor_data.floors[floor].arrival)
+
+
 func _enter_room() -> void:
 	rest_finished = false
 	shop_purchases.clear()
@@ -117,9 +158,12 @@ func _enter_room() -> void:
 	_clear_events()
 	elapsed = 0
 	var room: Dictionary = data.map[area]
+	if room.type == "ascend":
+		_ascend()
+		room = data.map[area]
 	pending_mystery = room.get("event", "")
 	if room.foe.is_empty():
-		phase = "won" if area == "exit" else "route"
+		phase = "won" if room.type == "exit" else "route"
 		return
 	var foe: Dictionary = data.foes[room.foe]
 	var bonus := 2 if room.type == "elite" else 0
@@ -455,7 +499,7 @@ func _next_recruit() -> void:
 	if not pending_recruit.is_empty():
 		_met.append(pending_recruit)
 		phase = "recruit"
-	elif area == "lift":
+	elif data.map[area].type == "boss":
 		phase = "route"
 	else:
 		_roll_rewards()

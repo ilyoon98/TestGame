@@ -129,6 +129,8 @@ func _check_market_and_mystery(vp: SubViewport, path: String) -> void:
 	await process_frame
 	var field := opening.find_child("Seed", true, false) as LineEdit
 	field.text = "2"
+	# Seed 2's market and cache sit on the two-column layout the scenario was written for.
+	(opening.find_child("MapWidths", true, false) as LineEdit).text = "3,3"
 	_press(opening, "StartRun")
 	_press(opening, "OpeningSkip")
 	_fight_to_map(opening)

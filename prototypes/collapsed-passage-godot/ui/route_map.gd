@@ -12,13 +12,20 @@ const TYPES := {
 	"shop": ["상점", Color("#e5b970")],
 	"elite": ["강적", Color("#eeb4ac")],
 	"mystery": ["사건", Color("#bea6d2")],
+	"ascend": ["위층", FieldUI.BRASS],
 }
 const ROWS := 3.0
 const INSET := 7
+const MEDALLION := "res://art/route/medallions/%s.webp"
+const NEXT_RING := Color("#82b39f")
 var _rooms: Dictionary
 var _walked: Dictionary = {}
 var _buttons: Dictionary = {}
 var _cells: Dictionary = {}
+var _icons: Dictionary = {}
+var _current := ""
+var _reachable: Array = []
+var _done: Dictionary = {}
 var _travel_from := ""
 var _travel_to := ""
 var _traveler: TextureRect
@@ -28,6 +35,10 @@ func setup(rooms: Dictionary, trail: Array, reachable: Array, preview := false, 
 	_rooms = rooms
 	for i in range(1, trail.size()):
 		_walked[trail[i - 1] + "→" + trail[i]] = true
+	_current = trail.back()
+	_reachable = reachable
+	for id: String in trail:
+		_done[id] = true
 	var columns := 1.0
 	for room: Dictionary in rooms.values():
 		columns = maxf(columns, room.col)
@@ -38,7 +49,7 @@ func setup(rooms: Dictionary, trail: Array, reachable: Array, preview := false, 
 		var current: bool = id == trail.back()
 		var next := reachable.has(id)
 		var state := "현재 위치" if current else next_label if next and preview else "완료" if trail.has(id) else ""
-		var cell: Control = _room_button(id, room) if next and not preview else _room_tile(room, state, next)
+		var cell: Control = _room_button(id, room) if next and not preview else _room_tile(id, room, state, next)
 		if preview:
 			cell.name = "Preview_" + id
 		_cells[id] = cell
@@ -88,8 +99,8 @@ func animate_travel(origin: String, destination: String) -> void:
 
 
 func _set_travel_progress(progress: float) -> void:
-	var from: Vector2 = _cells[_travel_from].get_rect().get_center()
-	var to: Vector2 = _cells[_travel_to].get_rect().get_center()
+	var from: Vector2 = _disc(_travel_from)[0]
+	var to: Vector2 = _disc(_travel_to)[0]
 	_traveler.position = from.lerp(to, progress) - _traveler.size / 2.0
 	queue_redraw()
 
@@ -98,61 +109,85 @@ func _room_button(id: String, room: Dictionary) -> Button:
 	var button := Button.new()
 	button.name = "Move_" + id
 	button.custom_minimum_size.y = FieldUI.ACTION_HEIGHT
-	button.tooltip_text = "%s (%s)\n이동 가능" % [room.name, TYPES[room.type][0]]
+	button.tooltip_text = "%s (%s)
+이동 가능" % [room.name, TYPES[room.type][0]]
 	button.accessibility_name = button.tooltip_text
-	button.add_theme_stylebox_override("normal", FieldUI.plate(Color("#263731"), Color("#82b39f"), 0))
-	button.add_theme_stylebox_override("hover", FieldUI.plate(Color("#354940"), FieldUI.ALLY, 0))
-	var content := _room_face(room)
+	for state in ["normal", "hover", "pressed", "focus", "disabled", "hover_pressed"]:
+		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	var content := _room_face(id, room, NEXT_RING)
 	button.add_child(content)
 	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	content.offset_left = 3
-	content.offset_right = -3
 	button.pressed.connect(func(): room_chosen.emit(id))
+	for change in [button.mouse_entered, button.mouse_exited, button.focus_entered, button.focus_exited]:
+		change.connect(queue_redraw)
 	_buttons[id] = button
 	return button
 
 
-func _room_tile(room: Dictionary, state: String, next: bool) -> PanelContainer:
+func _room_tile(id: String, room: Dictionary, state: String, next: bool) -> PanelContainer:
 	var panel := PanelContainer.new()
-	var current := state == "현재 위치"
-	var background := Color("#412e26") if current else Color("#263731") if next else FieldUI.IRON
-	var border := FieldUI.BRASS if current else Color("#82b39f") if next else FieldUI.RIM
+	var ink := FieldUI.BRASS if state == "현재 위치" else NEXT_RING if next else FieldUI.MUTED if state == "완료" else FieldUI.MUTED.darkened(0.25)
 	panel.tooltip_text = "%s (%s)" % [room.name, TYPES[room.type][0]]
 	if not state.is_empty():
-		panel.tooltip_text += "\n" + state
+		panel.tooltip_text += "
+" + state
 	panel.accessibility_name = panel.tooltip_text
-	panel.add_theme_stylebox_override("panel", FieldUI.plate(background, border, 3))
-	var content := _room_face(room)
-	panel.add_child(content)
-	if not state.is_empty():
-		var caption := FieldUI.label(state, 13, border.lightened(0.25))
-		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		content.add_child(caption)
+	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	panel.add_child(_room_face(id, room, ink))
 	return panel
 
 
-func _room_face(room: Dictionary) -> VBoxContainer:
+## A painted medallion for the room type with the room name under it.
+func _room_face(id: String, room: Dictionary, ink: Color) -> VBoxContainer:
 	var face := VBoxContainer.new()
 	face.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	face.alignment = BoxContainer.ALIGNMENT_CENTER
-	face.add_theme_constant_override("separation", 1)
-	face.add_child(FieldUI.mark(room.type, TYPES[room.type][1]))
-	var title := FieldUI.label(room.name, 15)
+	face.add_theme_constant_override("separation", 2)
+	var icon := TextureRect.new()
+	icon.name = "Medallion"
+	icon.texture = load(MEDALLION % room.type)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size = Vector2(FieldUI.GLYPH_SIZE, FieldUI.GLYPH_SIZE + 12)
+	icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.resized.connect(queue_redraw)
+	face.add_child(icon)
+	_icons[id] = icon
+	var title := FieldUI.label(room.name, 13, ink)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	face.add_child(title)
 	return face
 
 
+## Centre and radius of a room's medallion in this control's space.
+func _disc(id: String) -> Array:
+	var icon: TextureRect = _icons[id]
+	var box := Rect2(icon.global_position - global_position, icon.size)
+	return [box.get_center(), minf(box.size.x, box.size.y) / 2.0]
+
+
 func _draw() -> void:
 	for id: String in _rooms:
 		for dest: String in _rooms[id].next:
-			var a: Control = _cells[id]
-			var b: Control = _cells[dest]
 			var walked := _walked.has(id + "→" + dest)
 			var traveling := id == _travel_from and dest == _travel_to
 			var color := FieldUI.BRASS if traveling else Color("#b5a77e") if walked else Color("#6b5b56")
-			var start := a.position + Vector2(a.size.x, a.size.y * 0.5)
-			var finish := b.position + Vector2(0, b.size.y * 0.5)
-			draw_line(start, finish, color, 2.0, true)
+			draw_line(_disc(id)[0], _disc(dest)[0], color, 3.0 if walked or traveling else 2.0, true)
+	for id: String in _icons:
+		var disc := _disc(id)
+		var ring := Color.TRANSPARENT
+		var width := 3.0
+		if id == _current:
+			ring = FieldUI.BRASS
+		elif _buttons.has(id):
+			var button: Button = _buttons[id]
+			ring = NEXT_RING.lightened(0.35) if button.is_hovered() or button.has_focus() else NEXT_RING
+			width = 4.0 if button.has_focus() else 3.0
+		elif _reachable.has(id):
+			ring = NEXT_RING
+		if ring.a > 0:
+			draw_arc(disc[0], disc[1] + 4.0, 0.0, TAU, 48, ring, width, true)
+		if _done.has(id) and id != _current:
+			draw_circle(disc[0], disc[1] * 0.98, Color(0, 0, 0, 0.45))
