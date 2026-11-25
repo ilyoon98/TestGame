@@ -6,6 +6,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 
 KST = timezone(timedelta(hours=9))
@@ -82,7 +83,22 @@ def add_daily_changes(data, previous):
     data['comparedAsOf'] = previous['asOf']
 
 
-def build(data_path, output_path, previous_path=None):
+def write_report(destination, html):
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    staging = None
+    try:
+        with NamedTemporaryFile(
+            mode='w', encoding='utf-8', dir=destination.parent, suffix='.tmp', delete=False
+        ) as file:
+            staging = Path(file.name)
+            file.write(html)
+        staging.replace(destination)
+    finally:
+        if staging is not None:
+            staging.unlink(missing_ok=True)
+
+
+def build(data_path, output_path, previous_path=None, latest_path=None):
     data = json.loads(Path(data_path).read_text(encoding='utf-8-sig'))
     if previous_path:
         previous = json.loads(Path(previous_path).read_text(encoding='utf-8-sig'))
@@ -91,8 +107,11 @@ def build(data_path, output_path, previous_path=None):
     payload = json.dumps(data, ensure_ascii=False).replace('<', '\\u003c')
     result = template.replace('__REPORT_DATA__', payload)
     destination = Path(output_path).resolve()
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(result, encoding='utf-8')
+    write_report(destination, result)
+    if latest_path:
+        latest = Path(latest_path).resolve()
+        if latest != destination:
+            write_report(latest, result)
     return destination
 
 
@@ -123,10 +142,13 @@ if __name__ == '__main__':
     parser.add_argument('data')
     parser.add_argument('output')
     parser.add_argument('--previous', help='Earlier KST report JSON for price comparison and ordering')
+    parser.add_argument('--latest', help='Also replace the standalone HTML at this fixed path')
     parser.add_argument('--serve', action='store_true')
     parser.add_argument('--port', type=int, default=0)
     args = parser.parse_args()
-    report = build(args.data, args.output, args.previous)
+    report = build(args.data, args.output, args.previous, args.latest)
     print(f'REPORT_FILE={report}', flush=True)
+    if args.latest:
+        print(f'LATEST_FILE={Path(args.latest).resolve()}', flush=True)
     if args.serve:
         serve(report, args.port)

@@ -52,7 +52,7 @@ console.log('PASS: genre sections, app deduplication and legacy data support');
 
 const genreTabs=[...groupedDOM.document.querySelectorAll('[role="tab"]')];
 const genrePanels=[...groupedDOM.document.querySelectorAll('#sections > section')];
-assert.equal(genreTabs.length,4);
+assert.equal(genreTabs.length,5);
 assert.equal(genreTabs[0].getAttribute('aria-selected'),'true');
 assert.equal(genrePanels[0].hidden,false);
 assert.equal(genrePanels[1].hidden,true,'Empty genres do not repeat empty notices');
@@ -70,7 +70,7 @@ let focused=-1;
 genreTabs.forEach((tab,index)=>{tab.focus=()=>{focused=index;};});
 const key=new groupedDOM.window.Event('keydown');key.key='ArrowLeft';
 genreTabs[0].dispatchEvent(key);
-assert.equal(focused,3,'Arrow keys wrap and focus the last tab');
+assert.equal(focused,genreTabs.length-1,'Arrow keys wrap and focus the last tab');
 assert.equal(genreTabs.filter(tab=>tab.getAttribute('aria-selected')==='true').length,1);
 console.log('PASS: genre tabs, counts, show/hide, all view, keyboard navigation and focus');
 
@@ -344,3 +344,30 @@ assert.equal(expandedGenresDoc.querySelector('[role="tab"][aria-label="덱빌딩
 const oldCombinedFixture=mountAdult({...data,groups:[{name:'덱빌딩·자동 전투',new:[makeGame(999)],deals:[],free:[]}]});
 assert.ok(oldCombinedFixture.querySelector('[aria-label="덱빌딩·자동 전투"]'),'Frozen historical reports remain readable');
 console.log('PASS: added genre navigation, independent deck/autobattler filters and legacy report readability');
+
+const coOpDoc=mountAdult({...data,groups:[
+  {name:'RPG',new:[
+    {...makeGame(1001),steamTags:[{id:'3843',name:'온라인 협동'}],reportUpdates:['added']},
+    {...makeGame(1002),steamTags:['멀티플레이어'],reportUpdates:['price']},
+  ],free:[],deals:[]},
+  {name:'전략',new:[{...makeGame(1003),steamTags:['협동 플레이 미지원']}],free:[],deals:[
+    {...makeGame(1004,'−30%'),steamTags:['Local Co-op'],dailyChange:true},
+  ]},
+]});
+const coOpCount=()=>coOpDoc.querySelector('#view-count').textContent;
+const newOnlyButton=coOpDoc.querySelector('#new-only');
+assert.equal(coOpCount(),'4개 게임');
+newOnlyButton.click();
+assert.equal(coOpCount(),'2개 게임','Only actual ribbons count as NEW');
+coOpDoc.querySelector('[role="tab"][aria-label="협동"]').click();
+assert.equal(coOpCount(),'1개 게임','Co-op and NEW filters intersect');
+assert.equal(newOnlyButton.getAttribute('aria-pressed'),'true');
+coOpDoc.querySelector('[data-type="deals"]').click();
+assert.equal(newOnlyButton.hidden,true);
+assert.equal(coOpCount(),'1개 게임','An ongoing co-op discount is available in the discount tab');
+coOpDoc.querySelector('[data-type="all"]').click();
+assert.equal(coOpCount(),'1개 게임');
+newOnlyButton.click();
+assert.equal(coOpCount(),'2개 게임','Co-op accepts exact Steam tags across genre groups');
+assert.equal(coOpDoc.querySelectorAll('.game').length,4,'Co-op view does not clone cards');
+console.log('PASS: cooperative games across genres, exact tag matching, and combinable NEW ribbon filter');

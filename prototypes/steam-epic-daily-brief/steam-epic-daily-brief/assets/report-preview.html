@@ -47,6 +47,9 @@
     .free-scope button[aria-pressed="true"] { color:#e5f5ff; border-bottom-color:var(--blue); }
     .view-info { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:17px 0 0; font-size:12px; color:var(--sub); }
     .view-info strong { color:#dce9f2; font-weight:600; }
+    .view-actions { display:flex; align-items:center; gap:12px; }
+    .new-only { color:#aacde2; border:1px solid #416079; border-radius:3px; padding:2px 8px; }
+    .new-only:hover,.new-only[aria-pressed="true"] { color:#092534; background:#78d5ff; border-color:#78d5ff; }
     .active-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
     .active-tags:empty { display:none; }
     .active-tag { padding:3px 7px; color:#b9e0f8; background:#254b63; border:1px solid #416b86; font-size:11px; }
@@ -129,7 +132,13 @@
           <button type="button" data-free-type="free" aria-pressed="true">100% 할인 · 영구 소장</button>
           <button type="button" data-free-type="alwaysFree" aria-pressed="false">상시 무료</button>
         </div>
-        <div class="view-info"><strong id="view-title">전체 게임</strong><span id="view-count" role="status" aria-live="polite"></span></div>
+        <div class="view-info">
+          <strong id="view-title">전체 게임</strong>
+          <div class="view-actions">
+            <button id="new-only" class="new-only" type="button" aria-pressed="false" hidden>NEW만</button>
+            <span id="view-count" role="status" aria-live="polite"></span>
+          </div>
+        </div>
         <div id="active-tags" class="active-tags" aria-label="적용한 필터"></div>
         <div id="sections"></div><p id="empty-state" class="empty" role="status" hidden></p>
         <details class="report-details"><summary>출처와 조사 기준</summary><p class="limits" id="limits"></p><div class="sources" id="sources"></div><p class="load-state" id="image-state" role="status">썸네일 확인 중</p></details>
@@ -149,6 +158,7 @@
     function icon(name) { const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.7');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');svg.setAttribute('class','icon');svg.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',iconPaths[name]||iconPaths.grid);svg.append(path);return svg; }
     const genreLabels={'전체':['전체','grid'],'RPG':['RPG','sword'],'액션':['액션','zap'],'어드벤처':['모험','compass'],'로그라이크·로그라이트':['로그라이크','dice'],'전략':['전략','flag'],'시뮬레이션·경영':['시뮬·경영','factory'],'생존·제작':['생존','leaf'],'공포':['공포','ghost'],'퍼즐':['퍼즐','puzzle'],'플랫포머·메트로배니아':['플랫폼','steps'],'스포츠·레이싱':['스포츠·레이싱','wheel'],'리듬·음악':['리듬','music'],'방치형':['방치','clock'],'증분':['증분','growth'],'성인 요소':['성인','shield'],'덱빌딩':['덱빌딩','cards'],'오토배틀러':['오토배틀러','units'],'자동화·공장':['자동화·공장','factory'],'타워 디펜스':['타워 디펜스','tower'],'도시 건설':['도시 건설','city'],'덱빌딩·자동 전투':['덱빌딩','cards']};
     const typeIcons={all:'grid',new:'spark',deals:'sale',free:'gift'};
+    genreLabels['협동']=['협동','units'];
     const primaryPreferences={'RPG':['RPG','JRPG','액션 RPG'],'액션':['액션','액션 로그라이크','핵 앤 슬래시'],'어드벤처':['어드벤처','퍼즐','탐험'],'로그라이크·로그라이트':['로그라이크','로그라이트','액션 로그라이크'],'전략':['전략','턴제 전술','타워 디펜스'],'시뮬레이션·경영':['경영','시뮬레이션','자원관리'],'생존·제작':['생존','생존 제작','제작'],'공포':['공포','심리적 공포','생존 공포'],'퍼즐':['퍼즐','논리','퍼즐 플랫폼'],'플랫포머·메트로배니아':['플랫폼','메트로배니아','2D 플랫폼'],'스포츠·레이싱':['레이싱','스포츠','운전'],'리듬·음악':['리듬','음악'],'방치형':['아이들러','방치형','자동화'],'증분':['인크리멘탈','Incremental','자원관리'],'덱빌딩':['덱빌딩','로그라이크 덱빌딩','카드 배틀','카드 게임'],'오토배틀러':['오토 배틀러','오토배틀러','전략','전술 RPG'],'자동화·공장':['자동화','자원관리','기지 건설'],'타워 디펜스':['타워 디펜스','전략'],'도시 건설':['도시 건설','기지 건설','경영']};
     const storeHosts = new Set(['store.steampowered.com','steamcommunity.com']);
     const imageHosts = new Set(['shared.akamai.steamstatic.com','shared.fastly.steamstatic.com','shared.cloudflare.steamstatic.com','cdn.akamai.steamstatic.com','cdn.cloudflare.steamstatic.com']);
@@ -225,7 +235,8 @@
     ]);
     function addUpdateRibbon(cover, updates) {
       const labels=Array.isArray(updates)?updates.map(key=>updateLabels.get(key)).filter(Boolean):[];
-      if(!labels.length || cover.querySelector('.new-ribbon'))return;
+      if(!labels.length)return false;
+      if(cover.querySelector('.new-ribbon'))return true;
       const reason=labels.join(' · ');
       const ribbon=make('div','','new-ribbon');
       ribbon.setAttribute('role','img');
@@ -233,6 +244,7 @@
       ribbon.append(make('span','NEW'));
       cover.querySelector('.image-link').title=reason;
       cover.append(ribbon);
+      return true;
     }
     const reportStamp=String(data.asOf || '').replace(' ','T');
     const reportTime=Date.parse(/[Zz]|[+-]\d{2}:\d{2}$/.test(reportStamp)?reportStamp:reportStamp+'+09:00');
@@ -308,6 +320,13 @@
     let selectedGenre=-1;
     let selectedType='all';
     let selectedFreeType='free';
+    let newOnly=false;
+    const coOpGenre=-3;
+    const coOpTagIds=new Set(['1685','3843','3841','4508']);
+    const coOpTagNames=new Set(['협동','온라인 협동','로컬 협동','협동 캠페인','co-op','online co-op','local co-op','co-op campaign']);
+    const hasCoOp=game=>(game.steamTags || []).some(tag=>tag.id
+      ?coOpTagIds.has(String(tag.id))
+      :coOpTagNames.has((typeof tag==='string'?tag:tag.name || '').trim().toLowerCase()));
     const alwaysFree=game=>game.priceVerified===true && game.priceValue===0 &&
       (game.freeType==='always' || String(game.price || '').startsWith('상시 무료'));
     const discountPercent=game=>{
@@ -353,13 +372,14 @@
           const existing=seen.get(key);
           existing.categories.add(category);existing.curatedCategories.add(category);
           existing.sexual ||= sexualTags(game).length>0;for(const tag of registerTags(game))existing.tagKeys.add(tag);
-          addUpdateRibbon(existing.row.querySelector('.cover'),game.reportUpdates);
+          existing.coOp ||= hasCoOp(game);
+          existing.hasUpdate = addUpdateRibbon(existing.row.querySelector('.cover'),game.reportUpdates) || existing.hasUpdate;
           continue;
         }
         const row = make('article','','game');
         const sexTags=sexualTags(game);
         const korean=koreanSupport(game);
-        const item={row,tagKeys:registerTags(game),korean,homeCategory:category,curatedCategories:new Set([category]),categories:new Set([category]),sexual:sexTags.length>0};
+        const item={row,tagKeys:registerTags(game),korean,coOp:hasCoOp(game),homeCategory:category,curatedCategories:new Set([category]),categories:new Set([category]),sexual:sexTags.length>0};
         const saleRemaining=percent ? saleEnd(game)-reportTime : NaN;
         item.saleRemaining=saleRemaining>0?saleRemaining:Infinity;
         if(percent && percent<100 && category!=='free') item.categories.add('deals');
@@ -395,7 +415,7 @@
         }
         if(item.categories.has('free')) badges.append(make('span','무료 배포','badge badge-sale'));
         if(badges.childNodes.length) cover.append(badges);
-        addUpdateRibbon(cover,game.reportUpdates);
+        item.hasUpdate=addUpdateRibbon(cover,game.reportUpdates);
         const description=make('p',game.description,'description');description.title=game.description;copy.append(description);
         const metadata=make('div','','metadata');
         const languageBadge=make(korean===true?'button':'span',`한국어 ${korean===true?'O':korean===false?'X':'미확인'}`,`badge ${korean===true?'language-supported':'language-unsupported'}`);
@@ -480,19 +500,27 @@
       tagOptions.push({key,name:tag.name,label,input,count});
     }
     const typeButtons=[...byId('type-filters').querySelectorAll('[data-type]')];
+    const newButton=byId('new-only');
+    const hasUpdates=[...seen.values()].some(item=>item.hasUpdate && item.homeCategory!=='alwaysFree');
+    newButton.addEventListener('click',()=>{newOnly=!newOnly;renderView();});
     typeButtons.forEach(button=>{const text=button.textContent;button.textContent='';button.append(icon(typeIcons[button.dataset.type]),make('span',text));});
     function renderView() {
       if(activePreview)activePreview.stop();
       const viewingFree=selectedType==='free';
       const viewType=viewingFree?selectedFreeType:selectedType;
+      const showNewOnly=newOnly && viewType==='all';
+      newButton.hidden=viewType!=='all' || !hasUpdates;
+      newButton.setAttribute('aria-pressed',String(showNewOnly));
       byId('free-scope').hidden=!viewingFree;
       freeButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.freeType===selectedFreeType)));
       let count=0;facetCounts=new Map();
       panels.forEach((panel,index)=>{
-        const inGenre=selectedGenre===-1 || selectedGenre===-2 || selectedGenre===index;
+        const inGenre=selectedGenre<0 || selectedGenre===index;
         const candidates=panel.items.filter(item=>
           (viewType==='all' ? item.homeCategory!=='alwaysFree' : item.categories.has(viewType)) &&
           (selectedGenre!==-2 || item.sexual) &&
+          (selectedGenre!==coOpGenre || item.coOp) &&
+          (!showNewOnly || item.hasUpdate) &&
           (!koreanOnly || item.korean===true)
         );
         const limit=data.selectionLimits?.[viewType];
@@ -523,10 +551,10 @@
         panel.columns.dataset.mode=visibleBuckets>1?'split':'single';
         panel.section.hidden=!inGenre || visible===0;
         const heading=panel.section.querySelector('h2');
-        if(heading) heading.hidden=selectedGenre!==-1;
+        if(heading) heading.hidden=selectedGenre!==-1 && selectedGenre!==coOpGenre;
         if(inGenre) count+=visible;
       });
-      const name=selectedGenre===-1?'전체 장르':selectedGenre===-2?'성인 요소':panels[selectedGenre].name;
+      const name=selectedGenre===-1?'전체 장르':selectedGenre===-2?'성인 요소':selectedGenre===coOpGenre?'협동':panels[selectedGenre].name;
       const viewName=selectedGenre===-2?name:(genreLabels[name]?.[0] || name);byId('view-title').title=name;
       byId('view-title').textContent=viewType==='all'?viewName:`${viewName} · ${labels[viewType]}`;
       byId('view-count').textContent=`${count}개 게임`;
@@ -536,13 +564,15 @@
       renderTagOptions();renderActiveFilters();
       const empty=byId('empty-state'); empty.hidden=count!==0;
       if(!count) {
-        const messages=panels.filter((_,index)=>selectedGenre===-1 || selectedGenre===-2 || selectedGenre===index).map(panel=>panel.emptyMessages[viewType] || (viewType==='all' ? Object.values(panel.emptyMessages).join(' ') : '')).join(' ');
+        const messages=panels.filter((_,index)=>selectedGenre<0 || selectedGenre===index).map(panel=>panel.emptyMessages[viewType] || (viewType==='all' ? Object.values(panel.emptyMessages).join(' ') : '')).join(' ');
         const incomplete=/실패|불가|제한|미기재/.test(messages);
         if(koreanOnly) empty.textContent='현재 조건에 맞는 한국어 지원 게임이 없습니다.';
         else if(selectedTags.size) empty.textContent='선택한 태그를 모두 포함한 게임이 없습니다.';
         else if(incomplete) empty.textContent=viewType==='free'?'무료 배포 정보를 확인하지 못했습니다.':'이 조건의 정보를 확인하지 못했습니다.';
         else if(viewType==='free') empty.textContent='현재 확인된 무료 배포가 없습니다.';
         else if(viewType==='alwaysFree') empty.textContent='현재 이 목록에 상시 무료 게임이 없습니다.';
+        else if(showNewOnly) empty.textContent='현재 조건에 맞는 NEW 게임이 없습니다.';
+        else if(selectedGenre===coOpGenre) empty.textContent='현재 목록에 협동 지원이 확인된 게임이 없습니다.';
         else empty.textContent='조건에 맞는 게임이 없습니다.';
       }
     }
@@ -550,7 +580,8 @@
     freeButtons.forEach(button=>button.addEventListener('click',()=>{selectedFreeType=button.dataset.freeType; renderView();}));
     if (grouped && panels.length) {
       const tabs=[];
-      const entries=[{name:'전체',index:-1},...panels.map((panel,index)=>({name:panel.name,index})),...(data.includeMature?[{name:'성인 요소',index:-2}]:[])];
+      const genres=panels.map((panel,index)=>({name:panel.name,index})).filter(entry=>entry.name!=='협동');
+      const entries=[{name:'전체',index:-1},...genres,{name:'협동',index:coOpGenre},...(data.includeMature?[{name:'성인 요소',index:-2}]:[])];
       byId('genre-tabs').hidden=false;
       byId('sections').setAttribute('role','tabpanel');
       function activate(index) {
