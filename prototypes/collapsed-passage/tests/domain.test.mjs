@@ -46,6 +46,17 @@ test("a body part keeps the larger guard, never drops below zero and reports its
   assert.deepEqual(JSON.parse(JSON.stringify(part)), {hp: 0, max: 6, guard: 0});
 });
 
+test("body parts copy like plain data so tools can clone the run state", () => {
+  const {state} = setup();
+  state.player.body.arms.hp = 3;
+  state.player.body.arms.raiseGuard(2);
+  const arms = {hp: 3, max: 7, guard: 2};
+  assert.deepEqual(structuredClone(state.player.body).arms, arms);
+  assert.deepEqual({...state.player.body.arms}, arms);
+  assert.deepEqual(Object.keys(state.player.body.arms), ["hp", "max", "guard"]);
+  assert.deepEqual(structuredClone({hp: state.player.hp, body: state.player.body}).body.head, {hp: 9, max: 9, guard: 0});
+});
+
 test("a training dummy can stand in for any enemy without ever going down", () => {
   const {services} = setup();
   const dummy = services.fighters.enemy("janitor", {training: true});
