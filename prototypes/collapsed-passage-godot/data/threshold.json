@@ -4540,38 +4540,142 @@
       }
     },
     "janitor": {
-      "idle": "art/characters/janitor-idle.webp",
+      "idle": "art/characters/foes/janitor-idle.webp",
       "poses": {
-        "attack": "art/characters/motion/janitor-attack.png",
-        "hit": "art/characters/motion/janitor-hit.png",
-        "guard": "art/characters/motion/janitor-guard.webp",
-        "defeat": "art/characters/motion/janitor-defeat.webp"
+        "attack": "art/characters/foes/janitor-attack.webp",
+        "hit": "art/characters/foes/janitor-hit.webp",
+        "guard": "art/characters/foes/janitor-guard.webp",
+        "defeat": "art/characters/foes/janitor-defeat.webp"
       },
       "anchors": {
         "idle": {
           "head": [
-            33,
-            11
+            37,
+            28
           ],
           "eyes": [
-            57,
-            20
+            37,
+            33
           ],
           "arms": [
-            73,
-            43
+            70,
+            57
+          ],
+          "chest": [
+            50,
+            48
+          ],
+          "belly": [
+            52,
+            62
+          ],
+          "legs": [
+            50,
+            82
+          ]
+        },
+        "attack": {
+          "head": [
+            34,
+            30
+          ],
+          "eyes": [
+            32,
+            36
+          ],
+          "arms": [
+            62,
+            22
+          ],
+          "chest": [
+            45,
+            50
+          ],
+          "belly": [
+            50,
+            62
+          ],
+          "legs": [
+            50,
+            82
+          ]
+        },
+        "hit": {
+          "head": [
+            64,
+            29
+          ],
+          "eyes": [
+            64,
+            33
+          ],
+          "arms": [
+            30,
+            45
+          ],
+          "chest": [
+            55,
+            52
+          ],
+          "belly": [
+            52,
+            63
+          ],
+          "legs": [
+            45,
+            82
+          ]
+        },
+        "guard": {
+          "head": [
+            41,
+            36
+          ],
+          "eyes": [
+            40,
+            41
+          ],
+          "arms": [
+            60,
+            53
           ],
           "chest": [
             48,
-            37
+            58
           ],
           "belly": [
-            56,
-            60
+            50,
+            68
           ],
           "legs": [
-            51,
+            50,
             83
+          ]
+        },
+        "defeat": {
+          "head": [
+            23.6,
+            79.0
+          ],
+          "eyes": [
+            21.6,
+            81.5
+          ],
+          "arms": [
+            45.1,
+            85.1
+          ],
+          "chest": [
+            50.0,
+            77.5
+          ],
+          "belly": [
+            64.7,
+            79.0
+          ],
+          "legs": [
+            84.2,
+            79.0
           ]
         }
       },
@@ -4579,38 +4683,142 @@
       "kneeling": {}
     },
     "crawler": {
-      "idle": "art/characters/crawler-idle.webp",
+      "idle": "art/characters/foes/crawler-idle.webp",
       "poses": {
-        "attack": "art/characters/motion/crawler-attack.png",
-        "hit": "art/characters/motion/crawler-hit.png",
-        "guard": "art/characters/motion/crawler-guard.webp",
-        "defeat": "art/characters/motion/crawler-defeat.webp"
+        "attack": "art/characters/foes/crawler-attack.webp",
+        "hit": "art/characters/foes/crawler-hit.webp",
+        "guard": "art/characters/foes/crawler-guard.webp",
+        "defeat": "art/characters/foes/crawler-defeat.webp"
       },
       "anchors": {
         "idle": {
           "head": [
-            28,
-            26
+            24,
+            47
           ],
           "eyes": [
-            51,
-            23
+            24,
+            54
           ],
           "arms": [
-            63,
-            50
+            70,
+            57
           ],
           "chest": [
-            45,
-            43
+            50,
+            62
           ],
           "belly": [
-            72,
-            65
+            55,
+            72
           ],
           "legs": [
-            53,
-            85
+            62,
+            82
+          ]
+        },
+        "attack": {
+          "head": [
+            33,
+            57
+          ],
+          "eyes": [
+            31,
+            63
+          ],
+          "arms": [
+            12,
+            70
+          ],
+          "chest": [
+            48,
+            70
+          ],
+          "belly": [
+            60,
+            72
+          ],
+          "legs": [
+            80,
+            82
+          ]
+        },
+        "hit": {
+          "head": [
+            40,
+            52
+          ],
+          "eyes": [
+            40,
+            58
+          ],
+          "arms": [
+            20,
+            68
+          ],
+          "chest": [
+            55,
+            68
+          ],
+          "belly": [
+            60,
+            75
+          ],
+          "legs": [
+            70,
+            82
+          ]
+        },
+        "guard": {
+          "head": [
+            42,
+            55
+          ],
+          "eyes": [
+            40,
+            62
+          ],
+          "arms": [
+            42,
+            68
+          ],
+          "chest": [
+            52,
+            70
+          ],
+          "belly": [
+            55,
+            78
+          ],
+          "legs": [
+            55,
+            88
+          ]
+        },
+        "defeat": {
+          "head": [
+            23.6,
+            80.7
+          ],
+          "eyes": [
+            26.2,
+            82.7
+          ],
+          "arms": [
+            36.8,
+            89.4
+          ],
+          "chest": [
+            51.8,
+            84.4
+          ],
+          "belly": [
+            63.2,
+            84.4
+          ],
+          "legs": [
+            83.5,
+            86.2
           ]
         }
       },
@@ -4618,38 +4826,142 @@
       "kneeling": {}
     },
     "medic": {
-      "idle": "art/characters/medic-idle.webp",
+      "idle": "art/characters/foes/medic-idle.webp",
       "poses": {
-        "attack": "art/characters/motion/medic-attack.png",
-        "hit": "art/characters/motion/medic-hit.png",
-        "guard": "art/characters/motion/medic-guard.webp",
-        "defeat": "art/characters/motion/medic-defeat.webp"
+        "attack": "art/characters/foes/medic-attack.webp",
+        "hit": "art/characters/foes/medic-hit.webp",
+        "guard": "art/characters/foes/medic-guard.webp",
+        "defeat": "art/characters/foes/medic-defeat.webp"
       },
       "anchors": {
         "idle": {
           "head": [
-            36,
-            12
+            50,
+            27
+          ],
+          "eyes": [
+            44,
+            34
+          ],
+          "arms": [
+            30,
+            46
+          ],
+          "chest": [
+            48,
+            50
+          ],
+          "belly": [
+            48,
+            62
+          ],
+          "legs": [
+            48,
+            82
+          ]
+        },
+        "attack": {
+          "head": [
+            52,
+            34
+          ],
+          "eyes": [
+            45,
+            42
+          ],
+          "arms": [
+            25,
+            52
+          ],
+          "chest": [
+            55,
+            57
+          ],
+          "belly": [
+            55,
+            66
+          ],
+          "legs": [
+            55,
+            82
+          ]
+        },
+        "hit": {
+          "head": [
+            64,
+            34
           ],
           "eyes": [
             58,
-            22
+            38
           ],
           "arms": [
-            68,
-            47
+            35,
+            30
           ],
           "chest": [
-            46,
-            39
+            50,
+            55
           ],
           "belly": [
-            57,
-            61
+            48,
+            65
           ],
           "legs": [
-            49,
+            45,
+            82
+          ]
+        },
+        "guard": {
+          "head": [
+            37,
+            38
+          ],
+          "eyes": [
+            32,
+            46
+          ],
+          "arms": [
+            35,
+            58
+          ],
+          "chest": [
+            40,
+            60
+          ],
+          "belly": [
+            42,
+            70
+          ],
+          "legs": [
+            45,
             84
+          ]
+        },
+        "defeat": {
+          "head": [
+            18.6,
+            74.7
+          ],
+          "eyes": [
+            19.5,
+            80.2
+          ],
+          "arms": [
+            36.5,
+            82.8
+          ],
+          "chest": [
+            45.5,
+            76.3
+          ],
+          "belly": [
+            59.0,
+            77.9
+          ],
+          "legs": [
+            81.4,
+            77.9
           ]
         }
       },
@@ -4657,38 +4969,142 @@
       "kneeling": {}
     },
     "sentinel": {
-      "idle": "art/characters/sentinel-idle.webp",
+      "idle": "art/characters/foes/sentinel-idle.webp",
       "poses": {
-        "attack": "art/characters/motion/sentinel-attack.png",
-        "hit": "art/characters/motion/sentinel-hit.png",
-        "guard": "art/characters/motion/sentinel-guard.webp",
-        "defeat": "art/characters/motion/sentinel-defeat.webp"
+        "attack": "art/characters/foes/sentinel-attack.webp",
+        "hit": "art/characters/foes/sentinel-hit.webp",
+        "guard": "art/characters/foes/sentinel-guard.webp",
+        "defeat": "art/characters/foes/sentinel-defeat.webp"
       },
       "anchors": {
         "idle": {
           "head": [
-            36,
-            12
+            42,
+            14
           ],
           "eyes": [
-            60,
-            21
+            42,
+            22
           ],
           "arms": [
-            72,
-            46
+            78,
+            58
           ],
           "chest": [
-            49,
-            37
+            60,
+            40
           ],
           "belly": [
-            57,
-            61
+            55,
+            58
           ],
           "legs": [
-            46,
-            83
+            50,
+            85
+          ]
+        },
+        "attack": {
+          "head": [
+            37,
+            38
+          ],
+          "eyes": [
+            37,
+            44
+          ],
+          "arms": [
+            85,
+            58
+          ],
+          "chest": [
+            60,
+            52
+          ],
+          "belly": [
+            55,
+            65
+          ],
+          "legs": [
+            55,
+            85
+          ]
+        },
+        "hit": {
+          "head": [
+            70,
+            33
+          ],
+          "eyes": [
+            72,
+            40
+          ],
+          "arms": [
+            45,
+            42
+          ],
+          "chest": [
+            60,
+            57
+          ],
+          "belly": [
+            58,
+            67
+          ],
+          "legs": [
+            50,
+            82
+          ]
+        },
+        "guard": {
+          "head": [
+            42,
+            34
+          ],
+          "eyes": [
+            42,
+            40
+          ],
+          "arms": [
+            55,
+            60
+          ],
+          "chest": [
+            55,
+            57
+          ],
+          "belly": [
+            55,
+            68
+          ],
+          "legs": [
+            55,
+            86
+          ]
+        },
+        "defeat": {
+          "head": [
+            7.5,
+            75.7
+          ],
+          "eyes": [
+            11.6,
+            79.2
+          ],
+          "arms": [
+            19.7,
+            84.3
+          ],
+          "chest": [
+            34.8,
+            77.2
+          ],
+          "belly": [
+            50.0,
+            75.7
+          ],
+          "legs": [
+            75.3,
+            75.7
           ]
         }
       },
