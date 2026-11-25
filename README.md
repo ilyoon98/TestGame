@@ -9,7 +9,8 @@
 | 실험 | 열 파일 | 내용 |
 | --- | --- | --- |
 | Coin Flip | [coin.html](prototypes/coin-flip/coin.html) | 동전 뒤집기 |
-| 붕괴 통로 | [index.html](prototypes/collapsed-passage/index.html) | 부위별 부상과 추격을 관리하는 턴제 카드 게임. HTML 파일을 브라우저에서 바로 엽니다. [기획서](prototypes/collapsed-passage/DESIGN.md) |
+| 붕괴 통로 | [index.html](prototypes/collapsed-passage/index.html) | 부위별 부상과 추격을 관리하는 턴제 카드 게임. ES 모듈을 쓰므로 위의 로컬 서버로 엽니다. [기획서](prototypes/collapsed-passage/DESIGN.md) |
+| 붕괴 통로 연출 실험실 | [index.html](prototypes/collapsed-passage-fx-lab/index.html) | 일반·치명타·부상·결손 데미지 숫자와 부상 컷인·결손 컷신을 눌러 보고 값을 조정합니다. 붕괴 통로 원화를 상대 경로로 읽으므로 위 HTTP 서버로 엽니다. |
 | Dice | [dice2d.html](prototypes/dice/dice2d.html), [dice_land_phase7.html](prototypes/dice/dice_land_phase7.html) | 2D 주사위와 주사위 땅따먹기 |
 | Emotion Buttons | [index.html](prototypes/emotion-buttons/index.html) | 버튼으로 바꾸는 감정 표현 |
 | Envy Movement | [stamina-demo.html](prototypes/envy-movement/envy-v3/stamina-demo.html) | 캐릭터 이동과 스태미나 애니메이션. 초기 에셋은 같은 폴더의 `envy/`, `envy-v2/`에 있습니다. |

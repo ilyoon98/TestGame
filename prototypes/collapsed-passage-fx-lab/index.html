@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>부상·결손 연출 실험실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16111b;--panel:#211a28;--panel2:#2a2133;--line:#3d3149;--ink:#efe6da;--mute:#a99bb3;
+  --gold:#f3c56b;--lilac:#b9a3d8;--injury:#e9a54a;--loss:#ff4a3d;--crit:#ffd36e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:14px/1.5 "Malgun Gothic",system-ui,sans-serif;padding:16px}
+h1{font:700 18px/1.3 "Malgun Gothic",sans-serif;margin:0 0 2px}
+.sub{color:var(--mute);margin:0 0 12px;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;max-width:1500px;margin:0 auto}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+
+/* ---------- stage ---------- */
+.stage{position:relative;aspect-ratio:2.1/1;overflow:hidden;border-radius:10px;border:1px solid var(--line);background:#0c090e;user-select:none;cursor:default}
+@media (max-width:700px){.stage{aspect-ratio:1.45/1}}
+.cam,.shaker,.world{position:absolute;inset:0}
+.cam{will-change:transform}
+.backdrop{position:absolute;inset:0;background:url(../collapsed-passage/art/arena/prison-backdrop.webp) center 70%/cover;transition:filter .25s}
+.backdrop::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#0d0a10 0%,transparent 35%)}
+.actor{position:absolute;bottom:3%;height:86%;aspect-ratio:2/3;transition:filter .25s}
+.actor.ally{left:13%}
+.actor.enemy{right:13%}
+.body{position:absolute;inset:0}
+.sprite{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 6px #0009)}
+.shadow{position:absolute;left:18%;right:18%;bottom:3%;height:5%;border-radius:50%;background:radial-gradient(#000a,transparent 70%)}
+.name{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);font-size:12px;color:var(--mute);white-space:nowrap}
+.status{position:absolute;left:50%;top:100%;transform:translate(-50%,-115%);display:flex;gap:4px;z-index:3}
+.chip{display:flex;align-items:center;gap:3px;padding:1px 6px 1px 3px;border-radius:5px;font-size:11px;font-weight:700;white-space:nowrap}
+.chip svg{width:14px;height:14px}
+.chip.injured{background:#3b2713;color:#ffd9a6;border:1px solid var(--injury)}
+.chip.lost{background:#43100d;color:#ffd1cb;border:1px solid var(--loss)}
+.mark{position:absolute;width:13%;aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;z-index:2;filter:drop-shadow(0 2px 3px #000c)}
+.mark svg{width:100%;height:100%;display:block}
+.ring{position:absolute;width:15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:3px solid var(--c);box-shadow:0 0 14px var(--c),inset 0 0 10px var(--c);pointer-events:none;z-index:2}
+.spark{position:absolute;width:24%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(circle,#fff 0 12%,var(--c) 30%,transparent 66%);mix-blend-mode:screen}
+.streak{position:absolute;height:5px;width:42%;transform-origin:50% 50%;pointer-events:none;z-index:3;border-radius:5px;background:linear-gradient(90deg,transparent,#fff 45%,var(--c) 70%,transparent);mix-blend-mode:screen}
+
+/* ---------- damage numbers ---------- */
+.dmg{position:absolute;translate:-50% -50%;pointer-events:none;z-index:6;white-space:nowrap}
+.pop{display:flex;align-items:center;gap:.18em}
+.jit{display:flex;align-items:center;gap:.18em}
+.val{font-family:var(--f);font-size:var(--s);font-weight:var(--w);color:var(--c);line-height:1;letter-spacing:-.02em;
+  -webkit-text-stroke:.15em #140b0e;paint-order:stroke fill;text-shadow:0 .07em .14em #000c;font-variant-numeric:tabular-nums}
+.val.light{-webkit-text-stroke:.1em #140b0e}
+.tag{font:800 calc(var(--s)*.42)/1 "Malgun Gothic",sans-serif;color:var(--c);-webkit-text-stroke:.18em #140b0e;paint-order:stroke fill;align-self:flex-start}
+.badge{position:relative;width:calc(var(--s)*.95);height:calc(var(--s)*.95);display:grid;place-items:center;border-radius:.22em;border:2px solid var(--c);background:#2b1a10;color:#ffe9cc;box-shadow:0 2px 6px #000b}
+.badge svg{width:68%;height:68%}
+.badge.lost{background:#4a0e0c}
+.badge .x{position:absolute;right:-26%;bottom:-26%;width:66%;height:66%}
+
+/* ---------- overlays ---------- */
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20;mix-blend-mode:screen}
+.vignette{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:19;background:radial-gradient(ellipse at center,transparent 45%,#7a0703cc 100%)}
+.letterbox{position:absolute;left:0;right:0;height:0;background:#050305;z-index:18;pointer-events:none}
+.letterbox.top{top:0}.letterbox.bottom{bottom:0}
+.dim{position:absolute;inset:0;background:#0a0710;opacity:0;pointer-events:none;z-index:10}
+.layer{position:absolute;inset:0;pointer-events:none;z-index:12}
+.skip-hint{position:absolute;right:10px;bottom:8px;z-index:21;font-size:11px;color:#fff9;opacity:0;transition:opacity .2s;pointer-events:none}
+.stage.busy .skip-hint{opacity:1}
+.stage.busy{cursor:pointer}
+.art-missing{position:absolute;inset:0;z-index:30;display:grid;place-content:center;justify-items:center;gap:8px;padding:16px;text-align:center;background:#0c090ef2;font-size:13px;color:#d8cde2}
+.art-missing[hidden]{display:none}
+.art-missing b{font-size:15px;color:var(--gold)}
+.art-missing code{font:12px Consolas,monospace;background:#211a28;border:1px solid var(--line);border-radius:5px;padding:3px 8px;color:#fff;user-select:all;max-width:100%;overflow-wrap:anywhere}
+
+/* injury / short cut-in band */
+.cutin{position:absolute;left:-6%;right:-6%;top:31%;height:38%;transform:skewY(-5deg);border-block:3px solid var(--c);
+  background:repeating-linear-gradient(100deg,#ffffff07 0 2px,transparent 2px 26px),linear-gradient(90deg,#0f0a0df2,#2b1b13f5 45%,#0f0a0df2);
+  box-shadow:0 0 0 1px #000,0 10px 30px #000c;overflow:hidden}
+.cutin.lost{background:repeating-linear-gradient(100deg,#ffffff07 0 2px,transparent 2px 26px),linear-gradient(90deg,#120507f2,#3d0b0af5 45%,#120507f2)}
+.cutin-inner{position:absolute;inset:0;transform:skewY(5deg);display:flex;align-items:center;justify-content:center;gap:3%}
+.cutin-face{height:118%;aspect-ratio:1;background-repeat:no-repeat;background-size:290%;filter:drop-shadow(0 0 1px #000)}
+.cutin-part{height:70%;aspect-ratio:1;border-radius:8px;border:2px solid var(--c);background:center/cover;box-shadow:0 0 18px color-mix(in srgb,var(--c) 50%,transparent)}
+.cutin-text{display:grid;gap:2px}
+.cutin-word{font:400 clamp(30px,6.4vw,76px)/1 "Black Han Sans","Malgun Gothic",sans-serif;color:var(--c);-webkit-text-stroke:.06em #000;paint-order:stroke fill;letter-spacing:.02em}
+.cutin-subtext{font-weight:700;font-size:clamp(12px,1.5vw,17px);color:#f2e4d6}
+
+/* loss cutscene */
+.cs{position:absolute;inset:0;z-index:14;pointer-events:none}
+.cs-panel{position:absolute;top:50%;width:min(30%,46vh);aspect-ratio:1;translate:-50% -54%}
+.cs-art,.cs-half{position:absolute;inset:0;background:center/cover;border-radius:10px}
+.cs-art{border:3px solid var(--loss);box-shadow:0 0 40px #ff2a1a66,0 10px 30px #000}
+.cs-half{border:3px solid var(--loss);opacity:0}
+.cs-half.a{clip-path:polygon(0 0,100% 0,0 100%)}
+.cs-half.b{clip-path:polygon(100% 0,100% 100%,0 100%)}
+.cs-slash{position:absolute;inset:-12%;width:124%;height:124%;overflow:visible}
+.cs-slash line{stroke:#fff;stroke-width:3.2;stroke-linecap:round;filter:drop-shadow(0 0 4px #ff3b2b) drop-shadow(0 0 10px #ff3b2b)}
+.cs-stamp{position:absolute;top:50%;translate:-50% 0;display:grid;justify-items:center;opacity:0}
+.cs-stamp b{font:400 clamp(44px,9vw,120px)/1 "Black Han Sans","Malgun Gothic",sans-serif;color:var(--loss);-webkit-text-stroke:.05em #0b0405;paint-order:stroke fill;text-shadow:0 0 24px #ff200f88}
+.cs-stamp span{margin-top:4px;font-weight:800;font-size:clamp(13px,1.7vw,19px);color:#ffe0d9;padding:1px 10px;border-radius:4px;background:#2a0907;border:1px solid var(--loss)}
+.shard{position:absolute;width:3.2%;aspect-ratio:1;background:var(--c);clip-path:polygon(50% 0,100% 60%,30% 100%,0 40%);opacity:0}
+.ink{position:absolute;width:40%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:radial-gradient(circle,#b0100acc 0 30%,#6d0806aa 45%,transparent 66%);opacity:0;filter:blur(1px)}
+
+/* ---------- controls ---------- */
+.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:12px 0}
+.group{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.group>.lbl{color:var(--mute);font-size:12px;margin-right:2px}
+button,.seg label{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer}
+button:hover,.seg label:hover{border-color:#6a5780}
+button:focus-visible,.seg input:focus-visible+label,input:focus-visible,select:focus-visible{outline:2px solid var(--lilac);outline-offset:1px}
+button.hit{font-weight:800;min-width:76px;padding:9px 14px}
+button.hit kbd{opacity:.55;font-size:11px;margin-left:5px;font-family:inherit}
+button.hit[data-tier=normal]{border-color:#7d7189}
+button.hit[data-tier=crit]{border-color:var(--crit);color:var(--crit)}
+button.hit[data-tier=injury]{border-color:var(--injury);color:var(--injury)}
+button.hit[data-tier=loss]{border-color:var(--loss);color:#ff8c82;background:#2e1215}
+.seg{display:flex;gap:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{border-radius:0;margin-left:-1px;padding:5px 10px;font-size:13px}
+.seg label:first-of-type{border-radius:7px 0 0 7px;margin-left:0}
+.seg label:last-of-type{border-radius:0 7px 7px 0}
+.seg input:checked+label{background:#46375a;border-color:var(--lilac);color:#fff}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;align-self:start;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+@media (max-width:980px){.panel{position:static;max-height:none}}
+.tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.tabs button{padding:5px 9px;font-size:13px}
+.tabs button[aria-selected=true]{background:#46375a;border-color:var(--lilac)}
+.field{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;margin:7px 0}
+.field label{font-size:13px}
+.field output{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
+.field input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--lilac)}
+.field.check{grid-template-columns:auto 1fr;justify-content:start}
+.field.check input{accent-color:var(--lilac);width:16px;height:16px;margin:0}
+.field select,.field input[type=color]{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:2px 4px;font:inherit;font-size:12px}
+.field input[type=color]{width:44px;height:26px;padding:1px}
+.sect{margin:14px 0 4px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--lilac);font-weight:700}
+.preview{display:grid;place-items:center;height:86px;border-radius:8px;background:#0d0a10;border:1px dashed var(--line);margin-bottom:6px;position:relative;overflow:hidden}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+textarea{width:100%;height:150px;background:#0d0a10;color:#d9cfe4;border:1px solid var(--line);border-radius:7px;font:11px/1.4 Consolas,monospace;padding:8px;resize:vertical}
+.toast{position:fixed;left:50%;bottom:20px;translate:-50% 0;background:#46375a;border:1px solid var(--lilac);padding:7px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+
+/* notes */
+details.notes{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+details.notes summary{cursor:pointer;font-weight:700}
+.notes table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+.notes th,.notes td{border-top:1px solid var(--line);padding:7px 8px;vertical-align:top;text-align:left}
+.notes th{color:var(--lilac);font-weight:700;white-space:nowrap}
+.notes td:first-child{font-weight:700;white-space:nowrap}
+.notes .ref{color:var(--mute);font-size:12px}
+.notes a{color:var(--lilac)}
+.notes p{margin:8px 0;color:#d8cde2}
+@media (max-width:700px){.notes table,.notes tbody,.notes tr,.notes td{display:block}.notes thead{display:none}.notes td{border:0;padding:2px 0}.notes tr{border-top:1px solid var(--line);padding:8px 0}}
+@media (prefers-reduced-motion:reduce){.backdrop,.actor{transition:none}}
+</style>
+</head>
+<body>
+<h1>부상·결손 연출 실험실</h1>
+<p class="sub">붕괴 통로 원화로 타격 단계별 연출을 바로 눌러 보고 값을 조정합니다. 마음에 드는 값은 조정 패널의 ‘설정 JSON 복사’로 가져가세요.</p>
+
+<div class="layout">
+<main>
+  <div class="stage" id="stage" aria-label="전투 미리보기">
+    <div class="cam" id="cam">
+      <div class="shaker" id="shaker">
+        <div class="world" id="world">
+          <div class="backdrop" id="backdrop"></div>
+          <div class="actor ally" id="ally"><div class="shadow"></div><div class="body"><img class="sprite" alt="수녀"></div><div class="status"></div></div>
+          <div class="actor enemy" id="enemy"><div class="shadow"></div><div class="body"><img class="sprite" alt="교도관"></div><div class="status"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="dim" id="dim"></div>
+    <div class="layer" id="fxlayer"></div>
+    <div class="vignette" id="vignette"></div>
+    <div class="letterbox top" id="lbTop"></div>
+    <div class="letterbox bottom" id="lbBottom"></div>
+    <div class="flash" id="flash"></div>
+    <div class="skip-hint">클릭하면 건너뜀</div>
+    <div class="art-missing" id="artMissing" hidden>
+      <b>원화를 불러오지 못했습니다</b>
+      <span>파일로 직접 열면 미리보기 창이 상대 경로 그림을 읽지 못합니다. 저장소 루트에서 로컬 서버를 켜고 아래 주소로 여세요.</span>
+      <code>py -m http.server 8000 --bind 127.0.0.1</code>
+      <code>http://127.0.0.1:8000/prototypes/collapsed-passage-fx-lab/</code>
+    </div>
+  </div>
+
+  <div class="bar">
+    <div class="group">
+      <button class="hit" data-tier="normal">일반<kbd>1</kbd></button>
+      <button class="hit" data-tier="crit">치명타<kbd>2</kbd></button>
+      <button class="hit" data-tier="injury">부상<kbd>3</kbd></button>
+      <button class="hit" data-tier="loss">결손<kbd>4</kbd></button>
+      <button id="demo">연속 재생<kbd style="opacity:.55;font-size:11px;margin-left:5px">5</kbd></button>
+      <button id="reset" title="부상·결손 상태를 정상으로 되돌립니다">상태 초기화<kbd style="opacity:.55;font-size:11px;margin-left:5px">R</kbd></button>
+    </div>
+  </div>
+  <div class="bar">
+    <div class="group"><span class="lbl">맞는 쪽</span>
+      <div class="seg" id="targetSeg">
+        <input type="radio" name="target" id="t-enemy" value="enemy" checked><label for="t-enemy">적</label>
+        <input type="radio" name="target" id="t-ally" value="ally"><label for="t-ally">수녀</label>
+      </div>
+    </div>
+    <div class="group"><span class="lbl">부위</span>
+      <div class="seg" id="partSeg"></div>
+    </div>
+    <div class="group"><span class="lbl">배속</span>
+      <div class="seg" id="speedSeg">
+        <input type="radio" name="speed" id="s1" value="1" checked><label for="s1">1×</label>
+        <input type="radio" name="speed" id="s2" value="2"><label for="s2">2×</label>
+        <input type="radio" name="speed" id="s4" value="4"><label for="s4">4×</label>
+      </div>
+    </div>
+  </div>
+
+  <details class="notes" open>
+    <summary>타격감 리서치와 붕괴 통로 적용안</summary>
+    <p>요청한 네 단계 폰트에 더해, 타격 순간을 여러 감각으로 겹치는 기법을 넣었습니다. 대부분 오른쪽 패널에서 끄고 켜거나 수치를 바꿀 수 있습니다.</p>
+    <table>
+      <thead><tr><th>기법</th><th>무엇을 하나</th><th>붕괴 통로 적용</th></tr></thead>
+      <tbody>
+        <tr><td>히트스톱</td><td>맞는 순간 두 인물을 수십 ms 멈춰 충격을 몸으로 느끼게 합니다. 길면 끊겨 보입니다. <span class="ref">60–120ms가 흔한 출발점</span></td><td>일반 0 · 치명 60 · 부상 110 · 결손 180ms. 정지 중 피격자만 미세하게 떨립니다.</td></tr>
+        <tr><td>방향성 화면 흔들림</td><td>공격 방향으로 화면을 밀고, 강도를 제곱해 약타는 거의 안 흔들리고 강타만 크게 흔들립니다. <span class="ref">Vlambeer “The Art of Screenshake”</span></td><td>단계별 진폭. 결손은 도장이 찍힐 때 한 번 더 흔듭니다.</td></tr>
+        <tr><td>피격 플래시</td><td>맞은 스프라이트를 한두 프레임 단색 실루엣으로 바꿉니다.</td><td>일반·치명은 흰색, 부상은 황갈색, 결손은 붉은색. 기존 ‘부상=황갈 / 결손=붉은색’ 색 규칙을 따릅니다.</td></tr>
+        <tr><td>숫자 팝과 오버슈트</td><td>숫자가 크게 튀어나왔다 제자리로 안착합니다. 큰 피해는 커지면서 떨려 무게를 줍니다.</td><td>요청한 4단계 폰트 규칙. 결손은 부위 아이콘 + X를 붙입니다.</td></tr>
+        <tr><td>부위 링</td><td>어디를 맞았는지 원형 표식으로 짚어 줍니다.</td><td>부상·결손 때 해당 부위에 링이 두 번 맥동합니다. 부위 전투의 핵심 정보라 텍스트보다 먼저 읽힙니다.</td></tr>
+        <tr><td>컷인 띠</td><td>짧은 사선 띠가 화면을 가로지르며 사건 이름을 알립니다. 진행을 거의 멈추지 않습니다.</td><td>부상 컷인 0.75초: 피격자 얼굴 · 부위 삽화 · ‘부상’. 전투 시간은 연출 중 멈추는 기존 규칙과 맞습니다.</td></tr>
+        <tr><td>시네마틱 슬로모션</td><td>부위가 파괴되는 순간에 카메라가 다가가고 레터박스와 탈색으로 주변을 지웁니다. <span class="ref">Fallout VATS의 사지 파괴 연출이 대표적</span></td><td>결손 컷신: 줌 → 부위 삽화를 베어 둘로 가름 → ‘결손’ 도장 → 결손 포즈로 교체.</td></tr>
+        <tr><td>상태의 영구 표시</td><td>한 번 일어난 큰 사건이 화면에 남아야 의미가 생깁니다.</td><td>이미 있는 팔·다리 결손 원화로 즉시 교체하고, X 표식과 상태 칩을 남깁니다.</td></tr>
+        <tr><td>피로도 관리</td><td>자동 전투에서 같은 컷신이 반복되면 흐름이 끊깁니다.</td><td>‘첫 결손만 풀 컷신’, 배속에 따른 단축(√배속), 클릭 스킵.</td></tr>
+        <tr><td>사운드 레이어</td><td>저음 쿵 + 중음 파열음 + 고음 디테일을 겹칩니다. 큰 사건 뒤의 이명은 여운을 만듭니다.</td><td>결손 후 약 1.4초 고음 이명. 브라우저 합성음이라 실제 효과음 교체 전 타이밍 확인용입니다.</td></tr>
+        <tr><td>동작 줄이기</td><td>흔들림·플래시에 민감한 사람을 위한 설정.</td><td>공통 탭에서 켜면 흔들림·줌·번쩍임을 끕니다. 게임 설정 항목으로 옮기기 좋습니다.</td></tr>
+      </tbody>
+    </table>
+    <p class="ref">참고: <a href="https://en.wikipedia.org/wiki/Game_feel" target="_blank" rel="noopener">Game feel (Wikipedia)</a> · <a href="https://kenney.nl/knowledge-base/learning/must-see-videos-for-indie-developers" target="_blank" rel="noopener">Juice it or lose it, The Art of Screenshake 등 강연 모음 (Kenney)</a> · <a href="https://forum.godotengine.org/t/game-feel-checklist-for-godot-4-hit-stop-trauma-shake-coyote-time-and-more/145340" target="_blank" rel="noopener">Godot 타격감 체크리스트</a> · <a href="https://rpgmaker.net/articles/2754" target="_blank" rel="noopener">Damage Number Philosophy</a> · <a href="https://giantbomb.com/wiki/Concepts/Limb_Targeting" target="_blank" rel="noopener">Limb Targeting</a></p>
+  </details>
+</main>
+
+<aside class="panel" aria-label="연출 조정">
+  <div class="preview" id="preview" aria-hidden="true"></div>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="fields"></div>
+  <div class="sect">내보내기</div>
+  <div class="row">
+    <button id="copy">설정 JSON 복사</button>
+    <button id="defaults">기본값</button>
+  </div>
+  <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:var(--mute)">JSON 보기·붙여넣기</summary>
+    <textarea id="json" spellcheck="false" aria-label="설정 JSON"></textarea>
+    <div class="row"><button id="applyJson">붙여넣은 값 적용</button></div>
+  </details>
+</aside>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const ART="../collapsed-passage/art/";
+const PARTS={head:"머리",eyes:"눈",arms:"팔",chest:"가슴",belly:"배",legs:"다리"};
+const ICONS={
+  head:'<circle cx="12" cy="8" r="5"/><path d="M7 21v-2a5 5 0 0110 0v2"/>',
+  eyes:'<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2"/>',
+  arms:'<path d="M4 14l3-5 4 1 2 4 3-2V8l-2-1 1-3 4 1 2 5-2 8-5 2-8-1Z"/>',
+  chest:'<path d="M8 4l-4 3 2 5 1 6h10l1-6 2-5-4-3-4 3Z"/><path d="M12 7v9"/>',
+  belly:'<path d="M7 5l-1 6-2 7 3 2h10l3-2-2-7-1-6"/><circle cx="12" cy="14" r="1"/>',
+  legs:'<path d="M8 3h8l-1 9 2 8h-4l-2-7-1 7H6l1-8Z"/>'
+};
+const svg=(id,sw=1.7)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[id]}</svg>`;
+const lostX='<svg class="x" viewBox="0 0 24 24" fill="none" stroke-linecap="round" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19" stroke="#f8e3cf" stroke-width="5"/><path d="m5 5 14 14M19 5 5 19" stroke="#d3241b" stroke-width="2.6"/></svg>';
+
+/* 원화 좌표 (게임 index.html의 bodyAnchors / armLossAnchors / legs-lost anchors.json 기준) */
+const ANCHORS={
+  ally:{head:[50,11],eyes:[62,23],arms:[25,43],chest:[49,44],belly:[50,58],legs:[58,80]},
+  enemy:{head:[36,14],eyes:[58,22],arms:[77,48],chest:[49,38],belly:[60,61],legs:[49,83]}
+};
+const KNEEL={head:[58,28],eyes:[63.4,38.7],arms:[65.6,54.2],chest:[58,51],belly:[57.6,64.6],legs:[70.5,83.3]};
+const ARM_STUMP=[64.8,40.1];
+const SPR={
+  ally:{
+    base:{idle:"characters/nun-sd.png",hit:"characters/motion/nun-hit.png",attack:"characters/motion/nun-attack.png"},
+    arms:{idle:"characters/conditions/arms-lost/nun-idle.webp",hit:"characters/conditions/arms-lost/nun-hit.webp",attack:"characters/conditions/arms-lost/nun-attack.webp"},
+    legs:{idle:"characters/conditions/legs-lost/nun-idle.webp",hit:"characters/conditions/legs-lost/nun-hit.webp",attack:"characters/conditions/legs-lost/nun-attack.webp"},
+    both:{idle:"characters/conditions/legs-lost/nun-idle-arms-lost.webp",hit:"characters/conditions/legs-lost/nun-hit-arms-lost.webp",attack:"characters/conditions/legs-lost/nun-attack-arms-lost.webp"}
+  },
+  enemy:{base:{idle:"characters/motion/warden-guard.webp",hit:"characters/motion/warden-hit.png",attack:"characters/motion/warden-attack.png"}}
+};
+const NAMES={ally:"수녀",enemy:"교도관"};
+
+const TIERS=["normal","crit","injury","loss"];
+const TIER_NAME={normal:"일반",crit:"치명타",injury:"부상",loss:"결손"};
+const FONTS={"Bricolage Grotesque":"Bricolage","Black Han Sans":"Black Han Sans","Malgun Gothic":"맑은 고딕"};
+const DEFAULTS={
+  tiers:{
+    normal:{font:"Bricolage Grotesque",color:"#efe6da",size:24,weight:500,pop:1.15,growTo:1,growMs:0,jitter:0,rise:46,holdMs:800,hitStop:0,shake:2,flashMs:60,icon:false},
+    crit:{font:"Bricolage Grotesque",color:"#ffd36e",size:34,weight:800,pop:1.6,growTo:1,growMs:0,jitter:0,rise:56,holdMs:1000,hitStop:60,shake:7,flashMs:90,icon:false},
+    injury:{font:"Bricolage Grotesque",color:"#e9a54a",size:34,weight:800,pop:1.3,growTo:1.55,growMs:650,jitter:3,rise:28,holdMs:1400,hitStop:110,shake:11,flashMs:120,icon:false},
+    loss:{font:"Black Han Sans",color:"#ff4a3d",size:38,weight:400,pop:1.4,growTo:1.9,growMs:900,jitter:5,rise:18,holdMs:1800,hitStop:180,shake:18,flashMs:160,icon:true}
+  },
+  injury:{ring:true,cutin:true,cutinMs:750},
+  loss:{ring:true,cutscene:true,sceneMs:1900,firstOnly:false,letterbox:true,zoom:1.5,shards:true,vignette:true,swap:true,ringTone:true},
+  global:{dmg:12,sound:true,dirShake:true,streak:true,labels:false,compress:true,reduce:false}
+};
+const TIER_FIELDS=[
+  ["font","폰트","select"],["color","색","color"],
+  ["size","글자 크기",12,64,1,"px"],["weight","굵기",300,900,100,""],
+  ["pop","튀어오름 배율",1,2.4,.05,"×"],["growTo","점차 커짐 최종",1,2.6,.05,"×"],["growMs","커지는 시간",0,1600,50,"ms"],
+  ["jitter","글자 흔들림",0,14,1,"px"],["rise","떠오름",0,100,2,"px"],["holdMs","표시 시간",300,2600,50,"ms"],
+  ["icon","부위 아이콘","check"],
+  ["sect","타격"],
+  ["hitStop","히트스톱",0,320,10,"ms"],["shake","화면 흔들림",0,32,1,"px"],["flashMs","피격 플래시",0,260,10,"ms"]
+];
+const EXTRA_FIELDS={
+  injury:[["sect","부상 연출"],["ring","부위 링","check"],["cutin","부상 컷인","check"],["cutinMs","컷인 길이",300,1600,50,"ms"]],
+  loss:[["sect","결손 컷신"],["ring","부위 링","check"],["cutscene","결손 컷신","check"],["sceneMs","컷신 길이",800,3200,50,"ms"],["firstOnly","첫 결손만 풀 컷신 (이후 짧은 컷인)","check"],
+    ["zoom","카메라 줌",1,2.2,.05,"×"],["letterbox","레터박스","check"],["shards","파편·핏자국","check"],["vignette","붉은 비네트","check"],["swap","결손 원화로 교체 (수녀 팔·다리)","check"],["ringTone","이명 효과음","check"]],
+  global:[["dmg","표시 피해",1,99,1,""],["sound","효과음","check"],["dirShake","공격 방향으로 흔들기","check"],["streak","베기 줄기","check"],["labels","숫자 옆 단계 문구","check"],["compress","배속에 맞춰 컷신 단축 (√배속)","check"],["reduce","동작 줄이기","check"]]
+};
+
+/* ---------- 설정 저장 ---------- */
+const KEY="cp-fx-lab-v1";
+const clone=o=>JSON.parse(JSON.stringify(o));
+function merge(base,over){
+  if(!over||typeof over!=="object") return base;
+  for(const k of Object.keys(base)){
+    if(base[k]&&typeof base[k]==="object") merge(base[k],over[k]);
+    else if(over[k]!==undefined&&typeof over[k]===typeof base[k]) base[k]=over[k];
+  }
+  return base;
+}
+let cfg=clone(DEFAULTS);
+try{cfg=merge(clone(DEFAULTS),JSON.parse(localStorage.getItem(KEY)||"null"));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(cfg));}catch(e){} $("#json").value=JSON.stringify(cfg,null,2);}
+
+/* ---------- DOM ---------- */
+const $=s=>document.querySelector(s);
+const stage=$("#stage"),cam=$("#cam"),shaker=$("#shaker"),world=$("#world"),backdrop=$("#backdrop");
+const fxlayer=$("#fxlayer"),dim=$("#dim"),flashEl=$("#flash"),vignette=$("#vignette"),lbTop=$("#lbTop"),lbBottom=$("#lbBottom");
+const actors={};
+for(const side of ["ally","enemy"]){
+  const el=$("#"+side);
+  actors[side]={side,el,body:el.querySelector(".body"),img:el.querySelector(".sprite"),status:el.querySelector(".status"),pose:"idle"};
+}
+const state={ally:{},enemy:{}};
+let target="enemy",part="arms",speed=1,lossCount=0;
+const reduce=()=>cfg.global.reduce||matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// 이미지 미리 불러오기
+for(const side of Object.keys(SPR)) for(const set of Object.values(SPR[side])) for(const src of Object.values(set)){const i=new Image();i.src=ART+src;}
+for(const p of Object.keys(PARTS)){const i=new Image();i.src=ART+`body-parts/${p}.webp`;}
+
+function spriteSet(side){
+  if(side!=="ally"||!cfg.loss.swap) return SPR[side].base;
+  const a=state.ally.arms==="lost",l=state.ally.legs==="lost";
+  return a&&l?SPR.ally.both:a?SPR.ally.arms:l?SPR.ally.legs:SPR.ally.base;
+}
+function setPose(side,pose){actors[side].pose=pose;actors[side].img.src=ART+spriteSet(side)[pose];}
+function anchor(side,p){
+  if(side==="ally"&&cfg.loss.swap){
+    if(state.ally.legs==="lost") return p==="arms"&&state.ally.arms==="lost"?[KNEEL.arms[0]-2,KNEEL.arms[1]-12]:KNEEL[p];
+    if(p==="arms"&&state.ally.arms==="lost") return ARM_STUMP;
+  }
+  return ANCHORS[side][p];
+}
+/* 부위 좌표 → 월드(px) 좌표. offset*은 transform 영향을 받지 않는다. */
+function worldPoint(side,p){
+  const a=actors[side].el,[ax,ay]=anchor(side,p);
+  return {x:a.offsetLeft+a.offsetWidth*ax/100,y:a.offsetTop+a.offsetHeight*ay/100,w:a.offsetWidth};
+}
+function renderStatus(side){
+  const a=actors[side];
+  a.status.innerHTML=Object.entries(state[side]).filter(([,v])=>v!=="healthy").map(([p,v])=>`<span class="chip ${v}" title="${PARTS[p]} ${v==="lost"?"결손":"부상"}">${svg(p,2)}${PARTS[p]}</span>`).join("");
+  a.body.querySelectorAll(".mark").forEach(m=>m.remove());
+  for(const [p,v] of Object.entries(state[side])) if(v==="lost") addLostMark(side,p,false);
+}
+function addLostMark(side,p,animate){
+  const a=actors[side],[x,y]=anchor(side,p);
+  const m=document.createElement("div");
+  m.className="mark";m.dataset.part=p;m.style.left=x+"%";m.style.top=y+"%";
+  m.innerHTML=lostX.replace('class="x"','');
+  a.body.querySelector(`.mark[data-part="${p}"]`)?.remove();
+  a.body.append(m);
+  if(animate) m.animate([{transform:"translate(-50%,-50%) scale(2.6) rotate(-20deg)",opacity:0},{transform:"translate(-50%,-50%) scale(.9) rotate(0)",opacity:1,offset:.55},{transform:"translate(-50%,-50%) scale(1)",opacity:1}],{duration:340,easing:"cubic-bezier(.2,.8,.3,1.2)"});
+}
+function resetState(){
+  for(const s of ["ally","enemy"]){for(const p of Object.keys(PARTS)) state[s][p]="healthy"; setPose(s,"idle"); renderStatus(s);}
+  lossCount=0;
+}
+
+/* ---------- 타이밍 도구 (스킵 지원) ---------- */
+let skipping=false,waiters=[],tracked=[];
+function wait(ms){return new Promise(r=>{if(skipping||ms<=0) return r();const id=setTimeout(()=>{waiters=waiters.filter(w=>w!==f);r();},ms);const f=()=>{clearTimeout(id);r();};waiters.push(f);});}
+function anim(el,frames,opts,track){const a=el.animate(frames,typeof opts==="number"?{duration:opts,fill:"forwards"}:{fill:"forwards",...opts});if(track) tracked.push(a);if(skipping&&track) a.finish();return a;}
+function skip(){if(!stage.classList.contains("busy")) return;skipping=true;waiters.splice(0).forEach(f=>f());tracked.splice(0).forEach(a=>{try{a.finish();}catch(e){}});}
+stage.addEventListener("click",skip);
+
+/* ---------- 효과음 (WebAudio 합성) ---------- */
+let ac=null;
+function sfx(kind){
+  if(!cfg.global.sound) return;
+  try{ac||=new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended") ac.resume();}catch(e){return;}
+  const a=ac,t=a.currentTime,out=a.createGain();out.gain.value=.55;out.connect(a.destination);
+  const tone=(f0,f1,dur,type="sine",vol=.6,d=0)=>{const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f0,t+d);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),t+d+dur);g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(vol,t+d+.006);g.gain.exponentialRampToValueAtTime(.0001,t+d+dur);o.connect(g).connect(out);o.start(t+d);o.stop(t+d+dur+.03);};
+  const burst=(dur,type,freq,vol=.5,d=0,q=1)=>{const b=a.createBuffer(1,Math.ceil(a.sampleRate*dur),a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*(1-i/ch.length)**2;const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(out);s.start(t+d);};
+  ({
+    normal(){burst(.08,"lowpass",1400,.5);tone(160,60,.12,"sine",.5);},
+    crit(){burst(.1,"highpass",2600,.35);burst(.09,"lowpass",1600,.55);tone(230,70,.16,"triangle",.55);tone(1900,1500,.28,"sine",.12,.01);},
+    injury(){burst(.2,"bandpass",650,1,0,.8);tone(110,42,.28,"sine",.75);burst(.06,"highpass",3200,.28,.05);},
+    loss(){tone(72,28,.9,"sine",.95);burst(.35,"lowpass",520,.85);},
+    slash(){burst(.24,"bandpass",3600,.7,0,2);burst(.12,"highpass",5000,.3,.02);},
+    stamp(){tone(95,38,.55,"square",.22);burst(.3,"lowpass",900,.8);tone(55,30,.7,"sine",.8);},
+    ring(){tone(3400,3320,1.5,"sine",.045);},
+    whoosh(){burst(.28,"bandpass",1100,.45,0,1.3);}
+  })[kind]?.();
+}
+
+/* ---------- 기본 효과 ---------- */
+function shake(px,dirX=0,ms=320){
+  if(reduce()||px<=0) return;
+  const frames=[],n=Math.max(6,Math.round(ms/28));
+  for(let i=0;i<=n;i++){
+    const k=1-i/n,tr=k*k,amp=px*tr;   // 제곱 감쇠: 약타는 금방 멎고 강타만 오래 남는다
+    const bias=cfg.global.dirShake?dirX*amp*.9:0;
+    frames.push({transform:i===n?"none":`translate(${bias+(Math.random()*2-1)*amp*.7}px,${(Math.random()*2-1)*amp*.55}px) rotate(${(Math.random()*2-1)*amp*.05}deg)`});
+  }
+  shaker.animate(frames,{duration:ms,easing:"linear"});
+}
+function flashSprite(side,tier,ms){
+  if(ms<=0) return;
+  const f={normal:"brightness(0) invert(1)",crit:"brightness(0) invert(1)",injury:"brightness(0) invert(.92) sepia(1) saturate(2.6) hue-rotate(-8deg)",loss:"brightness(0) invert(.55) sepia(1) saturate(9) hue-rotate(-38deg)"}[tier];
+  actors[side].img.animate([{filter:f},{filter:f,offset:.45},{filter:"drop-shadow(0 6px 6px #0009)"}],{duration:ms});
+}
+function screenFlash(op,ms,color="#fff"){
+  if(reduce()) op=Math.min(op,.15);
+  flashEl.style.background=color;
+  flashEl.animate([{opacity:op},{opacity:0}],{duration:ms,easing:"ease-out"});
+}
+function spark(side,p,color,scale=1){
+  const {x,y}=worldPoint(side,p),s=document.createElement("div");
+  s.className="spark";s.style.cssText=`left:${x}px;top:${y}px;--c:${color};width:${24*scale}%`;
+  s.style.width=actors[side].el.offsetWidth*.5*scale+"px";
+  world.append(s);
+  s.animate([{transform:"translate(-50%,-50%) scale(.2)",opacity:1},{transform:"translate(-50%,-50%) scale(1.5)",opacity:0}],{duration:280,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>s.remove();
+}
+function streak(side,p,color,dir){
+  if(!cfg.global.streak) return;
+  const {x,y,w}=worldPoint(side,p),s=document.createElement("div");
+  const ang=dir>0?-28:28;
+  s.className="streak";s.style.cssText=`left:${x-w*.6}px;top:${y}px;width:${w*1.2}px;--c:${color}`;
+  world.append(s);
+  s.animate([{transform:`rotate(${ang}deg) scaleX(0)`,opacity:1},{transform:`rotate(${ang}deg) scaleX(1)`,opacity:1,offset:.4},{transform:`rotate(${ang}deg) scaleX(1.05) scaleY(.2)`,opacity:0}],{duration:260,easing:"ease-out"}).onfinish=()=>s.remove();
+}
+function ring(side,p,color){
+  const a=actors[side],[x,y]=anchor(side,p),r=document.createElement("div");
+  r.className="ring";r.style.cssText=`left:${x}%;top:${y}%;--c:${color}`;
+  a.body.append(r);
+  r.animate([{transform:"translate(-50%,-50%) scale(2)",opacity:0},{transform:"translate(-50%,-50%) scale(1)",opacity:1,offset:.25},{transform:"translate(-50%,-50%) scale(1.25)",opacity:.35,offset:.5},{transform:"translate(-50%,-50%) scale(1)",opacity:1,offset:.7},{transform:"translate(-50%,-50%) scale(1.4)",opacity:0}],{duration:900,easing:"ease-out"}).onfinish=()=>r.remove();
+}
+
+/* ---------- 데미지 숫자 ---------- */
+const recent={ally:[],enemy:[]};
+function numberHTML(tier,value,p){
+  const T=cfg.tiers[tier],light=T.weight<600;
+  const badge=T.icon?`<span class="badge${tier==="loss"?" lost":""}">${svg(p,2)}${tier==="loss"?lostX:""}</span>`:"";
+  const tag=cfg.global.labels&&tier!=="normal"?`<span class="tag">${TIER_NAME[tier]}</span>`:"";
+  return `${badge}<span class="val${light?" light":""}">−${value}</span>${tag}`;
+}
+function spawnNumber(tier,side,p,value,host=world,at){
+  const T=cfg.tiers[tier],rm=reduce();
+  const el=document.createElement("div");
+  el.className="dmg";
+  el.style.cssText=`--f:"${T.font}",sans-serif;--s:${T.size}px;--w:${T.weight};--c:${T.color}`;
+  el.innerHTML=`<div class="pop"><div class="jit">${numberHTML(tier,value,p)}</div></div>`;
+  let x,y;
+  if(at){x=at.x;y=at.y;}else{
+    const pt=worldPoint(side,p),away=side==="enemy"?1:-1;
+    x=pt.x+away*pt.w*.2;y=pt.y;
+    const now=performance.now();
+    recent[side]=recent[side].filter(r=>now-r<450);
+    y-=recent[side].length*T.size*1.05;recent[side].push(now);
+    x=Math.max(40,Math.min(x,world.offsetWidth-40));
+  }
+  el.style.left=x+"px";el.style.top=y+"px";
+  host.append(el);
+  const hold=T.holdMs,pop=el.firstElementChild,jit=pop.firstElementChild;
+  el.animate([{transform:"translateY(0)",opacity:0},{opacity:1,offset:.05},{opacity:1,offset:.8},{transform:`translateY(${-T.rise}px)`,opacity:0}],{duration:hold,easing:"cubic-bezier(.25,.6,.3,1)",fill:"forwards"}).onfinish=()=>el.remove();
+  const tPeak=Math.min(90/hold,.2),tSet=Math.min(210/hold,.3),tGrow=Math.min((210+T.growMs)/hold,.92);
+  const g=rm?1:T.growTo,pk=rm?Math.min(T.pop,1.1):T.pop;
+  const sf=[{transform:"scale(.25)",offset:0,easing:"cubic-bezier(.2,.9,.3,1)"},{transform:`scale(${pk})`,offset:tPeak,easing:"ease-in-out"},{transform:"scale(1)",offset:tSet,easing:"cubic-bezier(.35,0,.25,1)"}];
+  if(T.growMs>0&&g!==1) sf.push({transform:`scale(${g})`,offset:tGrow});
+  sf.push({transform:`scale(${T.growMs>0?g:1})`,offset:1});
+  pop.animate(sf,{duration:hold,fill:"forwards"});
+  if(T.jitter>0&&!rm){
+    const jf=[{transform:"translate(0,0)",offset:0},{transform:"translate(0,0)",offset:tSet*.6}];
+    const end=Math.min(tGrow+200/hold,.97),steps=Math.max(4,Math.round((end-tSet)*hold/38));
+    for(let i=1;i<=steps;i++){
+      const k=i/steps,off=tSet+(end-tSet)*k;
+      const ramp=off<=tGrow?.4+.6*((off-tSet)/Math.max(tGrow-tSet,.001)):Math.max(0,1-(off-tGrow)/(end-tGrow));
+      const amp=T.jitter*ramp;
+      jf.push({transform:`translate(${((Math.random()*2-1)*amp).toFixed(1)}px,${((Math.random()*2-1)*amp*.7).toFixed(1)}px)`,offset:off});
+    }
+    jf.push({transform:"translate(0,0)",offset:1});
+    jit.animate(jf,{duration:hold,fill:"forwards"});
+  }
+  return el;
+}
+
+/* ---------- 컷인 (부상 / 짧은 결손) ---------- */
+async function cutin(kind,side,p,ms){
+  const color=kind==="lost"?cfg.tiers.loss.color:cfg.tiers.injury.color;
+  const fromLeft=side==="enemy";  // 공격자 쪽에서 들어온다
+  const [ax,hy]=anchor(side,"head"),ay=hy+5;
+  // 290% 확대한 원화에서 머리가 얼굴 칸 가운데 오도록 배경 위치를 계산한다 (원화 2:3)
+  const sx=2.9,sy=2.9*1.5,bx=(.5-sx*ax/100)/(1-sx)*100,by=(.5-sy*ay/100)/(1-sy)*100;
+  const band=document.createElement("div");
+  band.className="cutin"+(kind==="lost"?" lost":"");band.style.setProperty("--c",color);
+  band.innerHTML=`<div class="cutin-inner">
+    <div class="cutin-face" style="background-image:url(${ART+spriteSet(side).idle}),radial-gradient(circle,color-mix(in srgb,${color} 55%,transparent) 0,transparent 62%);background-size:290%,100%;background-position:${bx}% ${by}%,center"></div>
+    <div class="cutin-part" style="background-image:url(${ART}body-parts/${p}.webp)"></div>
+    <div class="cutin-text"><div class="cutin-word">${kind==="lost"?"결손":"부상"}</div><div class="cutin-subtext">${NAMES[side]} · ${PARTS[p]}</div></div></div>`;
+  $("#fxlayer").append(band);
+  const inner=band.firstElementChild,s=fromLeft?-1:1;
+  const tin=Math.min(170,ms*.22),tout=Math.min(170,ms*.22);
+  sfx("whoosh");
+  anim(dim,[{opacity:0},{opacity:.5}],{duration:tin},true);
+  anim(band,[{transform:`skewY(-5deg) translateX(${s*110}%)`},{transform:"skewY(-5deg) translateX(0)"}],{duration:tin,easing:"cubic-bezier(.2,.9,.25,1)"},true);
+  anim(inner,[{transform:`skewY(5deg) translateX(${s*-8}%)`},{transform:`skewY(5deg) translateX(${s*4}%)`}],{duration:ms,easing:"linear"},true);
+  await wait(ms-tout);
+  anim(band,[{transform:"skewY(-5deg) translateX(0)",opacity:1},{transform:`skewY(-5deg) translateX(${-s*110}%)`,opacity:1}],{duration:tout,easing:"cubic-bezier(.6,0,.8,.3)"},true);
+  anim(dim,[{opacity:.5},{opacity:0}],{duration:tout},true);
+  await wait(tout);
+  band.remove();
+}
+
+/* ---------- 결손 컷신 ---------- */
+async function lossScene(side,p,total,attacker){
+  const L=cfg.loss,rm=reduce(),C=cfg.tiers.loss.color;
+  const pt=worldPoint(side,p);
+  const z=rm?1:L.zoom;
+  const ph=f=>total*f;
+  // 1) 정지 + 번쩍 + 카메라 접근
+  screenFlash(.7,ph(.12));
+  if(L.letterbox){anim(lbTop,[{height:"0%"},{height:"11%"}],{duration:ph(.12),easing:"ease-out"},true);anim(lbBottom,[{height:"0%"},{height:"11%"}],{duration:ph(.12),easing:"ease-out"},true);}
+  backdrop.style.filter="grayscale(.85) brightness(.4)";
+  actors[attacker].el.style.filter="grayscale(.7) brightness(.35)";
+  cam.style.transformOrigin=`${pt.x}px ${pt.y}px`;
+  anim(cam,[{transform:"scale(1)"},{transform:`scale(${z})`}],{duration:ph(.16),easing:"cubic-bezier(.2,.8,.2,1)"},true);
+  if(L.vignette) anim(vignette,[{opacity:0},{opacity:.85}],{duration:ph(.16)},true);
+  await wait(ph(.14));
+
+  // 2) 부위 삽화를 베어 가른다
+  const scene=document.createElement("div");scene.className="cs";
+  const left=side==="enemy"?30:70;
+  scene.innerHTML=`<div class="cs-panel" style="left:${left}%">
+      <div class="cs-art" style="background-image:url(${ART}body-parts/${p}.webp)"></div>
+      <div class="cs-half a" style="background-image:url(${ART}body-parts/${p}.webp)"></div>
+      <div class="cs-half b" style="background-image:url(${ART}body-parts/${p}.webp)"></div>
+      <svg class="cs-slash" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-6" y1="106" x2="106" y2="-6" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>
+    </div>
+    <div class="cs-stamp" style="left:${left}%"><b>결손</b><span>${NAMES[side]} · ${PARTS[p]}</span></div>`;
+  fxlayer.append(scene);
+  const panel=scene.querySelector(".cs-panel"),art=scene.querySelector(".cs-art"),ha=scene.querySelector(".a"),hb=scene.querySelector(".b"),line=scene.querySelector("line"),stamp=scene.querySelector(".cs-stamp");
+  anim(panel,[{transform:"scale(.6) rotate(-4deg)",opacity:0},{transform:"scale(1.04) rotate(1deg)",opacity:1,offset:.7},{transform:"scale(1) rotate(0)",opacity:1}],{duration:ph(.1),easing:"ease-out"},true);
+  await wait(ph(.12));
+  sfx("slash");
+  anim(line,[{strokeDashoffset:1},{strokeDashoffset:0}],{duration:Math.max(70,ph(.05)),easing:"cubic-bezier(.6,0,.4,1)"},true);
+  await wait(Math.max(70,ph(.05)));
+  // 갈라짐
+  sfx("loss");
+  screenFlash(.5,ph(.06),"#ff3b2b");
+  shake(cfg.tiers.loss.shake*.7,side==="enemy"?1:-1,260);
+  art.style.opacity=0;ha.style.opacity=1;hb.style.opacity=1;
+  const d=rm?.3:1;
+  anim(ha,[{transform:"translate(0,0) rotate(0)",opacity:1},{transform:`translate(${-14*d}%,${-12*d}%) rotate(${-10*d}deg)`,opacity:1,offset:.5},{transform:`translate(${-22*d}%,${-26*d}%) rotate(${-16*d}deg)`,opacity:0}],{duration:ph(.32),easing:"cubic-bezier(.2,.7,.3,1)"},true);
+  anim(hb,[{transform:"translate(0,0) rotate(0)",opacity:1},{transform:`translate(${14*d}%,${12*d}%) rotate(${9*d}deg)`,opacity:1,offset:.5},{transform:`translate(${24*d}%,${34*d}%) rotate(${18*d}deg)`,opacity:0}],{duration:ph(.32),easing:"cubic-bezier(.2,.7,.3,1)"},true);
+  anim(line,[{opacity:1},{opacity:0}],{duration:ph(.12)},true);
+  if(L.shards&&!rm){
+    const ink=document.createElement("div");ink.className="ink";ink.style.cssText="left:50%;top:50%";panel.append(ink);
+    anim(ink,[{transform:"scale(.3)",opacity:0},{transform:"scale(1.6)",opacity:.9,offset:.25},{transform:"scale(1.9)",opacity:0}],{duration:ph(.4),easing:"ease-out"},true);
+    for(let i=0;i<14;i++){
+      const sh=document.createElement("div"),a=Math.random()*Math.PI*2,r=60+Math.random()*90,sz=2+Math.random()*4;
+      sh.className="shard";sh.style.cssText=`left:50%;top:50%;width:${sz}%;--c:${i%3?C:"#f3e4d0"}`;panel.append(sh);
+      anim(sh,[{transform:"translate(-50%,-50%) rotate(0)",opacity:1},{transform:`translate(${Math.cos(a)*r-50}%,${Math.sin(a)*r-50+30}%) rotate(${Math.random()*540-270}deg)`,opacity:0}],{duration:ph(.3)+Math.random()*ph(.1),easing:"cubic-bezier(.1,.8,.3,1)"},true);
+    }
+  }
+  await wait(ph(.08));
+  // 3) 도장
+  sfx("stamp");
+  shake(cfg.tiers.loss.shake,0,380);
+  anim(stamp,[{transform:"scale(2.8) rotate(-14deg)",opacity:0},{transform:"scale(.92) rotate(-5deg)",opacity:1,offset:.55},{transform:"scale(1) rotate(-6deg)",opacity:1}],{duration:ph(.09),easing:"cubic-bezier(.3,0,.3,1)"},true);
+  if(L.ringTone) setTimeout(()=>sfx("ring"),ph(.06));
+  await wait(ph(.16));
+
+  // 4) 실제 몸에 반영: 결손 원화 교체 + X 표식
+  state[side][p]="lost";
+  flashSprite(side,"loss",ph(.1));
+  setPose(side,"hit");
+  renderStatus(side);
+  addLostMark(side,p,true);
+  anim(panel,[{opacity:1},{opacity:0}],{duration:ph(.08)},true);
+  await wait(ph(.16));
+
+  // 5) 복귀
+  anim(stamp,[{opacity:1,transform:"scale(1) rotate(-6deg)"},{opacity:0,transform:"scale(1.15) rotate(-6deg)"}],{duration:ph(.1)},true);
+  anim(cam,[{transform:`scale(${z})`},{transform:"scale(1)"}],{duration:ph(.14),easing:"cubic-bezier(.5,0,.3,1)"},true);
+  if(L.letterbox){anim(lbTop,[{height:"11%"},{height:"0%"}],{duration:ph(.12)},true);anim(lbBottom,[{height:"11%"},{height:"0%"}],{duration:ph(.12)},true);}
+  if(L.vignette) anim(vignette,[{opacity:.85},{opacity:.25,offset:.5},{opacity:0}],{duration:ph(.3)},true);
+  backdrop.style.filter="";actors[attacker].el.style.filter="";
+  await wait(ph(.14));
+  scene.remove();
+}
+function cleanupScene(){
+  fxlayer.querySelectorAll(".cs,.cutin").forEach(e=>e.remove());
+  for(const el of [cam,lbTop,lbBottom,vignette,dim]) el.getAnimations().forEach(a=>a.cancel());
+  cam.style.transform="";backdrop.style.filter="";actors.ally.el.style.filter="";actors.enemy.el.style.filter="";
+}
+
+/* ---------- 한 번의 타격 ---------- */
+let chain=Promise.resolve(),pending=0;
+function queue(fn){pending++;chain=chain.then(fn).catch(e=>console.error(e)).finally(()=>pending--);return chain;}
+
+async function hit(tier){
+  const T=cfg.tiers[tier],side=target,p=part,attacker=side==="enemy"?"ally":"enemy";
+  const atk=actors[attacker],def=actors[side],dir=side==="enemy"?1:-1;
+  const sp=speed,cut=cfg.global.compress?Math.sqrt(sp):1;
+  const value=tier==="crit"?Math.round(cfg.global.dmg*1.5):cfg.global.dmg;
+  const color=T.color;
+
+  // 앞으로 내딛기
+  setPose(attacker,"attack");
+  const dist=world.offsetWidth*.09;
+  const lunge=atk.body.animate([{transform:"translateX(0) scale(1)"},{transform:`translateX(${dir*dist}px) scale(1.05)`}],{duration:150/sp,easing:"cubic-bezier(.5,0,.9,.6)",fill:"forwards"});
+  await lunge.finished;
+
+  // 충돌
+  setPose(side,"hit");
+  sfx(tier==="loss"?"injury":tier);
+  flashSprite(side,tier,T.flashMs);
+  spark(side,p,color,tier==="normal"?.7:tier==="crit"?1:1.2);
+  if(tier!=="normal") streak(side,p,color,dir);
+  shake(T.shake,dir,tier==="normal"?180:tier==="crit"?260:340);
+  if(tier==="crit") screenFlash(.18,120);
+  if(tier==="injury"&&cfg.injury.ring) ring(side,p,color);
+  if(tier==="loss"&&cfg.loss.ring) ring(side,p,color);
+  if(tier==="injury"&&state[side][p]!=="lost") {state[side][p]="injured";renderStatus(side);}
+
+  const fullScene=tier==="loss"&&cfg.loss.cutscene&&!(cfg.loss.firstOnly&&lossCount>0);
+  const shortScene=tier==="loss"&&!fullScene&&cfg.loss.cutscene;
+  if(tier!=="loss"||!cfg.loss.cutscene) spawnNumber(tier,side,p,value);
+
+  // 히트스톱: 둘 다 멈추고 맞는 쪽만 잘게 떨린다
+  if(T.hitStop>0){
+    if(!reduce()) def.body.animate([{transform:"translateX(0)"},{transform:`translateX(${dir*3}px)`},{transform:`translateX(${-dir*2}px)`},{transform:`translateX(${dir*2}px)`},{transform:"translateX(0)"}],{duration:T.hitStop,iterations:1});
+    await new Promise(r=>setTimeout(r,T.hitStop));
+  }
+
+  if(tier==="injury"&&cfg.injury.cutin){
+    stage.classList.add("busy");skipping=false;
+    await cutin("injured",side,p,cfg.injury.cutinMs/cut);
+    finishBusy();
+  }
+  if(fullScene){
+    stage.classList.add("busy");skipping=false;
+    await lossScene(side,p,cfg.loss.sceneMs/cut,attacker);
+    finishBusy();
+    lossCount++;
+    spawnNumber("loss",side,p,value);
+  }else if(shortScene){
+    stage.classList.add("busy");skipping=false;
+    await cutin("lost",side,p,cfg.injury.cutinMs/cut);
+    finishBusy();
+    lossCount++;
+    state[side][p]="lost";setPose(side,"hit");renderStatus(side);addLostMark(side,p,true);flashSprite(side,"loss",120);
+    spawnNumber("loss",side,p,value);
+  }else if(tier==="loss"){
+    lossCount++;
+    state[side][p]="lost";setPose(side,"hit");renderStatus(side);addLostMark(side,p,true);
+  }
+
+  // 복귀
+  lunge.cancel();
+  atk.body.animate([{transform:`translateX(${dir*dist}px) scale(1.05)`},{transform:"translateX(0) scale(1)"}],{duration:220/sp,easing:"cubic-bezier(.2,.7,.3,1)"});
+  def.body.animate([{transform:"translateX(0)"},{transform:`translateX(${dir*dist*.25}px)`,offset:.35},{transform:"translateX(0)"}],{duration:300/sp,easing:"ease-out"});
+  setPose(attacker,"idle");
+  await new Promise(r=>setTimeout(r,260/sp));
+  setPose(side,"idle");
+  await new Promise(r=>setTimeout(r,80/sp));
+}
+function finishBusy(){
+  cleanupScene();   // 끝 상태가 기본 상태와 같으므로 남은 fill 애니메이션을 정리한다
+  skipping=false;waiters=[];tracked=[];
+  stage.classList.remove("busy");
+}
+
+async function demo(){
+  const prevPart=part;
+  const plan=[["normal","chest"],["normal","belly"],["crit","head"],["injury","arms"],["loss","arms"]];
+  for(const [t,p] of plan){part=p;syncPart();await hit(t);await new Promise(r=>setTimeout(r,280));}
+  part=prevPart;syncPart();
+}
+
+/* ---------- 컨트롤 ---------- */
+document.querySelectorAll("button.hit").forEach(b=>b.addEventListener("click",()=>queue(()=>hit(b.dataset.tier))));
+$("#demo").addEventListener("click",()=>queue(demo));
+$("#reset").addEventListener("click",()=>queue(async()=>resetState()));
+document.querySelectorAll("input[name=target]").forEach(r=>r.addEventListener("change",()=>{target=r.value;}));
+document.querySelectorAll("input[name=speed]").forEach(r=>r.addEventListener("change",()=>{speed=+r.value;}));
+const partSeg=$("#partSeg");
+partSeg.innerHTML=Object.entries(PARTS).map(([k,v])=>`<input type="radio" name="part" id="p-${k}" value="${k}"${k===part?" checked":""}><label for="p-${k}">${v}</label>`).join("");
+partSeg.querySelectorAll("input").forEach(r=>r.addEventListener("change",()=>{part=r.value;}));
+function syncPart(){const r=$("#p-"+part);if(r) r.checked=true;}
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input[type=range],input[type=text],textarea,select")||e.ctrlKey||e.metaKey||e.altKey) return;
+  const map={"1":"normal","2":"crit","3":"injury","4":"loss"};
+  if(map[e.key]){queue(()=>hit(map[e.key]));e.preventDefault();}
+  else if(e.key==="5") queue(demo);
+  else if(e.key==="r"||e.key==="R") queue(async()=>resetState());
+  else if(e.key===" "||e.key==="Escape"){if(stage.classList.contains("busy")){skip();e.preventDefault();}}
+});
+
+let tab="injury";
+function renderTabs(){
+  const list=[...TIERS,"global"];
+  $("#tabs").innerHTML=list.map(t=>`<button role="tab" aria-selected="${t===tab}" data-tab="${t}">${t==="global"?"공통":TIER_NAME[t]}</button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.tab;renderTabs();renderFields();}));
+}
+function fieldHTML(scope,f){
+  const [key,label,a,b,step,unit]=f,id=`f-${scope}-${key}`;
+  const obj=scopeObj(scope),v=obj[key];
+  if(key==="sect") return `<div class="sect">${label}</div>`;
+  if(a==="check") return `<div class="field check"><input type="checkbox" id="${id}" data-scope="${scope}" data-key="${key}"${v?" checked":""}><label for="${id}">${label}</label></div>`;
+  if(a==="color") return `<div class="field"><label for="${id}">${label}</label><input type="color" id="${id}" data-scope="${scope}" data-key="${key}" value="${v}"></div>`;
+  if(a==="select") return `<div class="field"><label for="${id}">${label}</label><select id="${id}" data-scope="${scope}" data-key="${key}">${Object.entries(FONTS).map(([k,n])=>`<option value="${k}"${k===v?" selected":""}>${n}</option>`).join("")}</select></div>`;
+  return `<div class="field"><label for="${id}">${label}</label><output for="${id}">${fmt(v,unit)}</output><input type="range" id="${id}" min="${a}" max="${b}" step="${step}" value="${v}" data-scope="${scope}" data-key="${key}" data-unit="${unit}"></div>`;
+}
+const fmt=(v,u)=>(Number.isInteger(v)?v:(+v).toFixed(2))+u;
+function scopeObj(scope){return scope==="global"?cfg.global:scope.startsWith("x-")?cfg[scope.slice(2)]:cfg.tiers[scope];}
+function renderFields(){
+  let html="";
+  if(tab==="global") html=EXTRA_FIELDS.global.map(f=>fieldHTML("global",f)).join("");
+  else{
+    html=TIER_FIELDS.map(f=>fieldHTML(tab,f)).join("");
+    if(EXTRA_FIELDS[tab]) html+=EXTRA_FIELDS[tab].map(f=>fieldHTML("x-"+tab,f)).join("");
+    html+=`<div class="row"><button id="tryTab">이 단계 재생</button></div>`;
+  }
+  $("#fields").innerHTML=html;
+  $("#fields").querySelectorAll("[data-key]").forEach(inp=>{
+    const ev=inp.type==="range"||inp.type==="color"?"input":"change";
+    inp.addEventListener(ev,()=>{
+      const obj=scopeObj(inp.dataset.scope),k=inp.dataset.key;
+      obj[k]=inp.type==="checkbox"?inp.checked:inp.type==="range"?+inp.value:inp.value;
+      if(inp.type==="range") inp.previousElementSibling.textContent=fmt(obj[k],inp.dataset.unit);
+      if(k==="swap"){for(const s of ["ally","enemy"]){setPose(s,"idle");renderStatus(s);}}
+      save();previewSoon();
+    });
+  });
+  $("#tryTab")?.addEventListener("click",()=>queue(()=>hit(tab)));
+  previewSoon();
+}
+let pv=0;
+function previewSoon(){clearTimeout(pv);pv=setTimeout(preview,120);}
+let pvLoop=0;
+function preview(){
+  const host=$("#preview");host.innerHTML="";
+  const t=tab==="global"?"loss":tab;
+  const n=spawnNumber(t,"enemy",part,t==="crit"?Math.round(cfg.global.dmg*1.5):cfg.global.dmg,host,{x:host.clientWidth/2,y:host.clientHeight/2+10});
+  n.style.zIndex=1;
+  clearTimeout(pvLoop);pvLoop=setTimeout(preview,cfg.tiers[t].holdMs+700);   // 값을 바꾸는 동안 계속 반복 재생
+}
+$("#preview").addEventListener("click",preview);
+$("#preview").title="클릭하면 숫자만 다시 재생";
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast.id);toast.id=setTimeout(()=>t.classList.remove("on"),1600);}
+$("#copy").addEventListener("click",async()=>{
+  const text=JSON.stringify(cfg,null,2);$("#json").value=text;
+  try{await navigator.clipboard.writeText(text);toast("설정을 복사했습니다");}
+  catch(e){const ta=$("#json");ta.closest("details").open=true;ta.select();try{document.execCommand("copy");toast("설정을 복사했습니다");}catch(_){toast("JSON 칸에서 직접 복사하세요");}}
+});
+$("#defaults").addEventListener("click",()=>{cfg=clone(DEFAULTS);save();renderFields();for(const s of ["ally","enemy"]){setPose(s,"idle");renderStatus(s);}toast("기본값으로 되돌렸습니다");});
+$("#applyJson").addEventListener("click",()=>{try{cfg=merge(clone(DEFAULTS),JSON.parse($("#json").value));save();renderFields();toast("적용했습니다");}catch(e){toast("JSON 형식을 확인하세요");}});
+
+// 원화 확인: 파일로 직접 열어 그림을 못 읽으면 실행 방법을 보여 준다
+const probe=new Image();
+probe.onerror=()=>{$("#artMissing").hidden=false;};
+probe.src=ART+"arena/prison-backdrop.webp";
+
+resetState();renderTabs();renderFields();save();
+</script>
+</body>
+</html>

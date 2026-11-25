@@ -303,7 +303,7 @@ test("an archer with an arm loss stays visually consistent if the release pose i
   const {run}=presentation();
   run(`
     const archer=companionTypes.archer;
-    game.companion={...fighter(archer.name,archer.health,archer.vitality),kind:"archer"};
+    game.companion=Object.assign(fighter(archer.name,archer.health,archer.vitality),{kind:"archer"});
     game.companion.body.arms.hp=0;
     game.formation[1]="companion";
     panels.companion.dataset.portrait="archer";
@@ -382,7 +382,7 @@ test("the archer and shaman show their own attack, hurt, and defeat frames",()=>
   for(const [kind,card] of [["archer","snapShot"],["shaman","unseal"]]){
     const {run,at}=presentation({reduced:true,speed:4});
     run(`const companionType=companionTypes['${kind}'];
-      game.companion={...fighter(companionType.name,companionType.health,companionType.vitality),kind:'${kind}'};
+      game.companion=Object.assign(fighter(companionType.name,companionType.health,companionType.vitality),{kind:'${kind}'});
       panels.companion.dataset.portrait='${kind}';`);
     run(`game.feedback=${JSON.stringify([{...hit("companion","enemy"),card}])};playCombatFeedback();`);
     at(0);
@@ -440,7 +440,7 @@ test("Unseal applies its guard break and damage cues on spell contact",()=>{
   const {run,at}=presentation({speed:4});
   run(`
     const shaman=companionTypes.shaman;
-    game.companion={...fighter(shaman.name,shaman.health,shaman.vitality),kind:"shaman"};
+    game.companion=Object.assign(fighter(shaman.name,shaman.health,shaman.vitality),{kind:"shaman"});
     panels.companion.dataset.portrait="shaman";
     game.enemy.body.head.guard=2;
     globalThis.spell=null;
@@ -514,7 +514,7 @@ test("healers launch light before the 420 ms recovery effect at 4×",()=>{
     const {run,at}=presentation({speed:4});
     run(`
       const shaman=companionTypes.shaman;
-      game.companion={...fighter(shaman.name,shaman.health,shaman.vitality),kind:"shaman"};
+      game.companion=Object.assign(fighter(shaman.name,shaman.health,shaman.vitality),{kind:"shaman"});
       panels.companion.dataset.portrait="shaman";
       globalThis.healImpact=null;
       globalThis.healFlight=null;

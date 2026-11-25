@@ -1,0 +1,69 @@
+/* 타격 단계별 연출 (hit-fx.js). 값은 collapsed-passage-fx-lab 실험실 기본값. */
+
+/* 데미지 숫자: 상자 대신 외곽선 글자 */
+.combat-impact-number.hitfx .impact-copy b.damage{
+  background:none;border:0;padding:0;
+  color:var(--fx-c);font-family:var(--fx-f),"Bricolage Grotesque","Malgun Gothic",sans-serif;
+  font-size:var(--fx-s);font-weight:var(--fx-w);line-height:1;letter-spacing:-.02em;
+  -webkit-text-stroke:.15em #140b0e;paint-order:stroke fill;text-shadow:0 .07em .14em #000c;overflow:visible}
+.combat-impact-number.hitfx-normal .impact-copy b.damage{-webkit-text-stroke:.1em #140b0e}
+.hitfx-pop,.hitfx-jit{display:inline-block}
+.combat-impact-number.hitfx .hitfx-pop{transform-origin:left center}
+.combat-impact-number.hitfx[data-side="enemy"] .hitfx-pop{transform-origin:right center}
+@media (max-width:580px){.combat-impact-number.hitfx .impact-copy b.damage{font-size:calc(var(--fx-s)*.8)}}
+.impact-part.hitfx-injured{border-color:#e9a54a;background:#3b2713}
+.impact-part.hitfx-lost{position:relative;border-color:#ff4a3d;background:#4a0e0c;width:24px;height:24px}
+.impact-part.hitfx-lost svg:not(.hitfx-x){width:16px;height:16px}
+.impact-part .hitfx-x{position:absolute;right:-7px;bottom:-7px;width:16px;height:16px}
+
+/* 맞은 부위 표시 */
+.hitfx-ring{position:absolute;z-index:9;width:15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+  border:3px solid var(--fx-c);box-shadow:0 0 14px var(--fx-c),inset 0 0 10px var(--fx-c);animation:hitfx-ring .9s ease-out forwards}
+@keyframes hitfx-ring{
+  0%{transform:translate(-50%,-50%) scale(2);opacity:0}
+  25%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  50%{transform:translate(-50%,-50%) scale(1.25);opacity:.35}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(1.4);opacity:0}}
+.hitfx-streak{position:absolute;z-index:9;width:110%;height:5px;margin-left:-55%;border-radius:5px;pointer-events:none;mix-blend-mode:screen;
+  background:linear-gradient(90deg,transparent,#fff 45%,var(--fx-c) 70%,transparent);animation:hitfx-streak .26s ease-out forwards}
+@keyframes hitfx-streak{
+  0%{transform:rotate(var(--fx-a)) scaleX(0);opacity:1}
+  40%{transform:rotate(var(--fx-a)) scaleX(1);opacity:1}
+  100%{transform:rotate(var(--fx-a)) scaleX(1.05) scaleY(.2);opacity:0}}
+
+/* 공통 덮개 */
+.hitfx-dim{position:absolute;inset:0;z-index:20;background:#0a0710;opacity:0;pointer-events:none}
+.hitfx-flash{position:absolute;inset:0;z-index:26;background:#fff;opacity:0;pointer-events:none;mix-blend-mode:screen}
+.hitfx-vignette{position:absolute;inset:0;z-index:24;opacity:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,#7a0703cc 100%)}
+.hitfx-letterbox{position:absolute;left:0;right:0;height:0;z-index:25;background:#050305;pointer-events:none}
+.hitfx-letterbox.top{top:0}.hitfx-letterbox.bottom{bottom:0}
+
+/* 부상 컷인 */
+.hitfx-cutin{position:absolute;z-index:22;left:-6%;right:-6%;top:31%;height:38%;transform:skewY(-5deg);pointer-events:none;overflow:hidden;
+  border-block:3px solid var(--fx-c);box-shadow:0 0 0 1px #000,0 10px 30px #000c;
+  background:repeating-linear-gradient(100deg,#ffffff07 0 2px,transparent 2px 26px),linear-gradient(90deg,#0f0a0df2,#2b1b13f5 45%,#0f0a0df2)}
+.hitfx-cutin-inner{position:absolute;inset:0;transform:skewY(5deg);display:flex;align-items:center;justify-content:center;gap:3%}
+.hitfx-face{height:118%;aspect-ratio:1;background-repeat:no-repeat;background-size:260%;background-position:50% 4%;
+  filter:drop-shadow(0 0 1px #000)}
+.hitfx-part{height:70%;aspect-ratio:1;border-radius:8px;border:2px solid var(--fx-c);background:center/cover;box-shadow:0 0 18px color-mix(in srgb,var(--fx-c) 50%,transparent)}
+.hitfx-text{display:grid;gap:2px}
+.hitfx-text b{font:900 clamp(30px,6.4vw,72px)/1 "Malgun Gothic",sans-serif;color:var(--fx-c);-webkit-text-stroke:.06em #000;paint-order:stroke fill;letter-spacing:.02em}
+.hitfx-text span{font-weight:700;font-size:clamp(12px,1.5vw,17px);color:#f2e4d6}
+
+/* 결손 컷신 */
+.hitfx-cs{position:absolute;inset:0;z-index:23;pointer-events:none}
+.hitfx-cs-panel{position:absolute;top:44%;width:min(30%,40vh);aspect-ratio:1;margin-left:calc(min(30%,40vh) / -2);translate:0 -50%;opacity:0}
+.hitfx-cs-art,.hitfx-cs-half{position:absolute;inset:0;background:center/cover;border-radius:10px;border:3px solid #ff4a3d}
+.hitfx-cs-art{box-shadow:0 0 40px #ff2a1a66,0 10px 30px #000}
+.hitfx-cs-half{opacity:0}
+.hitfx-cs-half.a{clip-path:polygon(0 0,100% 0,0 100%)}
+.hitfx-cs-half.b{clip-path:polygon(100% 0,100% 100%,0 100%)}
+.hitfx-cs-slash{position:absolute;inset:-12%;width:124%;height:124%;overflow:visible}
+.hitfx-cs-slash line{stroke:#fff;stroke-width:3.2;stroke-linecap:round;filter:drop-shadow(0 0 4px #ff3b2b) drop-shadow(0 0 10px #ff3b2b)}
+.hitfx-cs-stamp{position:absolute;top:50%;display:grid;justify-items:center;opacity:0;transform:translateX(-50%)}
+.hitfx-cs-stamp b{font:900 clamp(44px,9vw,112px)/1 "Malgun Gothic",sans-serif;color:#ff4a3d;-webkit-text-stroke:.05em #0b0405;paint-order:stroke fill;text-shadow:0 0 24px #ff200f88}
+.hitfx-cs-stamp span{margin-top:4px;font-weight:800;font-size:clamp(13px,1.7vw,19px);color:#ffe0d9;padding:1px 10px;border-radius:4px;background:#2a0907;border:1px solid #ff4a3d}
+.hitfx-shard{position:absolute;left:50%;top:50%;aspect-ratio:1;background:var(--fx-c);clip-path:polygon(50% 0,100% 60%,30% 100%,0 40%);opacity:0}
+.hitfx-ink{position:absolute;left:50%;top:50%;width:40%;aspect-ratio:1;border-radius:50%;opacity:0;filter:blur(1px);
+  background:radial-gradient(circle,#b0100acc 0 30%,#6d0806aa 45%,transparent 66%)}

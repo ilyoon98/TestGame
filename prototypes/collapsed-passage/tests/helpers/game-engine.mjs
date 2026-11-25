@@ -1,11 +1,14 @@
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
+import {CP} from "../../src/bridge.js";
 
-const html=readFileSync(new URL("../../index.html",import.meta.url),"utf8");
-export const engine=gameEngine(html);
+const legacy=readFileSync(new URL("../../src/legacy.js",import.meta.url),"utf8");
+export const engine=gameEngine(legacy);
 
-export function gameEngine(gameHtml){
-  const source=gameHtml.match(/<script>([\s\S]*?)<\/script>/)[1].replace(/\n(?:start|renderOpening)\(\);\s*$/, "");
+// 게임 스크립트 본문이나 리팩터링 전 단일 index.html(기준선 비교용)을 받는다.
+export function gameEngine(input){
+  const inline=input.match(/<script>([\s\S]*?)<\/script>/);
+  const source=(inline?inline[1]:input).replace(/\n(?:start|renderOpening)\(\);\s*$/, "");
   const compiled=new vm.Script(source);
   return (seed=12345,{prep=false}={})=>runGame(compiled,seed,prep);
 }
@@ -27,7 +30,7 @@ function runGame(compiled,seed,prep){
   const context=vm.createContext({
     document:{hidden:false,querySelector:element,addEventListener(type,listener){element('document').listeners[type]=listener;}},
     ResizeObserver:class {observe(){} disconnect(){}},
-    structuredClone,matchMedia:()=>({matches:true}),window:{},Math:math,
+    CP,structuredClone,matchMedia:()=>({matches:true}),window:{},Math:math,
     setTimeout(callback,delay){const id=++timerId;timers.set(id,{callback,delay});return id;},
     clearTimeout(id){timers.delete(id);},
   });
