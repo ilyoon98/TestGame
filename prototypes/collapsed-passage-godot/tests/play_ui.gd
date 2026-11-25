@@ -32,6 +32,19 @@ func _check() -> void:
 		_check_focused(vp, size, "combat")
 		if args.size() == 1 and size.x == 1100:
 			await _capture(vp, args[0], "godot-threshold-combat")
+		var veil := ui.find_child("PauseVeil", true, false) as Control
+		_expect(veil != null and not veil.visible, "The battlefield has a hidden pause veil while running")
+		_key(vp, KEY_SPACE)
+		await process_frame
+		_expect(ui.paused and veil.visible, "Space pauses and shows the pause veil on the battlefield")
+		var badge := veil.find_child("PauseBadge", true, false) as Control
+		var field := veil.get_parent() as Control
+		_expect(field.get_global_rect().encloses(badge.get_global_rect()), "The pause badge stays inside the battlefield")
+		if args.size() == 1 and size.x == 1100:
+			await _capture(vp, args[0], "godot-threshold-paused")
+		_key(vp, KEY_SPACE)
+		await process_frame
+		_expect(not ui.paused and not veil.visible, "Space resumes and hides the pause veil")
 		# Drive the normal UI timer with a fixed delta instead of waiting in real time.
 		ui.set_process(false)
 		for i in 300:

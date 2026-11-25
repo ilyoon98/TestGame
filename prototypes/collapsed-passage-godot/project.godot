@@ -2,7 +2,7 @@
 config_version=5
 
 [application]
-config/name="붕괴 통로"
+config/name="루치아: 빈콜리의 등불"
 run/main_scene="res://ui/startup.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://art/icon/icon.png"

@@ -24,8 +24,8 @@ func _check() -> void:
 		title.tutorial_path = path
 		viewport.add_child(title)
 		await process_frame
-		_expect(not _control(title, "MapSettingsPanel").visible, "Map settings start collapsed")
-		_press(title, "MapSettings")
+		_expect(not _control(title, "QAPanel").visible, "QA tools and map settings start hidden")
+		_press(title, "OpenQA")
 		_expect(viewport.gui_get_focus_owner() == _control(title, "MapWidths"), "Opening settings focuses the width field")
 
 		var status := _control(title, "MapSettingsStatus") as Label
@@ -46,7 +46,7 @@ func _check() -> void:
 		_write(title, "Seed", "  격리문-04  ")
 		_expect(status.text == "구간 방 8개, 일반 전투 2개", "Summary reflects edits")
 		await process_frame
-		for id in ["MapSettingsPanel", "StartRun", "OpenCodex"]:
+		for id in ["QAPanel", "MapSettingsPanel", "StartTraining"]:
 			_check_bounds(_control(title, id), size)
 		if args.size() == 1 and size.x == 900:
 			await RenderingServer.frame_post_draw
@@ -76,7 +76,7 @@ func _check() -> void:
 		_press(title, "Restart")
 		_expect(game.run.data.map == layout and game.run.map_options == OPTIONS, "Retry reproduces the configured layout")
 		_press(title, "ReturnTitle")
-		_press(title, "MapSettings")
+		_press(title, "OpenQA")
 		_expect(_control(title, "MapWidths").text == "2,1,3,2", "Returning to title keeps the selected widths")
 		_expect(_control(title, "Map_elites").selected == 2, "Returning to title keeps special room counts")
 		_write(title, "MapWidths", "1,1,1,1")

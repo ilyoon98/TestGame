@@ -5,9 +5,11 @@ const GameScreen := preload("res://ui/threshold.tscn")
 const Codex := preload("res://ui/codex.gd")
 const SeedMap := preload("res://world/seed_map.gd")
 const FieldUI := preload("res://ui/field_ui.gd")
+const TitleLantern := preload("res://ui/title_lantern.gd")
 const OPENING_FOLDER := "res://art/opening/"
 const PALE := FieldUI.TEXT
 const GOLD := FieldUI.BRASS
+const MENU_WIDTH := 260
 const SPECIAL_ROOM_LABELS := {"shops": "상점", "rests": "휴식", "elites": "강적", "mysteries": "사건"}
 
 var tutorial_path := "user://opening.cfg"
@@ -15,6 +17,11 @@ var view := "home"
 var step := 0
 var seed := ""
 var sound_enabled := true
+## The lantern-snuffing intro plays before the opening comic in a visible window.
+var title_intro := true
+var _starting := false
+var _lantern = null
+var _home_ui: Control
 var _training := false
 var _tutorial_seen := false
 var _data: Dictionary
@@ -23,8 +30,8 @@ var _field: LineEdit
 var _codex: Control
 var _codex_opener: Control
 var _map_options := SeedMap.DEFAULT_OPTIONS.duplicate(true)
-var _map_panel: PanelContainer
-var _map_toggle: Button
+var _qa_panel: PanelContainer
+var _menus: Dictionary = {}
 var _map_widths: LineEdit
 var _map_counts: Dictionary = {}
 var _map_status: Label
@@ -65,80 +72,164 @@ func _render() -> void:
 
 
 func _show_home() -> void:
+	_starting = false
 	view = "home"
 	step = 0
 	_render()
 
 
 func _build_home() -> void:
-	var backdrop := _texture(_comic_path(0))
-	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	_display.add_child(backdrop)
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_lantern = TitleLantern.new()
+	_lantern.name = "TitleLantern"
+	_display.add_child(_lantern)
+	_lantern.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_lantern.snuffed.connect(_enter_opening, CONNECT_DEFERRED)
 
-	var shaded := TextureRect.new()
-	var gradient := Gradient.new()
-	gradient.colors = PackedColorArray([Color("#17101c0a"), Color("#130c15ef")])
-	var lighting := GradientTexture2D.new()
-	lighting.gradient = gradient
-	lighting.fill_from = Vector2(0.55, 0.07)
-	lighting.fill_to = Vector2(0.27, 0.95)
-	shaded.texture = lighting
-	shaded.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	shaded.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_display.add_child(shaded)
-	shaded.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_home_ui = Control.new()
+	_home_ui.name = "HomeUI"
+	_home_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_display.add_child(_home_ui)
+	_home_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	var content := _page(44)
-	content.alignment = BoxContainer.ALIGNMENT_END
-	var lockup := HBoxContainer.new()
-	lockup.add_theme_constant_override("separation", 17)
-	content.add_child(lockup)
-	var seal := FieldUI.mark("seal", GOLD, 66)
-	seal.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	lockup.add_child(seal)
-	lockup.add_child(FieldUI.label("붕괴 통로", 70, FieldUI.TEXT, true))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	content.add_child(row)
+	var margins := MarginContainer.new()
+	margins.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_home_ui.add_child(margins)
+	margins.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side: String in ["left", "top", "right", "bottom"]:
+		margins.add_theme_constant_override("margin_" + side, {"left": 72, "top": 64, "right": 44, "bottom": 56}[side])
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	column.custom_minimum_size.x = MENU_WIDTH
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margins.add_child(column)
+	var lockup := VBoxContainer.new()
+	lockup.name = "TitleLockup"
+	lockup.add_theme_constant_override("separation", 0)
+	column.add_child(lockup)
+	lockup.add_child(FieldUI.label("루치아", 76, FieldUI.TEXT, true))
+	lockup.add_child(FieldUI.label("빈콜리의 등불", 24, GOLD, true))
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(spacer)
+
+	_menus.clear()
+	var main := _menu_box(column, "MainMenu")
+	main.add_child(_menu_button("시작하기", "OpenRun", _show_menu.bind("seed"), true))
+	var book := _menu_button("도감", "OpenCodex", _open_codex)
+	FieldUI.add_key_hint(book, "D")
+	main.add_child(book)
+	main.add_child(_menu_button("설정", "OpenSettings", _show_menu.bind("settings")))
+
+	var seed_menu := _menu_box(column, "SeedMenu")
+	seed_menu.add_child(_label("시드", 17))
 	_field = LineEdit.new()
 	_field.name = "Seed"
 	_field.placeholder_text = "비우면 무작위"
+	_field.accessibility_name = "시드"
 	_field.text = seed
 	_field.max_length = 24
-	_field.custom_minimum_size.x = 195
+	_field.custom_minimum_size.y = FieldUI.ACTION_HEIGHT
 	_field.text_submitted.connect(func(_value: String): _start())
-	row.add_child(_label("시드", 17))
-	row.add_child(_field)
+	seed_menu.add_child(_field)
+	var seed_row := HBoxContainer.new()
+	seed_row.add_theme_constant_override("separation", 10)
+	seed_menu.add_child(seed_row)
 	var reroll := _button("무작위", "RandomSeed", func(): _field.text = _random_seed())
-	row.add_child(reroll)
-	_map_toggle = _button("지도 설정", "MapSettings", _toggle_map_settings)
-	_map_toggle.toggle_mode = true
-	row.add_child(_map_toggle)
-	var start := _button("시작하기", "StartRun", _start, true)
-	row.add_child(start)
-	var training := _button("QA 훈련장", "StartTraining", _start.bind(true))
-	row.add_child(training)
-	FieldUI.add_key_hint(training, "T")
-	var book := _button("도감", "OpenCodex", _open_codex)
-	row.add_child(book)
-	FieldUI.add_key_hint(book, "D")
-	_build_map_settings(content)
-	start.grab_focus()
+	reroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	seed_row.add_child(reroll)
+	var depart := _button("출발", "StartRun", _start, true)
+	depart.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	seed_row.add_child(depart)
+	seed_menu.add_child(_menu_button("뒤로", "SeedBack", _show_menu.bind("main")))
+
+	var settings := _menu_box(column, "SettingsMenu")
+	var sound := _menu_button("", "SoundToggle", func(): pass)
+	sound.toggle_mode = true
+	sound.button_pressed = sound_enabled
+	sound.text = "효과음 켬" if sound_enabled else "효과음 끔"
+	sound.toggled.connect(func(enabled: bool):
+		sound_enabled = enabled
+		sound.text = "효과음 켬" if enabled else "효과음 끔")
+	settings.add_child(sound)
+	settings.add_child(_menu_button("뒤로", "SettingsBack", _show_menu.bind("main")))
+
+	_build_qa_corner()
+	_show_menu("main")
+	# Touching any title control makes the candle gutter.
+	for control: BaseButton in _home_ui.find_children("*", "BaseButton", true, false):
+		control.mouse_entered.connect(_lantern.startle)
 
 
-func _build_map_settings(parent: VBoxContainer) -> void:
-	_map_panel = PanelContainer.new()
-	_map_panel.name = "MapSettingsPanel"
+func _menu_box(parent: Control, id: String) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	box.name = id
+	box.add_theme_constant_override("separation", 10)
+	parent.add_child(box)
+	_menus[id] = box
+	return box
+
+
+func _menu_button(text_value: String, id: String, action: Callable, primary := false) -> Button:
+	var button := _button(text_value, id, action, primary)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size.x = MENU_WIDTH
+	return button
+
+
+## Shows one of the title menus: "main", "seed" or "settings".
+func _show_menu(mode: String) -> void:
+	var id: String = {"main": "MainMenu", "seed": "SeedMenu", "settings": "SettingsMenu"}[mode]
+	for key: String in _menus:
+		_menus[key].visible = key == id
+	var focus: String = {"main": "OpenRun", "seed": "Seed", "settings": "SoundToggle"}[mode]
+	(_menus[id].find_child(focus, true, false) as Control).grab_focus()
+
+
+## QA tools stay out of the way in the top-right corner; map settings live inside them.
+func _build_qa_corner() -> void:
+	var corner := VBoxContainer.new()
+	corner.name = "QACorner"
+	corner.add_theme_constant_override("separation", 8)
+	corner.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_home_ui.add_child(corner)
+	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
+	var opener := _button("QA", "OpenQA", _toggle_qa)
+	FieldUI.style_action(opener, false, true)
+	opener.size_flags_horizontal = Control.SIZE_SHRINK_END
+	opener.modulate.a = 0.4
+	opener.tooltip_text = "QA 훈련장"
+	corner.add_child(opener)
+
+	_qa_panel = PanelContainer.new()
+	_qa_panel.name = "QAPanel"
+	_qa_panel.custom_minimum_size.x = 560
 	var panel_style := FieldUI.plate(Color("#211923f5"), FieldUI.RIM)
 	panel_style.content_margin_top = 12
 	panel_style.content_margin_bottom = 12
-	_map_panel.add_theme_stylebox_override("panel", panel_style)
-	parent.add_child(_map_panel)
-	_map_panel.hide()
+	_qa_panel.add_theme_stylebox_override("panel", panel_style)
+	corner.add_child(_qa_panel)
+	_qa_panel.hide()
 	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 10)
+	_qa_panel.add_child(content)
+	content.add_child(_label("QA 훈련장 · 지도 설정", 17))
+	_build_map_settings(content)
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 10)
+	actions.alignment = BoxContainer.ALIGNMENT_END
+	content.add_child(actions)
+	actions.add_child(_button("닫기", "CloseQA", _toggle_qa.bind(false)))
+	var training := _button("훈련장 시작", "StartTraining", _start.bind(true), true)
+	FieldUI.add_key_hint(training, "T")
+	actions.add_child(training)
+
+
+func _build_map_settings(parent: VBoxContainer) -> void:
+	var content := VBoxContainer.new()
+	content.name = "MapSettingsPanel"
 	content.add_theme_constant_override("separation", 8)
-	_map_panel.add_child(content)
+	parent.add_child(content)
 	var fields := HBoxContainer.new()
 	fields.add_theme_constant_override("separation", 10)
 	content.add_child(fields)
@@ -150,7 +241,7 @@ func _build_map_settings(parent: VBoxContainer) -> void:
 	_map_widths.max_length = 12
 	_map_widths.accessibility_name = "구간별 방 수"
 	_map_widths.text_changed.connect(func(_value: String): _refresh_map_status())
-	_map_widths.text_submitted.connect(func(_value: String): _start())
+	_map_widths.text_submitted.connect(func(_value: String): _start(true))
 	_add_map_field(fields, "구간별 방 수", _map_widths)
 
 	_map_counts.clear()
@@ -181,11 +272,12 @@ func _add_map_field(fields: HBoxContainer, title: String, input: Control) -> voi
 	column.add_child(input)
 
 
-func _toggle_map_settings() -> void:
-	_map_panel.visible = _map_toggle.button_pressed
-	if _map_panel.visible:
+func _toggle_qa(open: Variant = null) -> void:
+	_qa_panel.visible = not _qa_panel.visible if open == null else bool(open)
+	if _qa_panel.visible:
 		_map_widths.grab_focus()
-
+	else:
+		(_display.find_child("OpenQA", true, false) as Control).grab_focus()
 
 func _read_map_options() -> Dictionary:
 	var options := {"widths": SeedMap.parse_widths(_map_widths.text)}
@@ -269,12 +361,11 @@ func _build_pages() -> void:
 
 
 func _start(training := false) -> void:
-	if view != "home":
+	if view != "home" or _starting:
 		return
 	var options := _read_map_options()
 	if not _validate_map(options, training):
-		_map_toggle.set_pressed_no_signal(true)
-		_toggle_map_settings()
+		_toggle_qa(true)
 		if not options.widths.is_empty():
 			_map_counts.shops.grab_focus()
 		return
@@ -283,7 +374,33 @@ func _start(training := false) -> void:
 	if seed.is_empty():
 		seed = _random_seed()
 	_training = training
-	view = "game" if training else "comic"
+	step = 0
+	if training or not _title_intro_enabled():
+		view = "game" if training else "comic"
+		_render()
+		return
+	# Hold the title while the gust snuffs the lantern; `_enter_opening` follows.
+	_starting = true
+	create_tween().tween_property(_home_ui, "modulate:a", 0.0, 0.3)
+	_lantern.snuff()
+	if sound_enabled:
+		var player := AudioStreamPlayer.new()
+		player.name = "TitleSnuff"
+		player.stream = TitleLantern.snuff_stream()
+		player.finished.connect(player.queue_free)
+		add_child(player)
+		player.play()
+
+
+func _title_intro_enabled() -> bool:
+	return title_intro and DisplayServer.get_name() != "headless" and is_instance_valid(_lantern)
+
+
+func _enter_opening() -> void:
+	if not _starting or view != "home":
+		return
+	_starting = false
+	view = "comic"
 	step = 0
 	_render()
 
@@ -314,6 +431,12 @@ func _advance(skip := false) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _starting:
+		var press := event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton
+		if press and event.is_pressed() and not event.is_echo():
+			get_viewport().set_input_as_handled()
+			_lantern.finish()
+		return
 	if is_instance_valid(_codex) and _codex.visible:
 		if event.is_action_pressed("ui_cancel"):
 			get_viewport().set_input_as_handled()
@@ -324,7 +447,16 @@ func _input(event: InputEvent) -> void:
 	if event.ctrl_pressed or event.alt_pressed or event.meta_pressed:
 		return
 	if view == "home":
-		if get_viewport().gui_get_focus_owner() == _field or event.shift_pressed:
+		if event.keycode == KEY_ESCAPE:
+			if _qa_panel.visible:
+				_toggle_qa(false)
+			elif not _menus.MainMenu.visible:
+				_show_menu("main")
+			else:
+				return
+			get_viewport().set_input_as_handled()
+			return
+		if get_viewport().gui_get_focus_owner() is LineEdit or event.shift_pressed:
 			return
 		if event.keycode == KEY_D:
 			_open_codex()

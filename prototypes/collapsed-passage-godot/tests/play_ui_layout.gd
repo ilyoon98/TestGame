@@ -40,8 +40,18 @@ func _check() -> void:
 		viewport.add_child(title)
 		await process_frame
 		await process_frame
-		for id in ["StartRun", "RandomSeed", "MapSettings", "StartTraining", "OpenCodex"]:
+		for id in ["OpenRun", "OpenCodex", "OpenSettings"]:
 			_check_button(title.find_child(id, true, false), dimensions.x, id)
+		var corner := title.find_child("OpenQA", true, false) as Control
+		_expect(Rect2(Vector2.ZERO, dimensions).encloses(corner.get_global_rect()), "QA corner button cut off at %s" % dimensions)
+		title._show_menu("seed")
+		title._toggle_qa(true)
+		await process_frame
+		await process_frame
+		for id in ["StartRun", "RandomSeed", "SeedBack", "StartTraining", "CloseQA"]:
+			_check_button(title.find_child(id, true, false), dimensions.x, id)
+		var qa := title.find_child("QAPanel", true, false) as Control
+		_expect(Rect2(Vector2.ZERO, dimensions).encloses(qa.get_global_rect()), "QA panel cut off at %s" % dimensions)
 
 		title.view = "game"
 		title.seed = "LAYOUT"

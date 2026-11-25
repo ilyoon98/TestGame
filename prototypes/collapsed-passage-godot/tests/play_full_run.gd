@@ -32,6 +32,11 @@ func _play() -> void:
 	startup.find_child("Seed", true, false).text = fixture.seed
 	if not await _capture("godot-full-run-title") or not _press(startup, "StartRun"):
 		return
+	# In a visible window the title plays its lantern intro before the comic.
+	var wait_frames := 0
+	while startup.view == "home" and wait_frames < 600:
+		await tree.process_frame
+		wait_frames += 1
 	for index in 8:
 		if not _require(startup.view == "comic" and startup.step == index, "Opening panel order differs"):
 			return

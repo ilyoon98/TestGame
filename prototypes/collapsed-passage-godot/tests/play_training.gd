@@ -20,6 +20,8 @@ func _check() -> void:
 		var startup := Startup.instantiate()
 		startup.tutorial_path = "user://qa-test-%s.cfg" % Crypto.new().generate_random_bytes(8).hex_encode()
 		viewport.add_child(startup)
+		startup._toggle_qa(true)
+		await process_frame
 		await process_frame
 		_check_bounds(startup, "StartTraining", size)
 		var seed := startup.find_child("Seed", true, false) as LineEdit

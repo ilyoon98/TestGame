@@ -23,6 +23,8 @@ const MUTED := FieldUI.MUTED
 const ALLY := FieldUI.ALLY
 const FOE := FieldUI.DANGER
 const INJURY_LEVELS := {"healthy": "정상", "injured": "부상", "lost": "결손"}
+const COMBAT_BOARD_MIN := 262.0
+const PREP_BOARD_MIN := 148.0
 const QA_ACTIONS := {"win": "전투 승리 (K)", "heal": "아군 회복 (H)", "margin": "도망 여유 +5 (J)"}
 
 var run: RefCounted
@@ -51,6 +53,7 @@ var _status: Label
 var _intent: Label
 var _combat_note: Label
 var _pause: Button
+var _pause_veil: Control
 var _speed: Button
 var _sound_toggle: Button
 var _audio: Node
@@ -108,6 +111,7 @@ func _show(focus_key := "") -> void:
 	_shown_actors = {}
 	_shown_intent = {}
 	_effect = null
+	_pause_veil = null
 	_pursuer_shadow = null
 	_journal_body = null
 	_skill_bars.clear()
@@ -338,6 +342,7 @@ func _build_prep(focus_key: String) -> void:
 		_build_run_skills(loadout, equipped, focus_key)
 	if not run.ready_to_fight():
 		_page.add_child(_label("출전 대원의 빈 기술 칸을 채우세요.", 15, MUTED))
+	_fit_board.call_deferred(board, PREP_BOARD_MIN)
 
 
 func _build_run_skills(loadout: Array, equipped: int, focus_key: String) -> void:
@@ -498,6 +503,8 @@ func _build_combat() -> void:
 	_effect.name = "CombatEffect"
 	_effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay(board, _effect, 0)
+	_pause_veil = _build_pause_veil()
+	_overlay(board, _pause_veil, 0)
 	_combat_note = _label(" ", 16, AMBER)
 	_combat_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_page.add_child(_combat_note)
@@ -541,17 +548,18 @@ func _build_combat() -> void:
 		name_row.add_child(label)
 		var activation := _label("", 12, AMBER)
 		name_row.add_child(activation)
-		var bar := _bar(slot.cooldown, ALLY)
-		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		var charge := _row(6)
-		content.add_child(charge)
-		charge.add_child(bar)
+		# 남은 시간은 이름 줄 오른쪽, 충전 막대는 그 아래 얇은 줄. 대원이 여럿이어도 기술 칸이 창 안에 들어온다.
 		var time := _label("", 13, MUTED)
-		charge.add_child(time)
+		time.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		name_row.add_child(time)
+		var bar := _bar(slot.cooldown, ALLY)
+		bar.custom_minimum_size.y = 5
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		content.add_child(bar)
 		_skill_bars[id] = {"bar": bar, "time": time, "activation": activation}
 	_add_fallen_notice()
 	_refresh_combat()
+	_fit_board.call_deferred(board, COMBAT_BOARD_MIN)
 
 
 func _build_injury_tools() -> void:
@@ -618,7 +626,7 @@ func _add_fighter(parent: HBoxContainer, side: String, color: Color) -> void:
 	else:
 		cue.text = Run.RANKS[run.formation.find(side)]
 	var figure := Control.new()
-	figure.custom_minimum_size.y = 152
+	figure.custom_minimum_size.y = 112
 	figure.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(figure)
 	var sprite := ActorPortrait.new()
@@ -1020,6 +1028,8 @@ func _restore_poses() -> void:
 func _toggle_pause() -> void:
 	paused = not paused
 	_pause.text = "전투 계속" if paused else "일시정지"
+	if is_instance_valid(_pause_veil):
+		_pause_veil.visible = paused
 	_sync_audio_pause()
 
 
@@ -1678,6 +1688,40 @@ func _texture(path: String, min_height: float, crop := false) -> TextureRect:
 	image.custom_minimum_size.y = min_height
 	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return image
+
+
+# 전장 위 일시정지 표시. 멈춘 동안 전장을 어둡게 하고 위쪽 가운데에 상태를 띄운다.
+func _build_pause_veil() -> Control:
+	var veil := ColorRect.new()
+	veil.name = "PauseVeil"
+	veil.color = Color("#0c0a0e8f")
+	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var badge := _panel(Color("#141214eb"), ALLY, 7)
+	badge.name = "PauseBadge"
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := _row(8)
+	badge.add_child(row)
+	row.add_child(_label("일시정지", 19, ALLY))
+	var hint := _label("Space", 13, MUTED)
+	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(hint)
+	veil.add_child(badge)
+	badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 14)
+	badge.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	veil.visible = paused
+	return veil
+
+
+# 창이 낮으면 전장(또는 대열) 높이를 줄여 아래의 기술 칸이 한 화면에 더 들어오게 한다.
+# 인물이 읽히도록 최소 높이는 지킨다. 전투에서는 충전 막대, 준비에서는 기술 카드 설명이 대상이다.
+# board는 지연 호출 전에 화면이 다시 그려져 이미 해제됐을 수 있어 타입을 두지 않는다.
+func _fit_board(board: Variant, minimum: float) -> void:
+	if not is_instance_valid(board) or not is_instance_valid(_scroll) or not board.is_inside_tree():
+		return
+	var overflow := _page.get_combined_minimum_size().y - _scroll.size.y
+	if overflow <= 0.0:
+		return
+	board.custom_minimum_size.y = maxf(minimum, board.custom_minimum_size.y - ceilf(overflow))
 
 
 func _arena(height: int, image_path: String) -> Control:
