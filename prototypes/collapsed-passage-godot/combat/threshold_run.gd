@@ -823,6 +823,16 @@ func skill_conditions_met(id: String, side: String) -> bool:
 	return _battle.conditions_met(id, side)
 
 
+## 장착 기술 ID를 규칙의 발동 순서대로. 전투 상태는 바꾸지 않는다.
+func firing_order() -> Array[String]:
+	return _battle.firing_order()
+
+
+## 방어 기술이 지금 발동하면 예고된 적 공격의 피해를 막는가. 전투 상태는 바꾸지 않는다.
+func guard_blocks(id: String, side: String) -> bool:
+	return _battle.guard_blocks(id, side)
+
+
 func _roll_rewards() -> void:
 	var gained: Array[String] = []
 	var ready: Array[String] = []

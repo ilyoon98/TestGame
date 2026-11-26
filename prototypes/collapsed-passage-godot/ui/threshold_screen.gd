@@ -530,7 +530,8 @@ func _build_combat() -> void:
 	_overlay(board, _effect, 0)
 	# 충전 막대 대신 아군 기술과 적 행동이 중앙 발동선으로 모이는 한 줄을 전장 바로 아래에 둔다.
 	_converge = ConvergeTrack.new()
-	_converge.setup(run, run.party_sides())
+	_converge.setup(run)
+	_converge.speed = speed
 	_page.add_child(_converge)
 	_body_readout = BattleReadout.new()
 	_body_readout.setup(run, sides)
@@ -907,6 +908,8 @@ func _present_events() -> bool:
 	_feedback_states.assign(run.event_states)
 	_emoted_casts.clear()
 	_clock = 0.0
+	if is_instance_valid(_converge):
+		_converge.set_lead(0.0)
 	_pending_screen = run.phase != "combat"
 	_play_next_event()
 	_refresh_qa_toolbar()
@@ -930,7 +933,7 @@ func _play_next_event() -> void:
 	_hold = _contact_left + read_time
 	_mark_casting(event.card if event.from != "enemy" else "")
 	if event.from == "enemy" and is_instance_valid(_converge):
-		_converge.set_active(ConvergeTrack.ENEMY)
+		_converge.cast_enemy(event)
 	if heal:
 		_pose(event.from, "heal")
 		_launch_projectile()
@@ -991,6 +994,8 @@ func _show_cast_art(event: Dictionary) -> void:
 
 func _resolve_contact() -> void:
 	var event := _active_event
+	if event.from == "enemy" and is_instance_valid(_converge):
+		_converge.show_cast_result()
 	_refresh_combat({} if _feedback.is_empty() else _contact_state)
 	_show_event(event)
 	var points: Array[Vector2] = []
@@ -1225,6 +1230,8 @@ func _run_qa(id: String) -> void:
 func _cycle_speed() -> void:
 	speed = speed * 2 if speed < 4 else 1
 	_speed.text = "배속 %d×" % speed
+	if is_instance_valid(_converge):
+		_converge.speed = speed
 
 
 func _build_recruit() -> void:

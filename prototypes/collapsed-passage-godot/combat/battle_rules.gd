@@ -250,6 +250,45 @@ func _apply(id: String, from: String, side: String, targets: Array) -> void:
 		"skill": _heal(id, from, side, targets[0], amount)
 
 
+## 장착 기술을 발동 순서대로. 동시 발동 순서(준비 시각, 공격 이외 기술, 긴 충전, ID)를 그대로 쓴다.
+## 상태를 바꾸지 않으므로 화면 예고에 쓴다.
+func firing_order() -> Array[String]:
+	var ordered: Array[Dictionary] = run.slots.duplicate()
+	ordered.sort_custom(_earlier)
+	var ids: Array[String] = []
+	for slot: Dictionary in ordered:
+		ids.append(slot.id)
+	return ids
+
+
+## 방어 기술이 지금 발동하면, 예고된 적 공격이 노리는 대원·부위에서 이 카드의 가드가 피해를 실제로 막는가.
+## 가드 깨기의 제거와 정밀 타격의 관통까지 센다. 상태를 바꾸지 않는다.
+func guard_blocks(id: String, side: String) -> bool:
+	var forecast := intent()
+	if forecast.is_empty() or run.cards[forecast.id].type != "attack":
+		return false
+	var plan := _guard_plan(id, side)
+	var target: String = forecast.targets[0]
+	if plan.get("side", "") != forecast.get("side", "") or target not in plan.get("targets", []):
+		return false
+	var card: Dictionary = run.cards[id]
+	var added := 1 if id == "counter" else _power(id, run.get(side))
+	if card.has("injuredGuard") and run.condition(run.get(plan.side), target) == "injured":
+		added += int(card.injuredGuard)
+	if plan.side == run.party_sides().front():
+		added += _trait("guard")
+	var current := int(run.get(plan.side).body[target].guard)
+	# 이미 걸린 가드가 같거나 크면 이 카드는 보탤 것이 없고, 피해가 0이면 막을 것도 없다.
+	if added <= current or intent_power(forecast) <= 0:
+		return false
+	var guard := added
+	var effect: String = run.cards[forecast.id].get("effect", forecast.id)
+	var amount := _power(forecast.id, run.enemy)
+	var removed := amount if effect == "break" else 0
+	var pierce := amount if effect == "aim" else 0
+	return guard - removed - pierce > 0
+
+
 func _guard_plan(id: String, side: String) -> Dictionary:
 	var card: Dictionary = run.cards[id]
 	var mode: String = card.get("guardMode", "")
