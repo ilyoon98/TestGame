@@ -221,7 +221,7 @@ func _check_board_fit(ui: Control, vp: SubViewport, size: Vector2i, screen: Stri
 	var scroll: Rect2 = ui._scroll.get_global_rect()
 	var bars_visible := true
 	for id: String in ui._skill_bars:
-		var bar: Control = ui._skill_bars[id].bar
+		var bar: Control = ui._skill_bars[id].time
 		bars_visible = bars_visible and bar.get_global_rect().end.y <= scroll.end.y + 0.5
 	var at_floor := is_equal_approx(board.custom_minimum_size.y, maxf(ui.COMBAT_BOARD_MIN, row.get_combined_minimum_size().y + 32.0))
 	_expect(bars_visible or at_floor, "Battlefield shrinks until skill bars fit on %s at %s" % [screen, size])

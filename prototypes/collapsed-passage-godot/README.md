@@ -63,6 +63,8 @@ node scripts/compare-playthrough.mjs dist/windows-x64/CollapsedPassage.exe --exp
 
 전투에서는 공격 자세가 먼저 나오고 타격이 닿으면 맞은 부위에 피해·가드 수치가 뜬다. 피해는 주황색 충격과 낮은 타격음, 가드는 파란 방패와 금속음으로 구분한다. 궁수의 화살과 주술사의 봉인 해제는 날아가는 경로를 표시한다. ‘효과음 켬/끔’은 전투 연출과 별도로 소리를 제어하며, 게임을 실행한 동안 선택이 유지된다.
 
+전장 바로 아래 수렴선([ui/converge_track.gd](ui/converge_track.gd))에서 아군 기술과 적 행동의 남은 시간을 한 줄로 비교한다. 대원마다 한 칸씩 쓰는 아군 기술 토큰은 왼쪽에서, 적의 다음 행동은 오른쪽에서 중앙 발동선으로 다가오고, 중앙에 닿는 순서가 곧 발동 순서다. 반쪽 폭은 6초이고, 그보다 긴 기술이 있으면 그 기술의 충전 시간만큼 넓힌다. 칸마다 곧 발동할 기술에만 이름표를 단다. 회복할 부위가 없어 기다리는 기술은 발동선 바로 앞에 끊긴 테두리로 서 있다. 위치 제한이나 부위 결손으로 쓸 수 없는 기술은 바깥 끝에 흐리게 놓인다. 발동 연출 중인 토큰은 중앙선에서 커지고 황동 테두리가 붙는다. 눈을 다치면 적 토큰이 `?`로 바뀐다. 수렴선은 전투 규칙을 읽기만 하므로 발동 시각과 웹판 비교 결과는 그대로다. 기술 칸에는 이름과 남은 시간만 남고, 따로 있던 충전 막대는 없앴다.
+
 기술이 발동하면 카드 원화가 잠깐 나타나며, 수녀와 주술사의 회복 효과는 대상에게 닿은 뒤 체력을 갱신한다. 팔·다리 결손과 눈 결손은 전투 자세와 붕대에 반영된다. 일반 경로에서는 지도 위의 이동 표시가 목적지에 닿으면 방에 입장한다. 휴식과 출구에는 생존 대원이 나타나며, 추격에 붙잡히면 사형수가 다가오고 등불이 꺼지는 장면이 나온다.
 
 ## 웹판 비교
@@ -83,6 +85,7 @@ godot --headless --path . --script res://tests/play_map_settings.gd
 godot --headless --path . --script res://tests/play_combat_effects.gd
 godot --headless --path . --script res://tests/play_minimap.gd
 godot --headless --path . --script res://tests/play_battle_readout.gd
+godot --headless --path . --script res://tests/play_converge_track.gd
 godot --headless --path . --script res://tests/play_qa_tools.gd
 godot --headless --path . --script res://tests/play_injury_art.gd
 godot --headless --path . --script res://tests/play_floors.gd

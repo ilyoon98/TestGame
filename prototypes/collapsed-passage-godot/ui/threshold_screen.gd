@@ -11,6 +11,7 @@ const CombatAudio := preload("res://ui/combat_audio.gd")
 const CombatEffect := preload("res://ui/combat_effect.gd")
 const BattleReadout := preload("res://ui/battle_readout.gd")
 const PursuitTrack := preload("res://ui/pursuit_track.gd")
+const ConvergeTrack := preload("res://ui/converge_track.gd")
 const CaptureScene := preload("res://ui/capture_scene.gd")
 const ActorPortrait := preload("res://ui/actor_portrait.gd")
 const LocationScene := preload("res://ui/location_scene.gd")
@@ -66,6 +67,7 @@ var _audio: Node
 var _effect: Control
 var _fighters: Dictionary = {}
 var _skill_bars: Dictionary = {}
+var _converge: Control
 var _injury_side: OptionButton
 var _injury_members: Array = []
 var _minimap: Control
@@ -123,6 +125,7 @@ func _show(focus_key := "") -> void:
 	_pursuer_shadow = null
 	_journal_body = null
 	_skill_bars.clear()
+	_converge = null
 	_injury_side = null
 	_injury_members.clear()
 	_qa_buttons.clear()
@@ -525,6 +528,10 @@ func _build_combat() -> void:
 	_effect.name = "CombatEffect"
 	_effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay(board, _effect, 0)
+	# 충전 막대 대신 아군 기술과 적 행동이 중앙 발동선으로 모이는 한 줄을 전장 바로 아래에 둔다.
+	_converge = ConvergeTrack.new()
+	_converge.setup(run, run.party_sides())
+	_page.add_child(_converge)
 	_body_readout = BattleReadout.new()
 	_body_readout.setup(run, sides)
 	_page.add_child(_body_readout)
@@ -574,15 +581,11 @@ func _build_combat() -> void:
 		name_row.add_child(label)
 		var activation := _label("", 12, AMBER)
 		name_row.add_child(activation)
-		# 남은 시간은 이름 줄 오른쪽, 충전 막대는 그 아래 얇은 줄. 대원이 여럿이어도 기술 칸이 창 안에 들어온다.
+		# 남은 시간은 이름 줄 오른쪽에 둔다. 충전 진행은 전장 아래 수렴선이 보여 준다.
 		var time := _label("", 13, MUTED)
 		time.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		name_row.add_child(time)
-		var bar := _bar(slot.cooldown, ALLY)
-		bar.custom_minimum_size.y = 5
-		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		content.add_child(bar)
-		_skill_bars[id] = {"bar": bar, "time": time, "activation": activation}
+		_skill_bars[id] = {"time": time, "activation": activation}
 	_add_fallen_notice()
 	_refresh_combat()
 	_fit_board_node = board
@@ -773,11 +776,11 @@ func _refresh_combat(actors: Dictionary = {}) -> void:
 		"staggered": "기절 (철문 열림)"}.get(gate, "")
 	_show_intent(planned, eyes, gate_label)
 	_body_readout.refresh(planned)
+	_converge.refresh(eyes)
 	for slot: Dictionary in run.slots:
 		var left := maxi(0, slot.readyAt - run.elapsed)
 		var view: Dictionary = _skill_bars[slot.id]
 		var issue: String = run.skill_issue(slot.id, slot.side)
-		view.bar.value = slot.cooldown - left if issue.is_empty() else 0
 		if not issue.is_empty():
 			view.time.text = issue
 		elif left > 0:
@@ -869,6 +872,8 @@ func _process(delta: float) -> void:
 		if run.phase != "combat":
 			_show()
 			return
+	if is_instance_valid(_converge):
+		_converge.set_lead(_clock)
 
 
 func _advance_feedback(delta: float) -> void:
@@ -924,6 +929,8 @@ func _play_next_event() -> void:
 		read_time = 1.0
 	_hold = _contact_left + read_time
 	_mark_casting(event.card if event.from != "enemy" else "")
+	if event.from == "enemy" and is_instance_valid(_converge):
+		_converge.set_active(ConvergeTrack.ENEMY)
 	if heal:
 		_pose(event.from, "heal")
 		_launch_projectile()
@@ -969,6 +976,8 @@ func _mark_casting(id: String) -> void:
 	_active_skill = id
 	if _skill_bars.has(id):
 		_skill_bars[id].activation.text = "발동"
+	if is_instance_valid(_converge):
+		_converge.set_active(id)
 
 
 func _show_cast_art(event: Dictionary) -> void:
@@ -1795,16 +1804,6 @@ func _overlay(parent: Control, child: Control, inset: int) -> void:
 	child.offset_top = inset
 	child.offset_right = -inset
 	child.offset_bottom = -inset
-
-
-func _bar(maximum: int, color: Color) -> ProgressBar:
-	var bar := ProgressBar.new()
-	bar.max_value = maximum
-	bar.custom_minimum_size.y = 7
-	bar.show_percentage = false
-	bar.add_theme_stylebox_override("background", _style(INK, INK, 0))
-	bar.add_theme_stylebox_override("fill", _style(color, color, 0))
-	return bar
 
 
 func _card_button(parent: Container, card: Dictionary, action: Callable, number: int,
