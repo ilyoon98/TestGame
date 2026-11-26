@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1824">
+  <title>백야선</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✳</span>
+        <h1>백야선</h1>
+      </div>
+      <div class="controls">
+        <button id="speed" type="button" class="control" aria-label="재생 속도 1배">1×</button>
+        <button id="pause" type="button" class="control" disabled>일시정지</button>
+      </div>
+    </header>
+
+    <section class="line-panel" id="route-panel" aria-labelledby="line-title">
+      <div class="section-head">
+        <h2 id="line-title">북단 철도</h2>
+        <p id="distance">0 / 13칸</p>
+      </div>
+      <div class="rail">
+        <div id="train" class="train" aria-hidden="true"><span></span></div>
+        <ol id="track" class="track" aria-label="철도 경로"></ol>
+        <div class="dice" id="dice" role="img" aria-label="주사위 대기" hidden>
+          <span id="dice-face" class="dice-face" aria-hidden="true">–</span>
+          <span id="dice-faces" class="dice-faces" aria-hidden="true" hidden>
+            <span>⚀</span><span>⚁</span><span>⚂</span>
+          </span>
+          <span id="dice-value" class="dice-value" aria-hidden="true" hidden></span>
+        </div>
+      </div>
+      <ul class="legend" aria-label="정거장 종류">
+        <li><span class="route-symbol route-battle" aria-hidden="true"></span> 전투</li>
+        <li><span class="route-symbol route-supply" aria-hidden="true"></span> 보급</li>
+        <li><span class="route-symbol route-recruit" aria-hidden="true"></span> 영입</li>
+        <li><span aria-hidden="true">◆</span> 종착역</li>
+      </ul>
+    </section>
+
+    <div class="board">
+      <section class="operation" aria-labelledby="stage">
+        <div class="scene">
+          <div class="scene-grid" aria-hidden="true"></div>
+          <p class="phase" id="phase">출발 대기</p>
+          <h2 id="stage">북단 관제소</h2>
+          <p class="message" id="message" role="status">원정을 시작하면 주사위와 전투가 자동으로 진행됩니다.</p>
+          <div class="controls launch-controls" id="launch-controls">
+            <button id="start" type="button" class="primary">원정 시작 <span aria-hidden="true">→</span></button>
+            <button id="test-battle" type="button" class="control test-button">5대2 테스트</button>
+          </div>
+          <ol class="test-plan" id="test-plan" aria-label="테스트 전투 순서" hidden>
+            <li><span class="sr-only">동시 합</span></li>
+            <li><span class="sr-only">동시 추가 공격</span></li>
+            <li><span class="sr-only">마지막 공격</span></li>
+          </ol>
+          <div class="arena" id="arena" hidden>
+            <p class="sr-only" id="clash-caption"></p>
+            <div id="clash-lanes"></div>
+            <div id="waiting-line" class="waiting-line" hidden>
+              <p id="waiting-label">아군 대기열</p>
+              <ol id="waiting-crew" class="waiting-crew"></ol>
+            </div>
+          </div>
+          <template id="clash-lane">
+            <div class="clash-lane">
+              <span class="clash-announcement sr-only" role="status"></span>
+              <div class="clash-field">
+                <div class="clash-center" aria-hidden="true"></div>
+                <span class="clash-flash" aria-hidden="true"></span>
+                <span class="clash-sparks" aria-hidden="true"></span>
+                <div class="combatant ally">
+                  <div class="coins" role="img"></div>
+                  <span class="combat-score" role="img"></span><span class="combat-gain" hidden></span>
+                  <span class="win-tag" aria-hidden="true" hidden></span><span class="combat-icon" aria-hidden="true"></span><span class="combat-name"></span>
+                  <span class="combat-hp"></span>
+                  <span class="combat-spirit"></span>
+                  <span class="spirit-change" hidden></span>
+                </div>
+                <div class="combatant foe">
+                  <div class="coins" role="img"></div>
+                  <span class="combat-score" role="img"></span><span class="combat-gain" hidden></span>
+                  <span class="win-tag" aria-hidden="true" hidden></span><span class="combat-icon" aria-hidden="true"></span><span class="combat-name"></span>
+                  <span class="combat-hp"></span>
+                  <span class="combat-spirit"></span>
+                  <span class="spirit-change" hidden></span>
+                </div>
+                <span class="slash" aria-hidden="true" hidden></span>
+                <span class="finish-burst" aria-hidden="true" hidden></span>
+                <span class="damage-number" aria-hidden="true" hidden></span>
+              </div>
+            </div>
+          </template>
+          <ul class="enemy-list" id="enemies" aria-label="적" hidden></ul>
+          <div id="scene-notice" class="scene-notice" hidden>
+            <div class="notice-card">
+              <strong id="notice-title"></strong>
+              <p id="notice-detail"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="crew-panel" aria-labelledby="crew-title">
+        <div class="section-head">
+          <h2 id="crew-title">자동 편성</h2>
+        <p id="crew-count">4명 출전</p>
+        </div>
+        <ol id="crew" class="crew"></ol>
+        <p class="rating-note">전투력 = 공격 × 3 + 현재 HP + 방어 × 2</p>
+      </section>
+    </div>
+
+    <section class="journal" aria-labelledby="journal-title">
+      <h2 id="journal-title">운행 기록</h2>
+      <ol id="journal"></ol>
+    </section>
+  </main>
+</body>
+</html>

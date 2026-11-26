@@ -9,6 +9,7 @@
 | 실험 | 열 파일 | 내용 |
 | --- | --- | --- |
 | Coin Flip | [coin.html](prototypes/coin-flip/coin.html) | 동전 뒤집기 |
+| 백야선 | [index.html](prototypes/white-night-line/index.html) | 브라우저에서 **원정 시작** 또는 **5대2 테스트**를 누릅니다. 설치 없이 주사위 이동과 코인 합을 재생하는 자동 전투 실험입니다. [연출과 테스트](prototypes/white-night-line/VISUAL_DESIGN.md) |
 | 루치아: 빈콜리의 등불 | [index.html](prototypes/collapsed-passage/index.html) | 수녀 루치아가 동료와 함께 무너진 지하 감옥을 빠져나가는 덱빌딩 오토배틀러. 부위별 부상과 추격을 관리합니다. ES 모듈을 쓰므로 위의 로컬 서버로 엽니다. [기획서](prototypes/collapsed-passage/DESIGN.md) |
 | 붕괴 통로 연출 실험실 | [index.html](prototypes/collapsed-passage-fx-lab/index.html) | 일반·치명타·부상·결손 데미지 숫자와 부상 컷인·결손 컷신을 눌러 보고 값을 조정합니다. 붕괴 통로 원화를 상대 경로로 읽으므로 위 HTTP 서버로 엽니다. |
 | Dice | [dice2d.html](prototypes/dice/dice2d.html), [dice_land_phase7.html](prototypes/dice/dice_land_phase7.html) | 2D 주사위와 주사위 땅따먹기 |
