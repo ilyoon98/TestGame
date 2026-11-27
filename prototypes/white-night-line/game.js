@@ -17,64 +17,97 @@ const route = [
   { name: "백야 종착역", kind: "boss" },
 ];
 
-const initialCrew = [
-  { id: "naru", name: "나루", role: "선로 경비", identity: "철교 경비대", skillName: "철로 엄호", icon: "⛨",
-    level: 20, maxHp: 36, attack: 5, armor: 4, clashPower: 1,
-    typeResists: { blunt: 0.75, pierce: 1.25 }, affinityResists: { frost: 0.75, current: 1.25 },
-    skills: [
-      { name: "철로 엄호", basePower: 4, coinCount: 2, coinPower: 2, type: "blunt", affinity: "steam" },
-      { name: "차륜 밀기", basePower: 6, coinCount: 2, coinPower: 4, type: "blunt", affinity: "frost" },
-      { name: "철교 봉쇄", basePower: 5, coinCount: 3, coinPower: 2, type: "blunt", affinity: "steam" },
-    ] },
-  { id: "ian", name: "이안", role: "교대장", identity: "야간 호송대", skillName: "교차 베기", icon: "✳",
-    level: 21, maxHp: 31, attack: 8, armor: 2, type: "slash", spirit: 15,
-    typeResists: { slash: 0.75, blunt: 1.25 }, affinityResists: { steam: 0.75, frost: 1.25 },
-    skills: [
-      { name: "교차 베기", basePower: 4, coinCount: 2, coinPower: 3, type: "slash", affinity: "frost" },
-      { name: "신호등 베기", basePower: 4, coinCount: 3, coinPower: 4, type: "slash", affinity: "current" },
-      { name: "밤샘 호송", basePower: 5, coinCount: 3, coinPower: 4, type: "slash", affinity: "steam" },
-    ] },
-  { id: "yul", name: "율", role: "정찰수", identity: "설원 수색대", skillName: "삼연 사격", icon: "↗",
-    level: 20, maxHp: 25, attack: 8, armor: 1, type: "pierce", spirit: 10,
-    typeResists: { pierce: 0.75, slash: 1.25 }, affinityResists: { frost: 0.75, steam: 1.25 },
-    skills: [
-      { name: "삼연 사격", basePower: 4, coinCount: 3, coinPower: 2, type: "pierce", affinity: "frost" },
-      { name: "설야 조준", basePower: 4, coinCount: 4, coinPower: 2, type: "pierce", affinity: "current" },
-      { name: "눈보라 사격", basePower: 3, coinCount: 5, coinPower: 2, type: "pierce", affinity: "frost" },
-    ] },
-  { id: "seol", name: "설", role: "기관 정비사", identity: "북단 급전반", skillName: "과전류 타격", icon: "⌁",
-    level: 19, maxHp: 28, attack: 6, armor: 2,
-    typeResists: { blunt: 0.75, slash: 1.25 }, affinityResists: { current: 0.75, steam: 1.25 },
-    skills: [
-      { name: "활선 점검", basePower: 4, coinCount: 1, coinPower: 8, type: "blunt", affinity: "current" },
-      { name: "과전류 타격", basePower: 6, coinCount: 2, coinPower: 4, type: "blunt", affinity: "current" },
-      { name: "급전 복구", basePower: 6, coinCount: 3, coinPower: 3, type: "blunt", affinity: "steam" },
-    ] },
+const routeRecruits = { 5: "jin", 10: "onha" };
+const crewById = Object.fromEntries(crewCatalog.map((unit) => [unit.id, unit]));
+const startingSize = 4;
+const startingBudgets = possibleDraftCosts(crewCatalog, startingSize);
+const usualStartingBudgets = [8, 10, 12].filter((cost) => startingBudgets.has(cost));
+const selectableStartingBudgets = usualStartingBudgets.length ? usualStartingBudgets : [...startingBudgets].sort((a, b) => a - b);
+const defaultStartingCost = startingBudgets.has(10) ? 10 : selectableStartingBudgets[0];
+const crewGroups = [
+  { field: "affiliation", label: "소속", names: Object.fromEntries(crewTeams.map(({ name }) => [name, name])) },
+  { field: "type", label: "공격 유형", names: crewAttackTypes },
+  { field: "affinity", label: "공격 속성", names: crewAffinities },
 ];
+const secondarySets = [
+  { field: "type", stat: "offenseLevel", label: "공격 레벨", values: [2, 3] },
+  { field: "affinity", stat: "defenseLevel", label: "방어 레벨", values: [2, 3] },
+  { field: "animal", stat: "headsBonus", label: "앞면 확률", unit: "%p", values: [3, 5] },
+  { field: "weapon", stat: "firstHitDamage", label: "첫 적중 추가 피해", values: [1, 2] },
+];
+const crewSetLabels = { affiliation: "소속", type: "물리", affinity: "속성", animal: "동물", weapon: "무기" };
+const crewSets = [...crewTeams.map((team) => ({ ...team, field: "affiliation", key: team.name })),
+  ...secondarySets.flatMap((set) => {
+    const labels = crewGroups.find(({ field }) => field === set.field)?.names;
+    const keys = new Set(crewCatalog.filter((unit) => unit.sets.includes(set.field)).map((unit) => unit[set.field]));
+    return [...keys].map((key) => ({ ...set, key, name: labels?.[key] ?? key }));
+  }),
+];
+const belongsToSet = (unit, { field, key }) => unit[field] === key && (unit.sets?.includes(field) ?? true);
 
-const recruits = {
-  5: { id: "jin", name: "진", role: "통신선 기사", identity: "북단 통신반", skillName: "신호봉 강타", icon: "⌘",
-    level: 22, maxHp: 32, attack: 8, armor: 3,
-    typeResists: { pierce: 0.75, blunt: 1.25 }, affinityResists: { current: 0.75, frost: 1.25 },
-    skills: [
-      { name: "신호봉 강타", basePower: 5, coinCount: 1, coinPower: 6, type: "blunt", affinity: "steam" },
-      { name: "통신선 절단", basePower: 5, coinCount: 3, coinPower: 3, type: "slash", affinity: "current" },
-      { name: "비상 송신", basePower: 6, coinCount: 3, coinPower: 3, type: "slash", affinity: "current" },
-    ] },
-  10: { id: "onha", name: "온하", role: "철도 구조대", identity: "터널 구조대", skillName: "차단기 파쇄", icon: "◇",
-    level: 23, maxHp: 34, attack: 10, armor: 3,
-    typeResists: { slash: 0.75, pierce: 1.25 }, affinityResists: { steam: 0.75, current: 1.25 },
-    skills: [
-      { name: "안전핀 해체", basePower: 5, coinCount: 2, coinPower: 1, type: "pierce", affinity: "frost" },
-      { name: "차단기 파쇄", basePower: 6, coinCount: 2, coinPower: 3, type: "blunt", affinity: "steam" },
-      { name: "낙석 천공", basePower: 8, coinCount: 2, coinPower: 3, type: "pierce", affinity: "steam" },
-    ] },
-};
+function drawItem(items, random) {
+  return items[Math.floor(random() * items.length)];
+}
+
+function possibleDraftCosts(units, size) {
+  const totals = Array.from({ length: size + 1 }, () => new Set());
+  totals[0].add(0);
+  for (const { cost } of units) {
+    for (let slots = size; slots > 0; slots -= 1) {
+      for (const subtotal of totals[slots - 1]) totals[slots].add(subtotal + cost);
+    }
+  }
+  return totals[size];
+}
+
+function draftCrew(budget, random) {
+  const units = [];
+  for (let slotsLeft = startingSize - 1; slotsLeft >= 0; slotsLeft -= 1) {
+    const available = crewCatalog.filter((unit) => !units.includes(unit));
+    const eligible = available.filter((unit) =>
+      possibleDraftCosts(available.filter((candidate) => candidate !== unit), slotsLeft).has(budget - unit.cost));
+    const unit = drawItem(eligible, random);
+    units.push(unit);
+    budget -= unit.cost;
+  }
+  return units.map(makeRecruit);
+}
+
+function eligiblePacks(random) {
+  return crewGroups.map(({ field, label, names }) => {
+    const activeKeys = new Set(crewCatalog.map((unit) => unit[field]));
+    const key = drawItem(Object.keys(names).filter((name) => activeKeys.has(name)), random);
+    const costs = [...new Set(crewCatalog.filter((unit) => unit[field] === key).map((unit) => unit.cost))];
+    return { field, key, label, name: names[key], costs: costs.sort((a, b) => a - b) };
+  });
+}
+
+function teamSynergies(units) {
+  return crewSets.flatMap(({ values, ...set }) => {
+    const count = units.filter((unit) => unit.hp !== 0 && belongsToSet(unit, set)).length;
+    return count < 2 ? [] : [{ ...set, count, bonus: values[Number(count >= 3)] }];
+  });
+}
+
+function applySynergies(unit, synergies) {
+  const applied = { ...unit, clashPower: unit.clashPower ?? 0, offenseLevel: offenseLevel(unit), defenseLevel: defenseLevel(unit) };
+  for (const set of synergies) {
+    if (!belongsToSet(unit, set)) continue;
+    if (set.stat === "commandLevel") {
+      applied.offenseLevel += set.bonus;
+      applied.defenseLevel += set.bonus;
+    } else {
+      applied[set.stat] = (applied[set.stat] ?? 0) + set.bonus;
+    }
+  }
+  return applied;
+}
 
 const deploymentLimit = 5;
 const maxClashExchanges = 99;
-const testCrew = [initialCrew[1], initialCrew[0], initialCrew[2], initialCrew[3], recruits[5]].map(({ skills, typeResists, affinityResists, ...unit }) => ({
-  ...unit, level: 20, basePower: 5, coinCount: 2, coinPower: 2, offenseLevel: 20,
+const testCrew = ["ian", "naru", "yul", "seol", "jin"].map((id) => crewById[id])
+  .map(({ skills, typeResists, affinityResists, ...unit }) => ({
+  ...unit, skillName: skills[0].name, level: 20, basePower: 5, coinCount: 2, coinPower: 2, offenseLevel: 20,
   ...(["ian", "naru"].includes(unit.id) ? { clashPower: (unit.clashPower ?? 0) + 4 } : {}),
   ...(unit.id === "seol" ? { basePower: 6, coinPower: 4, spirit: 45 } : {}),
 }));
@@ -83,19 +116,22 @@ const testTargets = [
   { id: "test-b", name: "표적 B", maxHp: 46, attack: 2, armor: 0 },
 ].map((unit) => ({ ...unit, basePower: 1, coinPower: 1, offenseLevel: 20, defenseLevel: 20 }));
 const clampSpirit = (spirit) => Math.max(-45, Math.min(45, spirit));
-const headsChance = (unit) => 50 + clampSpirit(unit.spirit ?? 0);
+const headsChance = (unit) => 50 + clampSpirit((unit.spirit ?? 0) + (unit.headsBonus ?? 0));
 
 function copyFighter(unit) {
   const copy = { ...unit };
   if (unit.skills) copy.skills = unit.skills.map((skill) => ({ ...skill }));
   if (unit.typeResists) copy.typeResists = { ...unit.typeResists };
   if (unit.affinityResists) copy.affinityResists = { ...unit.affinityResists };
+  if (unit.sets) copy.sets = [...unit.sets];
   return copy;
 }
 
 const fighter = (unit) => ({ ...copyFighter(unit), hp: unit.maxHp, spirit: unit.spirit ?? 0 });
-const power = (unit) => unit.attack * 3 + unit.hp + unit.armor * 2;
+const makeRecruit = (unit) => fighter({ ...unit, sync: 1 });
+const power = (unit) => unit.attack * 3 + unit.hp + unit.armor * 2 + ((unit.sync ?? 1) - 1) * 5;
 const rankCrew = (crew) => crew.filter((unit) => unit.hp > 0).sort((a, b) => power(b) - power(a));
+const syncRequirement = (unit) => unit.sync === 1 ? 2 : 3 + Number(unit.cost >= 3);
 const characterLevel = (unit) => unit.level ?? 20;
 const offenseLevel = (unit) => unit.offenseLevel ?? characterLevel(unit) + unit.attack;
 const defenseLevel = (unit) => unit.defenseLevel ?? characterLevel(unit) + unit.armor * 2;
@@ -105,9 +141,16 @@ const baseStrength = (unit, skill) => skill?.basePower ?? unit.basePower ?? Math
 const baseCoinPower = (unit, heads, skill) =>
   baseStrength(unit, skill) + heads * coinStrength(unit, skill) + (unit.finalPower ?? 0);
 
+function skillProfile(unit, index) {
+  const skill = unit.skills[index];
+  const bonus = Math.max(unit.sync ?? 1, index + 1) - 1;
+  if (unit.sync === undefined) return { ...skill };
+  return { ...skill, basePower: skill.basePower + bonus, coinPower: skill.coinPower + bonus };
+}
+
 function clashPower(unit, opponent, heads, skill) {
   const levelBonus = Math.floor(Math.max(0, offenseLevel(unit) - offenseLevel(opponent)) / 3);
-  return Math.max(0, baseCoinPower(unit, heads, skill) + (unit.clashPower ?? 0) + levelBonus);
+  return Math.max(0, baseCoinPower(unit, heads, skill) + (unit.clashPower ?? 0) + (skill?.clashBonus ?? 0) + levelBonus);
 }
 
 function resistanceModifier(resistance) {
@@ -126,12 +169,17 @@ function coinDamage(source, target, coinPower, exchanges, skill) {
 const skillCycle = [0, 0, 0, 1, 1, 2];
 
 class SkillBag {
-  #remaining = [...skillCycle];
+  #remaining = [];
+  #unlocked = 0;
 
   get remaining() { return this.#remaining.length; }
 
-  draw(random) {
-    if (!this.#remaining.length) this.#remaining = [...skillCycle];
+  draw(random, unlocked = 3) {
+    if (!this.#remaining.length) this.#remaining = skillCycle.filter((slot) => slot < unlocked);
+    else if (unlocked > this.#unlocked) {
+      this.#remaining.push(...skillCycle.filter((slot) => slot >= this.#unlocked && slot < unlocked));
+    }
+    this.#unlocked = unlocked;
     const index = Math.floor(random() * this.#remaining.length);
     return this.#remaining.splice(index, 1)[0];
   }
@@ -178,6 +226,7 @@ class Battle {
   #waitingSide = null;
   #waitingOrder = [];
   #fieldOrder = [];
+  #marks = new Map();
 
   constructor(allies, enemies, random = seededRandom(0), alliedBags = new Map()) {
     const copy = (unit) => ({ ...copyFighter(unit), spirit: clampSpirit(unit.spirit ?? 0) });
@@ -191,8 +240,12 @@ class Battle {
     return this.#enemies.map(copyFighter);
   }
 
+  get alliedState() {
+    return this.#allies.map(({ id, hp, spirit }) => ({ id, hp, spirit }));
+  }
+
   get alliedSpirit() {
-    return this.#allies.map(({ id, spirit }) => ({ id, spirit }));
+    return this.alliedState.map(({ id, spirit }) => ({ id, spirit }));
   }
 
   get outcome() {
@@ -203,7 +256,8 @@ class Battle {
   get view() {
     if (!this.#stage) return null;
     const fighterView = (unit) => ({ id: unit.id, name: unit.name, icon: unit.icon ?? "✦",
-      hp: unit.hp, maxHp: unit.maxHp, spirit: unit.spirit, headsChance: headsChance(unit) });
+      portraitSheet: unit.portraitSheet, portraitCell: unit.portraitCell, hp: unit.hp, maxHp: unit.maxHp,
+      guard: unit.guard ?? 0, marked: this.#marks.has(unit.id), spirit: unit.spirit, headsChance: headsChance(unit) });
     return { round: this.#round, group: this.#group, stage: this.#stage, waiting: this.#waiting.length,
       fieldSlots: this.#fieldOrder.length, waitingSide: this.#waitingSide, waitingSlots: this.#waitingOrder.length,
       waitingUnits: this.#waiting.map((unit) => ({ ...fighterView(unit), slot: this.#waitingOrder.indexOf(unit.id) })),
@@ -232,16 +286,17 @@ class Battle {
     this.#waitingSide = left.length > right.length ? "ally" : "enemy";
     this.#waiting = (this.#waitingSide === "ally" ? left : right).slice(count);
     this.#waitingOrder = this.#waiting.map((unit) => unit.id);
-    this.#lanes = left.slice(0, count).map((ally, index) => this.#lane(ally, right[index]));
     this.#round += 1;
+    this.#marks.clear();
+    this.#lanes = left.slice(0, count).map((ally, index) => this.#lane(ally, right[index]));
     this.#group = 0;
     this.#stage = "ready";
   }
 
   #lane(ally, enemy, winner = null) {
     const skills = {
-      ally: winner === "enemy" ? null : this.#drawSkill(ally, this.#alliedBags),
-      enemy: winner === "ally" ? null : this.#drawSkill(enemy, this.#enemyBags),
+      ally: winner === "enemy" ? null : this.#drawSkill(ally, this.#alliedBags, winner === "ally"),
+      enemy: winner === "ally" ? null : this.#drawSkill(enemy, this.#enemyBags, winner === "enemy"),
     };
     return { ally, enemy, skills, counts: { ally: coinCount(ally, skills.ally), enemy: coinCount(enemy, skills.enemy) }, exchanges: 0,
       faces: { ally: [], enemy: [] }, scores: null, winner, exchangeWinner: null, broken: null, draw: false,
@@ -250,11 +305,14 @@ class Battle {
     };
   }
 
-  #drawSkill(unit, bags) {
-    if (!unit.skills) return null;
+  #drawSkill(unit, bags, followUp) {
+    if (!unit.skills?.length) return null;
     if (!bags.has(unit.id)) bags.set(unit.id, new SkillBag());
-    const index = bags.get(unit.id).draw(this.#random);
-    return { ...unit.skills[index], slot: index + 1 };
+    const index = bags.get(unit.id).draw(this.#random, Math.min(unit.sync ?? unit.skills.length, unit.skills.length));
+    const skill = skillProfile(unit, index);
+    const opening = this.#round === 1 ? unit.openingPower ?? 0 : 0;
+    const unopposed = followUp ? unit.followUpPower ?? 0 : 0;
+    return { ...skill, basePower: skill.basePower + opening + unopposed, slot: index + 1 };
   }
 
   #flip(unit) {
@@ -364,15 +422,45 @@ class Battle {
 
   #applyHits() {
     const hits = [];
+    const recoveries = [];
     for (const lane of this.#lanes) {
       if (!lane.hit) continue;
       const enemyWon = lane.winner === "enemy";
       const [source, target] = enemyWon ? [lane.enemy, lane.ally] : [lane.ally, lane.enemy];
-      const damage = Math.min(target.hp, coinDamage(source, target, lane.hit.power, lane.exchanges, lane.skills[lane.winner]));
+      const skill = lane.skills[lane.winner];
+      const firstHit = lane.hitsUsed === 0;
+      const mark = this.#marks.get(target.id);
+      const markedDamage = mark && mark.source !== source.id ? mark.amount : 0;
+      if (markedDamage) this.#marks.delete(target.id);
+      const finishing = target.hp * 2 <= (target.maxHp ?? target.hp);
+      const bonuses = markedDamage + (firstHit ? source.firstHitDamage ?? 0 : 0)
+        + (finishing ? (source.finishDamage ?? 0) + (skill?.finishDamage ?? 0) : 0)
+        + (lane.exchanges === 0 ? skill?.followUpDamage ?? 0 : 0);
+      const incoming = coinDamage(source, target, lane.hit.power, lane.exchanges, skill) + bonuses;
+      const absorbed = Math.min(target.guard ?? 0, incoming);
+      if (absorbed) target.guard -= absorbed;
+      const damage = Math.min(target.hp, incoming - absorbed);
       target.hp -= damage;
       lane.hitsUsed += 1;
       lane.hit.damage = damage;
-      hits.push({ source: source.name, target: target.name, damage, allyId: enemyWon ? target.id : null, hp: target.hp });
+      lane.hit.absorbed = absorbed;
+      const hit = { source: source.name, target: target.name, damage, allyId: enemyWon ? target.id : null, hp: target.hp, absorbed };
+      hits.push(hit);
+      if (!firstHit) continue;
+      const markAmount = Math.max(source.mark ?? 0, skill?.mark ?? 0);
+      if (markAmount > 0 && target.hp > 0 && markAmount >= (this.#marks.get(target.id)?.amount ?? 0)) {
+        this.#marks.set(target.id, { source: source.id, amount: markAmount });
+      }
+      if (skill?.guard) source.guard = Math.max(source.guard ?? 0, skill.guard);
+      if (skill?.heal) recoveries.push({ hit, amount: skill.heal, allies: enemyWon ? this.#enemies : this.#allies });
+    }
+    for (const { hit, amount, allies } of recoveries) {
+      const target = allies.filter((unit) => unit.hp > 0 && unit.hp < unit.maxHp)
+        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+      if (!target) continue;
+      const healed = Math.min(amount, target.maxHp - target.hp);
+      target.hp += healed;
+      hit.recovery = { name: target.name, healed };
     }
     this.#stage = "impact";
     return hits;
@@ -430,8 +518,13 @@ class Battle {
 class Expedition {
   #random;
   #combatRandom;
+  #recruitRandom;
   #skillBags = new Map();
-  #crew = initialCrew.map(fighter);
+  #crew = [];
+  #startingCost = null;
+  #syncParts = 0;
+  #reward = null;
+  #synergies = [];
   #phase = "ready";
   #position = 0;
   #destination = 0;
@@ -445,14 +538,17 @@ class Expedition {
   #journal = [];
   #message = "원정을 시작하면 주사위와 전투가 자동으로 진행됩니다.";
 
-  constructor(random, combatRandom = seededRandom(0)) {
+  constructor(random = seededRandom(0), combatRandom = seededRandom(0), recruitRandom = seededRandom(172)) {
     this.#random = random;
     this.#combatRandom = combatRandom;
+    this.#recruitRandom = recruitRandom;
   }
 
   get view() {
     const ranked = rankCrew(this.#crew);
-    const deployed = ["combat", "battleResult"].includes(this.#phase)
+    const nextSync = ranked.find((unit) => unit.sync < 3);
+    const fighting = ["combat", "battleResult"].includes(this.#phase);
+    const deployed = fighting
       ? this.#deployed : ranked.slice(0, deploymentLimit).map((unit) => unit.id);
     return {
       phase: this.#phase,
@@ -460,6 +556,11 @@ class Expedition {
       destination: this.#destination,
       die: this.#die,
       message: this.#message,
+      startingCost: this.#startingCost,
+      syncParts: this.#syncParts,
+      syncTarget: nextSync ? { name: nextSync.name, level: nextSync.sync + 1, required: syncRequirement(nextSync) } : null,
+      reward: this.#phase === "reward" ? structuredClone(this.#reward) : null,
+      synergies: fighting ? this.#synergies.map((synergy) => ({ ...synergy })) : teamSynergies(ranked.slice(0, deploymentLimit)),
       testBattle: this.#testBattle,
       journal: this.#journal.slice(),
       notice: this.#notice && { ...this.#notice },
@@ -472,10 +573,12 @@ class Expedition {
     };
   }
 
-  start() {
-    if (this.#phase !== "ready") return false;
+  start(budget = defaultStartingCost) {
+    if (this.#phase !== "ready" || !startingBudgets.has(budget)) return false;
+    this.#startingCost = budget;
+    this.#crew = draftCrew(budget, this.#recruitRandom);
     this.#phase = "roll";
-    this.#record("북단 관제소를 출발합니다.");
+    this.#record(`시작 코스트 ${budget} · ${this.#crew.map((unit) => unit.name).join(", ")} 출전`);
     return true;
   }
 
@@ -485,6 +588,17 @@ class Expedition {
     this.#crew = testCrew.map(fighter);
     this.#deploy(this.#crew, testTargets.map(fighter), seededRandom(991));
     this.#record("아군 5명 · 적 2명");
+    return true;
+  }
+
+  chooseReward(field, key, cost) {
+    if (this.#phase !== "reward") return false;
+    const pack = this.#reward.find((item) => item.field === field && item.key === key);
+    if (!pack?.costs.includes(cost)) return false;
+    const pool = crewCatalog.filter((unit) => unit[field] === key && unit.cost === cost);
+    const result = this.#recruit(drawItem(pool, this.#recruitRandom));
+    this.#reward = null;
+    this.#hold("stop", "roll", result.title, result.detail);
     return true;
   }
 
@@ -519,11 +633,12 @@ class Expedition {
     const tile = route[this.#position];
     if (tile.kind === "supply") {
       const restored = this.#heal(12);
-      this.#hold("stop", "roll", "보급 완료", restored ? `대원 체력 총 ${restored} 회복` : "모든 대원의 체력이 가득 찼습니다.");
+      const recovery = restored ? `대원 체력 총 ${restored} 회복` : "모든 대원의 체력이 가득 찼습니다.";
+      this.#hold("stop", "roll", "보급 완료", `${recovery} · ${this.#grantSync(1)}`);
     } else if (tile.kind === "recruit") {
-      const unit = fighter(recruits[this.#position]);
-      this.#crew.push(unit);
-      this.#hold("stop", "roll", "새 대원 영입", `${unit.name} · ${unit.role} 합류`);
+      const identity = crewById[routeRecruits[this.#position]];
+      const result = this.#recruit(identity);
+      this.#hold("stop", "roll", result.title, result.detail);
     } else {
       const allies = rankCrew(this.#crew).slice(0, deploymentLimit);
       this.#deploy(allies, threats(this.#position), this.#combatRandom);
@@ -533,7 +648,8 @@ class Expedition {
 
   #deploy(allies, enemies, random) {
     this.#deployed = allies.map((unit) => unit.id);
-    this.#battle = new Battle(allies, enemies, random, this.#skillBags);
+    this.#synergies = this.#testBattle ? [] : teamSynergies(allies);
+    this.#battle = new Battle(allies.map((unit) => applySynergies(unit, this.#synergies)), enemies, random, this.#skillBags);
     this.#phase = "combat";
     this.#battle.startRound();
   }
@@ -541,13 +657,14 @@ class Expedition {
   #fight() {
     const previous = this.#battle.view;
     const hits = this.#battle.advance();
-    for (const { id, spirit } of this.#battle.alliedSpirit) {
-      this.#crew.find((unit) => unit.id === id).spirit = spirit;
+    for (const { id, hp, spirit } of this.#battle.alliedState) {
+      const unit = this.#crew.find((member) => member.id === id);
+      unit.hp = hp;
+      unit.spirit = spirit;
     }
-    for (const hit of hits) {
-      if (hit.allyId) this.#crew.find((unit) => unit.id === hit.allyId).hp = hit.hp;
-    }
-    if (hits.length) this.#record(hits.map((hit) => `${hit.source} → ${hit.target} −${hit.damage}`).join(" · "));
+    if (hits.length) this.#record(hits.map(({ source, target, damage, absorbed, recovery }) =>
+      `${source} → ${target} −${damage}${absorbed ? ` (보호막 ${absorbed})` : ""}${recovery ? ` · ${recovery.name} 체력 +${recovery.healed}` : ""}`
+    ).join(" · "));
     if (!this.#battle.view) this.#finishClash(previous);
   }
 
@@ -574,16 +691,37 @@ class Expedition {
         this.#hold("battleResult", "won", "승리", "폭주 전환기를 멈추고 종착역에 도달했습니다.");
       } else {
         this.#heal(3);
-        const lead = rankCrew(this.#crew)[0];
-        lead.attack += 1;
-        lead.maxHp += 2;
-        lead.hp += 2;
         this.#resultClash = previous;
-        this.#hold("battleResult", "roll", "승리", `${lead.name} 무장 강화 · 공격 +1 / 최대 HP +2`);
+        this.#reward = eligiblePacks(this.#recruitRandom);
+        this.#hold("battleResult", "reward", "승리", this.#grantSync(1));
       }
     } else {
       this.#battle.startRound();
     }
+  }
+
+  #recruit(identity) {
+    if (this.#crew.some((unit) => unit.id === identity.id)) {
+      return { title: "동기화 재료 획득", detail: `${identity.name} 중복 영입 · ${this.#grantSync(2)}` };
+    }
+    this.#crew.push(makeRecruit(identity));
+    const detail = `${identity.name} · 코스트 ${identity.cost} · ${identity.affiliation}`;
+    return { title: "새 대원 영입", detail: [detail, this.#grantSync(0)].filter(Boolean).join(" · ") };
+  }
+
+  #grantSync(amount) {
+    this.#syncParts += amount;
+    const advances = amount > 0 ? [`동기화 재료 +${amount}`] : [];
+    for (const unit of rankCrew(this.#crew)) {
+      while (unit.sync < 3) {
+        const cost = syncRequirement(unit);
+        if (this.#syncParts < cost) return advances.join(" · ");
+        this.#syncParts -= cost;
+        unit.sync += 1;
+        advances.push(`${unit.name} 동기화 ${unit.sync}`);
+      }
+    }
+    return advances.join(" · ");
   }
 
   #heal(amount) {

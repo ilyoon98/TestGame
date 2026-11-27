@@ -5,7 +5,7 @@ const { join } = require("node:path");
 const vm = require("node:vm");
 const load = (file) => fs.readFileSync(join(__dirname, file), "utf8");
 const markup = load("index.html");
-const domain = load("game.js");
+const domain = ["crew-data.js", "crew.js", "game.js"].map(load).join("\n");
 const screenCode = load("main.js");
 
 function simulateScreen(seed, reduced = false) {
@@ -130,6 +130,108 @@ test("unchanged crew, enemies and journal retain their DOM during the toss", () 
   advanceUntil(screen, () => lane().dataset.stage === "reveal");
   const updated = ["crew", "enemies", "journal"].map((id) => get(id).children[0]);
   updated.forEach((node, index) => assert.equal(node, original[index]));
+});
+
+test("the default ten-cost lineup reveals one card at a time before the dice roll", () => {
+  for (const reduced of [false, true]) {
+    const screen = simulateScreen(0, reduced);
+    const { get } = screen;
+    get("start").click();
+    assert.equal(get("draft-panel").hidden, false);
+    assert.equal(get("crew-panel").hidden, true);
+    assert.equal(get("draft-total").textContent, "0 / 10");
+    assert.equal(get("draft-cards").children.length, 4);
+    let total = 0;
+    for (let i = 0; i < 4; i += 1) {
+      screen.step();
+      assert.equal(get("dice").hidden, true);
+      const revealed = get("draft-cards").querySelectorAll(".draft-card.is-revealed");
+      assert.equal(revealed.length, i + 1);
+      const latest = revealed.at(-1);
+      total += Number(latest.querySelector(".draft-cost").textContent.split(" ").at(-1));
+      assert.equal(get("draft-total").textContent, `${total} / 10`);
+      assert.equal(get("draft-meter").attributes["aria-valuenow"], String(total));
+      assert.match(latest.querySelector(".draft-portrait").style.backgroundImage, /-(?:anime|recruit)\.png/);
+      const flip = screen.effects.find((effect) => effect.node === latest && effect.frames[0].transform.includes("rotateY"));
+      if (reduced) assert.equal(flip, undefined);
+      else assert.ok(flip);
+      if (i === 0) {
+        get("pause").click();
+        assert.equal(screen.timers.size, 0);
+        if (flip) assert.equal(flip.playState, "paused");
+        get("pause").click();
+      }
+    }
+    assert.equal(total, 10);
+    assert.ok(get("draft-panel").classes.has("is-complete"));
+    assert.equal(get("draft-fill").style.width, "100%");
+    screen.step();
+    assert.equal(get("draft-panel").hidden, true);
+    assert.equal(get("dice").hidden, false);
+    assert.equal(get("crew-panel").hidden, false);
+  }
+});
+
+test("the detailed draft cards and battlefield portraits use different framing of the same art", () => {
+  const opening = simulateScreen(1145, true);
+  opening.get("start").click();
+  advanceUntil(opening, () => opening.get("draft-panel").classes.has("is-complete"));
+  const cards = opening.get("draft-cards").children;
+
+  const demo = simulateScreen(0, true);
+  demo.get("test-battle").click();
+  const ian = demo.get("clash-lanes").querySelectorAll(".combatant.ally")
+    .find((token) => token.querySelector(".combat-name").textContent === "배온");
+  const waiting = demo.get("waiting-crew").children;
+  for (const [id, name, portrait] of [
+    ["ian", "배온", ian.querySelector(".combat-icon")],
+    ["yul", "벤", waiting.find((unit) => unit.dataset.fighterId === "yul").querySelector(".waiting-icon")],
+    ["seol", "나령", waiting.find((unit) => unit.dataset.fighterId === "seol").querySelector(".waiting-icon")],
+  ]) {
+    const card = cards.find((item) => item.querySelector(".draft-caption").children[0].textContent === name);
+    const draftPortrait = card.querySelector(".draft-portrait");
+    assert.equal(draftPortrait.style.backgroundImage, `url("assets/${id}-recruit.png")`);
+    assert.equal(draftPortrait.style.backgroundSize, "100%");
+    assert.equal(portrait.style.backgroundImage, draftPortrait.style.backgroundImage);
+    assert.ok(parseFloat(portrait.style.backgroundSize) > 100);
+  }
+});
+
+test("the opening cost and reward buttons complete a recruitment interaction", () => {
+  const screen = simulateScreen(0);
+  const { get } = screen;
+  get("starting-cost").value = "8";
+  get("start").click();
+  assert.equal(get("draft-total").textContent, "0 / 8");
+  advanceUntil(screen, () => get("draft-panel").hidden);
+  assert.match(get("sync-parts").textContent, /시작 코스트 8.*동기화 2 재료 0\/2/);
+  for (const row of get("crew").children) {
+    assert.equal(row.querySelectorAll(".coin-profile.is-locked").length, 2);
+    assert.match(row.querySelector(".unit-growth").textContent, /코스트 [1-4] · 동기화 1/);
+  }
+  advanceUntil(screen, () => !get("recruit-panel").hidden);
+  assert.equal(screen.timers.size, 0);
+  assert.ok(get("launch-controls").hidden);
+  assert.equal(get("recruit-packs").children.length, 3);
+  const choice = get("recruit-packs").querySelector(".recruit-choice");
+  assert.match(choice.attributes["aria-label"], /팩 코스트 [1-4] 영입/);
+  choice.click();
+  assert.ok(get("recruit-panel").hidden);
+  assert.match(get("notice-title").textContent, /새 대원 영입|동기화 재료 획득/);
+  assert.equal(screen.timers.size, 1);
+});
+
+test("the crew view displays the active animal and weapon set effects", () => {
+  const screen = simulateScreen(2);
+  const { get } = screen;
+  get("starting-cost").value = "10";
+  get("start").click();
+  advanceUntil(screen, () => get("draft-panel").hidden);
+  const setEffects = get("synergies").children.map((item) => item.children.map((label) => label.textContent).join(" "));
+  assert.ok(setEffects.includes("동물 쥐 2명 · 앞면 확률 +3%p"));
+  assert.ok(setEffects.includes("무기 도검 3명 · 첫 적중 추가 피해 +2"));
+  const crew = get("crew").children.map((row) => row.querySelector(".identity").textContent);
+  assert.ok(crew.includes("Alfa 간부 · 참격 · 쥐 · 도검"));
 });
 
 test("simultaneous contact recoil keeps horizontal positions within each lane", () => {

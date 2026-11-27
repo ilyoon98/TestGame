@@ -4,15 +4,21 @@ const { runInNewContext } = require("node:vm");
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
 
-const source = readFileSync(join(__dirname, "game.js"), "utf8");
-const { Expedition, Battle, route, seededRandom, clashPower, coinDamage, headsChance } = runInNewContext(
-  source + "\n({ Expedition, Battle, route, seededRandom, clashPower, coinDamage, headsChance })", { structuredClone }
+const source = ["crew-data.js", "crew.js", "game.js"].map((file) => readFileSync(join(__dirname, file), "utf8")).join("\n");
+const { Expedition, Battle, SkillBag, crewCatalog, route, seededRandom, clashPower, coinDamage, headsChance,
+  skillProfile, teamSynergies, applySynergies } = runInNewContext(
+  source + "\n({ Expedition, Battle, SkillBag, crewCatalog, route, seededRandom, clashPower, coinDamage, headsChance, skillProfile, teamSynergies, applySynergies })",
+  { structuredClone },
 );
 
 function advanceUntil(run, condition) {
   for (let step = 0; step < 1500; step += 1) {
-    if (condition(run.view)) return run.view;
-    assert.equal(run.advance(), true, "The run stalled in " + run.view.phase);
+    const view = run.view;
+    if (condition(view)) return view;
+    if (view.phase === "reward") {
+      const [pack] = view.reward;
+      assert.ok(run.chooseReward(pack.field, pack.key, pack.costs[0]));
+    } else assert.equal(run.advance(), true, "The run stalled in " + view.phase);
   }
   assert.fail("The run did not reach the expected state");
 }
@@ -67,52 +73,54 @@ test("automatic formation selects up to five by power and locks combat slots", (
   assert.equal(run.view.phase, "combat");
   for (const { id, slot } of run.view.crew) assert.equal(slot, slots.get(id));
   const joined = advanceUntil(run, ({ position, phase }) => position === 5 && phase === "stop");
-  assert.ok(joined.crew.some(({ name }) => name === "진"));
-  assert.match(joined.notice.detail, /진 .*합류/);
+  assert.ok(joined.crew.some(({ id }) => id === "jin"));
+  assert.match(joined.notice.detail, /노엘/);
   const next = advanceUntil(run, ({ phase }) => phase === "combat");
-  assert.ok(next.crew.find(({ name }) => name === "진").slot >= 0);
+  assert.ok(next.crew.some(({ id }) => id === "jin"));
   const full = advanceUntil(run, ({ position, phase }) => position === 10 && phase === "roll");
-  assert.equal(full.crew.length, 6);
+  assert.ok(full.crew.length >= 6);
   const deployed = [...full.crew].filter(({ slot }) => slot >= 0);
   assert.equal(deployed.length, 5);
-  assert.ok(deployed.at(-1).power >= full.crew.find(({ slot }) => slot < 0).power);
+  assert.ok(full.crew.filter(({ slot }) => slot < 0).every((unit) => deployed.at(-1).power >= unit.power));
 });
 
-test("reinforcement applies once on victory and travel resumes without a reward phase", () => {
+test("victory grants synchronization material and waits for one valid pack and cost", () => {
   const run = new Expedition(() => 0);
   run.start();
-  const firstFight = advanceUntil(run, ({ phase }) => phase === "combat");
-  const original = new Map(firstFight.crew.map((unit) => [unit.id, unit]));
   const victory = advanceUntil(run, ({ phase, position }) => phase === "battleResult" && position === 1);
-  const upgrades = victory.crew.filter((unit) => original.get(unit.id).attack !== unit.attack);
-  assert.equal(upgrades.length, 1);
-  const lead = upgrades[0];
-  assert.equal(lead.attack, original.get(lead.id).attack + 1);
-  assert.equal(lead.maxHp, original.get(lead.id).maxHp + 2);
-  assert.match(victory.message, /무장 강화/);
+  assert.equal(victory.syncParts, 1);
+  assert.match(victory.message, /동기화 재료/);
   assert.equal(victory.notice.title, "승리");
   assert.ok(victory.clash, "Final combat frame stays visible during the result");
   run.advance();
-  assert.equal(run.view.phase, "roll");
+  assert.equal(run.view.phase, "reward");
   assert.equal(run.view.clash, null);
   assert.equal(run.view.notice, null);
-  run.advance();
-  assert.equal(run.view.phase, "travel");
-  assert.equal(run.view.crew.find(({ id }) => id === lead.id).attack, lead.attack);
+  assert.equal(run.advance(), false);
+  assert.deepEqual(Array.from(run.view.reward, ({ field }) => field), ["affiliation", "type", "affinity"]);
+  const [pack] = run.view.reward;
+  assert.equal(run.chooseReward(pack.field, pack.key, 7), false);
+  assert.ok(run.chooseReward(pack.field, pack.key, pack.costs[0]));
+  assert.equal(run.chooseReward(pack.field, pack.key, pack.costs[0]), false);
+  assert.equal(run.view.phase, "stop");
+  assert.ok(run.advance());
+  assert.equal(run.view.phase, "roll");
 });
 
 test("reading and editing snapshots cannot change an expedition or a later run", () => {
   const run = new Expedition(() => 0);
+  run.start();
   const crew = run.view.crew[0];
   const originalBase = crew.skills[0].basePower;
   const originalResistance = crew.typeResists.blunt;
   crew.skills[0].basePower = 777;
   crew.typeResists.blunt = 0;
-  for (const expedition of [run, new Expedition()]) {
+  const later = new Expedition();
+  later.start();
+  for (const expedition of [run, later]) {
     assert.equal(expedition.view.crew[0].skills[0].basePower, originalBase);
     assert.equal(expedition.view.crew[0].typeResists.blunt, originalResistance);
   }
-  run.start();
   const active = advanceUntil(run, ({ phase }) => phase === "combat");
   active.enemies[0].typeResists.pierce = 0;
   assert.equal(run.view.enemies[0].typeResists.pierce, 0.75);
@@ -293,19 +301,19 @@ test("the public test battle opens directly and runs one scripted five-versus-tw
   assert.equal(run.view.enemies.length, 2);
   assert.equal(run.view.clash.lanes.length, 2);
   assert.deepEqual(Array.from(run.view.clash.waitingUnits, ({ name, slot }) => [name, slot]), [
-    ["율", 0], ["설", 1], ["진", 2],
+    ["벤", 0], ["나령", 1], ["노엘", 2],
   ]);
   const firstClash = advanceUntil(run, ({ clash }) => clash?.group === 0 && clash.stage === "contact");
   assert.ok(firstClash.clash.lanes.every((lane) => lane.scores.ally - lane.scores.enemy >= 9));
   const parallel = advanceUntil(run, ({ clash }) => clash?.group === 1 && clash.stage === "impact");
   assert.deepEqual(Array.from(parallel.clash.lanes, (lane) => [lane.ally.name, lane.enemy.name]), [
-    ["율", "표적 A"], ["설", "표적 B"],
+    ["벤", "표적 A"], ["나령", "표적 B"],
   ]);
   assert.ok(parallel.clash.lanes.every((lane) => lane.hit.damage > 0));
-  assert.deepEqual(Array.from(parallel.clash.waitingUnits, ({ name, slot }) => [name, slot]), [["진", 2]]);
+  assert.deepEqual(Array.from(parallel.clash.waitingUnits, ({ name, slot }) => [name, slot]), [["노엘", 2]]);
   const finalHit = advanceUntil(run, ({ clash }) => clash?.group === 2 && clash.stage === "impact");
   assert.equal(finalHit.clash.lanes.length, 1);
-  assert.equal(finalHit.clash.lanes[0].ally.name, "진");
+  assert.equal(finalHit.clash.lanes[0].ally.name, "노엘");
   assert.equal(finalHit.clash.lanes[0].enemy.name, "표적 B");
   assert.equal(finalHit.clash.lanes[0].slot, 1);
   assert.equal(finalHit.enemies[0].hp, 0);
@@ -318,10 +326,10 @@ test("the public test battle opens directly and runs one scripted five-versus-tw
 });
 
 test("enemy coin impacts update the expedition's allied HP only at contact with the target", () => {
-  const flips = [0, 0.95, 0.95, 0, 0, 0.95, 0, 0, 0];
-  const run = new Expedition(() => 0, () => flips.shift() ?? 0);
-  run.start();
-  const state = advanceUntil(run, ({ clash }) => clash?.stage === "strike");
+  const seed = 1;
+  const run = new Expedition(() => 0, seededRandom(seed), seededRandom(seed ^ 0x85ebca6b));
+  run.start(8);
+  const state = advanceUntil(run, ({ clash }) => clash?.stage === "strike" && clash.lanes[0].winner === "enemy");
   const lane = state.clash.lanes[0];
   assert.equal(lane.winner, "enemy");
   const before = state.crew.find(({ id }) => id === lane.ally.id).hp;
@@ -392,9 +400,9 @@ test("character level affects clashes and selected skill types determine both da
   assert.equal(coinDamage(source, { ...target, armor: 6 }, 20, 0, skill), 25);
 });
 
-test("a single start finishes a deterministic expedition with no further input", () => {
+test("the same starting seed and pack choices produce a deterministic expedition", () => {
   function play(seed) {
-    const run = new Expedition(seededRandom(seed), seededRandom(seed ^ 0x9e3779b9));
+    const run = new Expedition(seededRandom(seed), seededRandom(seed ^ 0x9e3779b9), seededRandom(seed ^ 0x85ebca6b));
     assert.equal(run.start(), true);
     assert.equal(run.start(), false);
     return JSON.stringify(advanceUntil(run, isOver));
@@ -402,4 +410,150 @@ test("a single start finishes a deterministic expedition with no further input",
   const outcomes = Array.from({ length: 24 }, (_, index) => play(index * 7919));
   assert.ok(outcomes.some((view) => JSON.parse(view).phase === "won"));
   assert.equal(play(15838), outcomes[2]);
+});
+
+test("independent starting rosters contain four different characters at the exact selected cost", () => {
+  assert.equal(new Set(crewCatalog.map(({ id }) => id)).size, 24);
+  assert.deepEqual([1, 2, 3, 4].map((cost) => crewCatalog.filter((unit) => unit.cost === cost).length), [6, 6, 6, 6]);
+  for (let budget = 4; budget <= 16; budget += 1) {
+    const rosters = new Set();
+    for (let seed = 0; seed < 24; seed += 1) {
+      const run = new Expedition(seededRandom(seed), seededRandom(seed), seededRandom(seed * 104729));
+      assert.equal(run.start(0), false);
+      assert.ok(run.start(budget));
+      const crew = run.view.crew;
+      assert.equal(crew.length, 4);
+      assert.equal(new Set(crew.map(({ id }) => id)).size, 4);
+      assert.equal(crew.reduce((sum, unit) => sum + unit.cost, 0), budget);
+      assert.ok(crew.every((unit) => unit.sync === 1));
+      assert.ok(crew.every((unit, index) => index === 0 || crew[index - 1].power >= unit.power));
+      rosters.add(crew.map(({ id }) => id).sort().join(","));
+    }
+    assert.ok(rosters.size > 1);
+  }
+});
+
+test("a newly recruited character matches both the chosen concept and exact cost", () => {
+  const run = new Expedition(() => 0, () => 0, () => 0);
+  run.start(8);
+  const offer = advanceUntil(run, ({ phase }) => phase === "reward");
+  const pack = offer.reward.find(({ field, costs }) => field === "type" && costs.includes(4));
+  assert.ok(pack);
+  const original = new Set(offer.crew.map((unit) => unit.id));
+  assert.ok(run.chooseReward(pack.field, pack.key, 4));
+  const recruited = run.view.crew.find((unit) => !original.has(unit.id));
+  assert.equal(recruited[pack.field], pack.key);
+  assert.equal(recruited.cost, 4);
+  assert.equal(recruited.sync, 1);
+});
+
+test("duplicate pack recruits automatically strengthen the first living fighter and unlock skills", () => {
+  const run = new Expedition(() => 0, () => 0, () => 0);
+  run.start(10);
+  const reward = advanceUntil(run, ({ phase }) => phase === "reward");
+  const leader = reward.crew[0];
+  const [pack] = reward.reward;
+  assert.ok(run.chooseReward(pack.field, pack.key, 2));
+  const promoted = run.view.crew.find((unit) => unit.id === leader.id);
+  assert.equal(run.view.crew.length, 4);
+  assert.equal(promoted.sync, 2);
+  assert.equal(run.view.syncParts, 1);
+  assert.match(run.view.notice.detail, /중복 영입.*동기화 2/);
+  assert.equal(skillProfile(promoted, 0).basePower, leader.skills[0].basePower + 1);
+  assert.equal(skillProfile(promoted, 0).coinPower, leader.skills[0].coinPower + 1);
+
+  const next = advanceUntil(run, ({ phase }) => phase === "reward");
+  assert.ok(run.chooseReward(next.reward[0].field, next.reward[0].key, 2));
+  assert.equal(run.view.crew.find((unit) => unit.id === leader.id).sync, 3);
+  assert.equal(skillProfile({ ...promoted, sync: 3 }, 2).basePower, leader.skills[2].basePower + 2);
+});
+
+test("skill bags add newly unlocked slots without refreshing used cards", () => {
+  const bag = new SkillBag();
+  assert.equal(bag.draw(() => 0, 1), 0);
+  assert.equal(bag.remaining, 2);
+  assert.equal(bag.draw(() => 0.99, 2), 1);
+  assert.equal(bag.remaining, 3);
+  assert.equal(bag.draw(() => 0.99, 3), 2);
+  assert.equal(bag.remaining, 3);
+  const rest = Array.from({ length: 3 }, () => bag.draw(() => 0, 3));
+  assert.deepEqual(rest, [0, 0, 1]);
+  assert.equal(bag.remaining, 0);
+  assert.equal(bag.draw(() => 0.99, 3), 2);
+  assert.equal(bag.remaining, 5);
+});
+
+test("main and secondary synergies affect their own members only", () => {
+  const crew = ["hae", "naru", "ryeon"].map((id) => crewCatalog.find((unit) => unit.id === id));
+  const synergies = teamSynergies(crew);
+  const [hae, naru, ryeon] = crew.map((unit) => applySynergies(unit, synergies));
+  assert.equal(hae.clashPower, 1);
+  assert.equal(hae.offenseLevel, hae.level + hae.attack + 2);
+  assert.equal(hae.defenseLevel, hae.level + hae.armor * 2);
+  assert.equal(hae.firstHitDamage, 1);
+  assert.equal(naru.clashPower, 2);
+  assert.equal(naru.offenseLevel, naru.level + naru.attack);
+  assert.equal(naru.firstHitDamage, undefined);
+  assert.equal(ryeon.clashPower, 0);
+  assert.equal(ryeon.firstHitDamage, 1);
+  assert.equal(teamSynergies([crew[0]]).length, 0);
+});
+
+test("every redesigned character has three skills and active sets follow the cost budget", () => {
+  const counts = new Map();
+  for (const fighter of crewCatalog) {
+    counts.set(fighter.affiliation, (counts.get(fighter.affiliation) ?? 0) + 1);
+    assert.equal(fighter.skills.length, 3);
+    assert.equal(new Set(fighter.sets).size, fighter.cost === 1 ? 3 : 4);
+    assert.ok(fighter.sets.includes("affiliation") && fighter.sets.includes("type"));
+    for (const field of fighter.sets) assert.ok(fighter[field]);
+    assert.equal(fighter.type, fighter.skills[0].type);
+    assert.equal(fighter.affinity, fighter.skills[0].affinity);
+  }
+  assert.deepEqual([...counts.values()], Array(8).fill(3));
+});
+
+test("animal and affinity only count members with that active tag", () => {
+  const crew = ["miru", "seol", "sol", "baek", "ian"].map((id) => crewCatalog.find((unit) => unit.id === id));
+  const synergies = teamSynergies(crew);
+  assert.equal(synergies.find(({ key }) => key === "쥐").count, 3);
+  assert.equal(synergies.find(({ key }) => key === "frost").count, 2);
+  const [miru, , , baek] = crew.map((fighter) => applySynergies(fighter, synergies));
+  assert.equal(headsChance(miru), 55);
+  assert.equal(miru.defenseLevel, 23);
+  assert.equal(baek.defenseLevel, 30);
+});
+
+test("the first round bonus and unopposed bonus apply to the selected skill only", () => {
+  const skills = [{ name: "test", basePower: 7, coinCount: 1, coinPower: 1 }];
+  const first = unit("first", 7, { openingPower: 2, skills });
+  const second = unit("second", 7, { openingPower: 2, followUpPower: 1, skills });
+  const battle = new Battle([first, second], [unit("enemy", 1)], () => 0.99);
+  battle.startRound();
+  assert.equal(battle.view.lanes[0].skills.ally.basePower, 9);
+  advanceBattle(battle, (view) => view.group === 1);
+  assert.equal(battle.view.lanes[0].skills.ally.basePower, 10);
+  for (let step = 0; battle.view && step < 30; step += 1) battle.advance();
+  battle.startRound();
+  assert.equal(battle.view.round, 2);
+  assert.equal(battle.view.lanes[0].skills.ally.basePower, 7);
+});
+
+test("protection absorbs damage, and first hits can heal and set a mark for a different ally", () => {
+  const medic = unit("medic", 6, { hp: 10, maxHp: 20,
+    skills: [{ name: "aid", basePower: 6, coinCount: 1, coinPower: 1, heal: 4, mark: 2 }] });
+  const attacker = unit("follow", 6, { coinCount: 1 });
+  const enemy = unit("enemy", 1, { hp: 25, maxHp: 25, guard: 8, coinCount: 1 });
+  const battle = new Battle([medic, attacker], [enemy], () => 0.99);
+  battle.startRound();
+  advanceBattle(battle, (view) => view.stage === "strike");
+  const [first] = battle.advance();
+  assert.equal(first.damage, 0);
+  assert.equal(first.absorbed, 6);
+  assert.equal(first.recovery.healed, 4);
+  assert.equal(battle.alliedState[0].hp, 14);
+  advanceBattle(battle, (view) => view.stage === "strike" && view.group === 1);
+  const [follow] = battle.advance();
+  assert.equal(follow.damage, 6);
+  assert.equal(follow.absorbed, 2);
 });

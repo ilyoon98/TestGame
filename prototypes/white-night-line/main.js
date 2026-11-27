@@ -1,7 +1,7 @@
 "use strict";
 
 const byId = (id) => document.getElementById(id);
-const delay = { roll: 740, travel: 340, combat: 0, stop: 1750, battleResult: 2200 };
+const delay = { draft: 500, roll: 740, travel: 340, combat: 0, stop: 1750, battleResult: 2200 };
 const clashDelay = { ready: 150, approach: 320, toss: 330, reveal: 380, contact: 1050, break: 400, attackToss: 205, strike: 150, impact: 320 };
 const dieReadTime = 490;
 const dispatchTime = 560;
@@ -13,8 +13,8 @@ const dieFaces = ["⚀", "⚁", "⚂"];
 const symbols = { start: "⊙", boss: "◆" };
 const stationKinds = { start: "출발", battle: "전투", supply: "보급", recruit: "영입", boss: "종착역" };
 const phases = {
-  ready: "출발 대기", roll: "주사위 준비", travel: "자동 이동", combat: "자동 전투",
-  stop: "정차", battleResult: "전투 결과", won: "원정 성공", lost: "원정 종료", testDone: "테스트 완료",
+  ready: "출발 대기", draft: "대원 추첨", roll: "주사위 준비", travel: "자동 이동", combat: "자동 전투",
+  stop: "정차", battleResult: "전투 결과", reward: "영입", won: "원정 성공", lost: "원정 종료", testDone: "테스트 완료",
 };
 const speeds = [1, 2, 4];
 
@@ -38,22 +38,44 @@ const signed = (value) => `${value > 0 ? "+" : ""}${value}`;
 
 const portraitCells = { naru: 0, ian: 1, yul: 2, seol: 3, jin: 4, onha: 5, sentry: 6, drone: 7, switch: 8,
   "test-a": 6, "test-b": 7 };
+const recruitPortraitCrops = {
+  seol: { size: "235%", position: "49% 8%" },
+  yul: { size: "225%", position: "65% 5%" },
+  ian: { size: "220%", position: "61% 0%" },
+  miru: { cardSize: "contain", faceImage: "miru-portrait.png", size: "100%", position: "center" },
+};
 const iconCells = { slash: 0, pierce: 1, blunt: 2, steam: 3, frost: 4, current: 5, hp: 6, spirit: 7,
   attack: 8, defense: 9, level: 10, coin: 11, tails: 12, broken: 13, unrevealed: 14, rating: 15 };
 
-function setBitmap(node, sheet, columns, cell) {
+function setBitmap(node, sheet, columns, cell, variant = "simple") {
   const step = 100 / (columns - 1);
-  node.style.backgroundImage = `url("assets/${sheet}-simple.png")`;
+  node.style.backgroundImage = `url("assets/${sheet}-${variant}.png")`;
   node.style.backgroundSize = `${columns * 100}% ${columns * 100}%`;
   node.style.backgroundPosition = `${cell % columns * step}% ${Math.floor(cell / columns) * step}%`;
 }
 
-function setPortrait(node, unit) {
+function setPortrait(node, unit, framing = "face") {
+  const crop = recruitPortraitCrops[unit.id];
+  if (crop) {
+    const isCard = framing === "card";
+    const image = !isCard && crop.faceImage ? crop.faceImage : `${unit.id}-recruit.png`;
+    node.textContent = "";
+    node.style.backgroundImage = `url("assets/${image}")`;
+    node.style.backgroundSize = isCard ? (crop.cardSize ?? "100%") : crop.size;
+    node.style.backgroundPosition = isCard ? "center" : crop.position;
+    node.style.backgroundRepeat = "no-repeat";
+    return;
+  }
+  if (unit.portraitSheet) {
+    node.textContent = "";
+    setBitmap(node, unit.portraitSheet, 3, unit.portraitCell, "anime");
+    return;
+  }
   const cell = portraitCells[unit.id];
   if (cell === undefined) node.textContent = unit.icon;
   else {
     node.textContent = "";
-    setBitmap(node, "portraits", 3, cell);
+    setBitmap(node, "portraits", 3, cell, "anime");
   }
 }
 
@@ -127,8 +149,8 @@ function clashOffsets(stage, lane, group) {
 }
 
 const hpText = (unit) => `${unit.hp} / ${unit.maxHp}`;
-const attackTypes = { slash: "참격", pierce: "관통", blunt: "타격" };
-const affinities = { steam: "증기", frost: "서리", current: "전류" };
+const attackTypes = crewAttackTypes;
+const affinities = crewAffinities;
 
 function unitStats(unit) {
   const stats = element("div", "unit-level");
@@ -157,12 +179,17 @@ function unitResists(unit) {
 function skillCard(unit, skill, position, current) {
   const item = element("li", "coin-profile");
   item.classList.toggle("is-current", current);
+  const locked = unit.sync !== undefined && position >= unit.sync;
+  item.classList.toggle("is-locked", locked);
   const picture = element("span", "skill-picture");
   picture.setAttribute("aria-hidden", "true");
-  const row = portraitCells[unit.id];
-  const sheet = row < 3 ? "skills-naru-ian-yul" : "skills-seol-jin-onha";
-  const pictureIndex = skill ? position : unit.id === "seol" ? 1 : 0;
-  setBitmap(picture, sheet, 3, row % 3 * 3 + pictureIndex);
+  if (skill && (unit.sets || unit.portraitSheet)) setBitmap(picture, "combat-icons", 4, iconCells[skill.type]);
+  else {
+    const row = portraitCells[unit.id];
+    const sheet = row < 3 ? "skills-naru-ian-yul" : "skills-seol-jin-onha";
+    const pictureIndex = skill ? position : unit.id === "seol" ? 1 : 0;
+    setBitmap(picture, sheet, 3, row % 3 * 3 + pictureIndex);
+  }
 
   const copy = element("div", "skill-copy");
   const heading = element("div", "skill-heading");
@@ -172,12 +199,18 @@ function skillCard(unit, skill, position, current) {
   coins.setAttribute("aria-label", `코인 ${count}개`);
   coins.append(...Array.from({ length: count }, () => hudIcon("coin")));
   heading.append(element("strong", "", skill ? `${position + 1}. ${skill.name}` : unit.skillName), coins);
+  if (locked) heading.append(element("span", "skill-lock", `동기화 ${position + 1} 필요`));
 
   const meta = element("div", "skill-meta");
   const type = skill?.type ?? unit.type ?? "blunt";
   const affinity = skill?.affinity ?? unit.affinity ?? "steam";
   meta.append(element("span", "", `기본 ${baseStrength(unit, skill)} · 앞면 ${signed(coinStrength(unit, skill))}`),
     hudIcon(type, attackTypes[type]), hudIcon(affinity, affinities[affinity]));
+  const effects = [
+    ["clashBonus", "합"], ["mark", "표식"], ["guard", "자신 보호막"], ["heal", "아군 회복"],
+    ["finishDamage", "마무리 피해"], ["followUpDamage", "일방 공격 피해"],
+  ].filter(([field]) => skill?.[field]).map(([field, label]) => `${label} ${signed(skill[field])}`);
+  if (effects.length) meta.append(element("span", "", effects.join(" · ")));
   copy.append(heading, meta);
   item.append(picture, copy);
   return item;
@@ -190,6 +223,7 @@ function clashForce(lane) {
 
 class GameScreen {
   #run;
+  #draftCount = null;
   #tiles;
   #lastView = null;
   #crewKey = null;
@@ -205,6 +239,13 @@ class GameScreen {
   #noticePlaying = false;
 
   constructor() {
+    const costPicker = byId("starting-cost");
+    costPicker.replaceChildren(...selectableStartingBudgets.map((cost) => {
+      const option = element("option", "", String(cost));
+      option.value = String(cost);
+      return option;
+    }));
+    costPicker.value = String(defaultStartingCost);
     const track = byId("track");
     track.style.setProperty("--station-count", route.length);
     this.#tiles = route.map((tile, index) => {
@@ -241,9 +282,12 @@ class GameScreen {
     this.#lastView = null;
     this.#crewKey = null;
     this.#enemyKey = null;
+    this.#draftCount = null;
     const [seed] = crypto.getRandomValues(new Uint32Array(1));
-    this.#run = new Expedition(seededRandom(seed), seededRandom(seed ^ 0x9e3779b9));
-    if (mode === "expedition") this.#run.start();
+    this.#run = new Expedition(seededRandom(seed), seededRandom(seed ^ 0x9e3779b9), seededRandom(seed ^ 0x85ebca6b));
+    if (mode === "expedition" && this.#run.start(Number(byId("starting-cost").value || defaultStartingCost))) {
+      this.#draftCount = 0;
+    }
     if (mode === "test") {
       this.#speedIndex = 0;
       this.#run.startTestBattle();
@@ -257,6 +301,10 @@ class GameScreen {
     for (const effect of this.#effects) effect.cancel();
     this.#effects = [];
     const view = this.#run.view;
+    if (this.#draftCount !== null) {
+      view.phase = "draft";
+      view.draftCount = this.#draftCount;
+    }
     const previous = this.#lastView;
     const dispatching = view.clash?.group > 0 && previous?.clash
       && view.clash.group !== previous.clash.group && !this.#motion?.matches;
@@ -272,6 +320,10 @@ class GameScreen {
   }
 
   #stepDuration(view, previous) {
+    if (view.phase === "draft") {
+      if (view.draftCount === 0) return 300;
+      return view.draftCount === view.crew.length ? 950 : delay.draft;
+    }
     if (view.notice) return delay[view.phase];
     if (view.clash) {
       if (view.clash.stage === "ready" && view.clash.group > 0 && previous?.clash?.group !== view.clash.group) return dispatchTime;
@@ -287,7 +339,8 @@ class GameScreen {
     this.#armedAt = performance.now();
     this.#timer = setTimeout(() => {
       this.#timer = null;
-      this.#run.advance();
+      if (this.#draftCount === null) this.#run.advance();
+      else this.#draftCount = this.#draftCount < this.#lastView.crew.length ? this.#draftCount + 1 : null;
       this.#next();
     }, this.#remaining / this.#clockSpeed);
   }
@@ -323,16 +376,17 @@ class GameScreen {
 
   #renderControls(phase) {
     const active = phase in delay;
+    const inRun = active || phase === "reward";
     const pause = byId("pause");
     const start = byId("start");
     const test = byId("test-battle");
     const speed = byId("speed");
-    const restoreFocus = !active && pause === document.activeElement;
+    const restoreFocus = !inRun && pause === document.activeElement;
     pause.disabled = !active;
     pause.textContent = this.#paused ? "계속" : "일시정지";
-    start.disabled = active;
-    test.disabled = active;
-    byId("launch-controls").hidden = active;
+    start.disabled = inRun;
+    test.disabled = inRun;
+    byId("launch-controls").hidden = inRun;
     test.textContent = phase === "testDone" ? "5대2 다시 보기" : "5대2 테스트";
     start.firstChild.nodeValue = phase === "ready" || phase === "testDone" ? "원정 시작 " : active ? "진행 중 " : "새 원정 ";
     speed.textContent = `${this.#speed}×`;
@@ -342,7 +396,9 @@ class GameScreen {
 
   #render(view, previous) {
     this.#renderControls(view.phase);
-    byId("route-panel").hidden = view.testBattle;
+    const drafting = view.phase === "draft";
+    byId("route-panel").hidden = view.testBattle || drafting;
+    byId("crew-panel").hidden = drafting;
     const plan = byId("test-plan");
     plan.hidden = !view.testBattle;
     if (view.testBattle) {
@@ -365,26 +421,32 @@ class GameScreen {
     const inBattle = view.phase === "combat" || view.phase === "battleResult";
     const phase = byId("phase");
     phase.textContent = phases[view.phase];
-    phase.classList.toggle("sr-only", inBattle);
-    byId("stage").textContent = view.testBattle ? "5대2 테스트 전투" : route[view.position].name;
+    phase.classList.toggle("sr-only", inBattle || drafting);
+    byId("stage").textContent = drafting ? "출발 편성" : view.testBattle ? "5대2 테스트 전투" : route[view.position].name;
     const message = byId("message");
-    if (message.textContent !== view.message) message.textContent = view.message;
-    message.classList.toggle("sr-only", inBattle);
+    const status = drafting ? "" : view.message;
+    if (message.textContent !== status) message.textContent = status;
+    message.classList.toggle("sr-only", inBattle || drafting);
     byId("train").style.left = trainPosition(view.position);
     this.#renderDie(view, previous);
     this.#renderClash(view.clash);
+    this.#renderDraft(view, previous);
     const notice = byId("scene-notice");
     notice.hidden = !view.notice;
     notice.dataset.kind = view.phase;
     byId("notice-title").textContent = view.notice?.title ?? "";
     byId("notice-detail").textContent = view.notice?.detail ?? "";
+    if (view.phase !== previous?.phase) this.#renderRewards(view.reward, view.crew);
+    if (!previous || view.syncParts !== previous.syncParts || view.startingCost !== previous.startingCost
+      || JSON.stringify(view.syncTarget) !== JSON.stringify(previous.syncTarget)
+      || JSON.stringify(view.synergies) !== JSON.stringify(previous.synergies)) this.#renderGrowth(view);
     const impacts = view.clash?.stage === "impact" ? view.clash.lanes.filter((lane) => lane.hit) : [];
     const hitIds = (side, winner) => new Set(impacts.filter((lane) => lane.winner === winner).map((lane) => lane[side].id));
-    const showingSkills = new Map(view.clash?.lanes.map((lane) => [lane.ally.id, lane.skills.ally]));
+    const showingSkills = new Map(view.phase === "combat" ? view.clash.lanes.map((lane) => [lane.ally.id, lane.skills.ally]) : []);
     const allyHits = hitIds("ally", "enemy");
     const enemyHits = hitIds("enemy", "ally");
     const crewKey = JSON.stringify(view.crew.map((unit) => [unit.id, unit.slot, unit.hp, unit.maxHp, unit.spirit,
-      unit.attack, allyHits.has(unit.id), showingSkills.get(unit.id)?.slot]));
+      unit.attack, unit.sync, allyHits.has(unit.id), showingSkills.get(unit.id)?.slot]));
     const enemyKey = JSON.stringify([view.enemies, [...enemyHits]]);
     if (this.#crewKey !== crewKey) {
       this.#renderCrew(view.crew, allyHits, showingSkills);
@@ -396,8 +458,8 @@ class GameScreen {
     }
     if (!previous || view.journal.length !== previous.journal.length || view.journal.some((line, index) => line !== previous.journal[index])) {
       byId("journal").replaceChildren(...view.journal.map((line) => element("li", "", line)));
-      byId("journal").closest("section").hidden = view.journal.length === 0;
     }
+    byId("journal").closest("section").hidden = drafting || view.journal.length === 0;
   }
 
   #renderDie(view, previous) {
@@ -416,6 +478,48 @@ class GameScreen {
     value.hidden = rolling || view.die === null;
     value.textContent = view.die === null ? "" : String(view.die);
     die.setAttribute("aria-label", rolling ? "주사위를 굴리는 중" : view.die === null ? "주사위 대기" : `주사위 눈 ${view.die}`);
+  }
+
+  #renderDraft(view, previous) {
+    const panel = byId("draft-panel");
+    panel.hidden = view.phase !== "draft";
+    if (panel.hidden) return;
+
+    const cards = byId("draft-cards");
+    const status = byId("draft-status");
+    const count = view.draftCount;
+    const budget = view.startingCost;
+    const spent = view.crew.slice(0, count).reduce((sum, unit) => sum + unit.cost, 0);
+    const complete = count === view.crew.length;
+    if (previous?.phase !== "draft") {
+      cards.replaceChildren(...view.crew.map(() => {
+        const card = element("li", "draft-card");
+        card.setAttribute("aria-label", "미공개 대원");
+        const art = element("span", "draft-portrait", "◆");
+        art.setAttribute("aria-hidden", "true");
+        card.append(art, element("div", "draft-caption"));
+        return card;
+      }));
+      status.textContent = `시작 코스트 ${budget}로 대원 네 명을 뽑습니다.`;
+    }
+
+    if (count > 0) {
+      const unit = view.crew[count - 1];
+      const card = cards.children[count - 1];
+      card.classList.toggle("is-revealed", true);
+      card.removeAttribute("aria-label");
+      setPortrait(card.querySelector(".draft-portrait"), unit, "card");
+      card.querySelector(".draft-caption").replaceChildren(element("strong", "", unit.name),
+        element("span", "draft-cost", `코스트 ${unit.cost}`));
+      status.textContent = `${unit.name} 영입, 코스트 ${unit.cost}. ${complete ? "출발 편성 완료." : `합계 ${spent}, 한도 ${budget}.`}`;
+    }
+
+    panel.classList.toggle("is-complete", complete);
+    byId("draft-total").textContent = `${spent} / ${budget}`;
+    const meter = byId("draft-meter");
+    meter.setAttribute("aria-valuemax", String(budget));
+    meter.setAttribute("aria-valuenow", String(spent));
+    byId("draft-fill").style.width = `${spent / budget * 100}%`;
   }
 
   #renderClash(clash) {
@@ -531,7 +635,8 @@ class GameScreen {
     damage.style.left = targetPosition;
     damage.hidden = !damaged;
     damage.classList.toggle("is-finisher", defeated);
-    damage.textContent = damaged ? `−${lane.hit.damage}` : "";
+    damage.classList.toggle("is-blocked", damaged && lane.hit.damage === 0 && lane.hit.absorbed > 0);
+    damage.textContent = damaged ? (lane.hit.damage ? `−${lane.hit.damage}` : `막음 ${lane.hit.absorbed}`) : "";
     finish.style.left = targetPosition;
     finish.hidden = !defeated;
   }
@@ -564,6 +669,8 @@ class GameScreen {
 
   #renderCombatant(token, unit, score, position, winner) {
     token.style.left = position;
+    token.classList.toggle("is-guarded", unit.guard > 0);
+    token.classList.toggle("is-marked", unit.marked === true);
     token.querySelector(".combat-name").textContent = unit.name;
     setPortrait(token.querySelector(".combat-icon"), unit);
     const scoreNode = token.querySelector(".combat-score");
@@ -622,6 +729,16 @@ class GameScreen {
   }
 
   #playTransition(view, previous, waitingOrigins, dieOrigin) {
+    if (view.phase === "draft") {
+      if (view.draftCount > 0) this.#playDraftReveal(view);
+      else [...byId("draft-cards").children].forEach((card, index) => {
+        this.#animate(card, [
+          { transform: "translateY(12px) scale(.96)", opacity: .15 },
+          { transform: "translateY(0) scale(1)", opacity: 1 },
+        ], 210, "ease-out", index * 24);
+      });
+      return;
+    }
     if (view.notice) {
       this.#animate(byId("scene-notice"), [{ opacity: 0 }, { opacity: 1, offset: .16 },
         { opacity: 1, offset: .83 }, { opacity: 0 }], delay[view.phase], "ease-in-out");
@@ -658,6 +775,23 @@ class GameScreen {
     if (view.clash && previous?.clash) {
       this.#playClash(view.clash, previous.clash);
       if (waitingOrigins) this.#playDispatch(view.clash, waitingOrigins);
+    }
+  }
+
+  #playDraftReveal(view) {
+    const card = byId("draft-cards").children[view.draftCount - 1];
+    this.#animate(card, [
+      { transform: "perspective(650px) rotateY(-84deg) scale(.96)", opacity: .48 },
+      { transform: "perspective(650px) rotateY(10deg) scale(1.035)", opacity: 1, offset: .73 },
+      { transform: "perspective(650px) rotateY(0) scale(1)", opacity: 1 },
+    ], 390, "cubic-bezier(.21,.66,.28,1)");
+    const fill = byId("draft-fill");
+    const spent = view.crew.slice(0, view.draftCount - 1).reduce((sum, unit) => sum + unit.cost, 0);
+    this.#animate(fill, [{ width: `${spent / view.startingCost * 100}%` }, { width: fill.style.width }], 310);
+    if (view.draftCount === view.crew.length) {
+      this.#animate(byId("draft-total"), [
+        { transform: "scale(1)" }, { transform: "scale(1.13)", offset: .34 }, { transform: "scale(1)" },
+      ], 420, "ease-out", 210);
     }
   }
 
@@ -820,6 +954,45 @@ class GameScreen {
     });
   }
 
+  #renderRewards(packs, crew) {
+    const panel = byId("recruit-panel");
+    panel.hidden = !packs;
+    const list = byId("recruit-packs");
+    list.replaceChildren(...(packs ?? []).map(({ field, key, label, name, costs }) => {
+      const pack = element("section", "recruit-pack");
+      const heading = element("h4", "", name);
+      const matching = crew.filter((unit) => unit.slot >= 0 && unit.hp > 0 && unit[field] === key).length;
+      const choices = element("div", "recruit-costs");
+      choices.append(...costs.map((cost) => {
+        const button = element("button", "control recruit-choice", `코스트 ${cost}`);
+        button.type = "button";
+        button.setAttribute("aria-label", `${name} 팩 코스트 ${cost} 영입`);
+        button.addEventListener("click", () => {
+          if (!this.#run.chooseReward(field, key, cost)) return;
+          this.#next();
+          byId("pause").focus({ preventScroll: true });
+        });
+        return button;
+      }));
+      pack.append(element("span", "pack-category", `${label} · 같은 계열 출전 ${matching}명`), heading, choices);
+      return pack;
+    }));
+    if (packs) byId("recruit-title").focus();
+  }
+
+  #renderGrowth(view) {
+    byId("crew-growth").hidden = view.startingCost === null;
+    const target = view.syncTarget;
+    const progress = target ? `${target.name} 동기화 ${target.level} 재료 ${view.syncParts}/${target.required}` : `동기화 재료 ${view.syncParts}`;
+    byId("sync-parts").textContent = `시작 코스트 ${view.startingCost} · ${progress}`;
+    byId("synergies").replaceChildren(...view.synergies.map(({ field, name, count, label, bonus, unit }) => {
+      const item = element("li", `synergy ${field === "affiliation" ? "is-main" : ""}`);
+      item.append(element("span", "synergy-tier", crewSetLabels[field]),
+        element("span", "", `${name} ${count}명 · ${label} +${bonus}${unit ?? ""}`));
+      return item;
+    }));
+  }
+
   #renderCrew(crew, hitIds, showingSkills) {
     byId("crew-count").textContent = `${crew.filter((unit) => unit.slot >= 0 && unit.hp > 0).length}명 출전`;
     const order = (unit) => unit.slot < 0 ? crew.length : unit.slot;
@@ -834,10 +1007,16 @@ class GameScreen {
       const state = unit.hp === 0 ? "이탈" : unit.slot < 0 ? "대기" : `출전 ${unit.slot + 1}`;
       const name = element("div", "crew-name");
       name.append(element("strong", "", unit.name), element("span", "unit-state", state));
-      bio.append(name, element("span", "identity", unit.identity), unitStats(unit), health(unit));
+      const setNames = { affiliation: unit.affiliation, type: attackTypes[unit.type], affinity: affinities[unit.affinity],
+        animal: unit.animal, weapon: unit.weapon };
+      const traits = unit.sets ? unit.sets.map((field) => setNames[field]).join(" · ") : unit.identity;
+      bio.append(name, element("span", "identity", traits));
+      if (unit.sync !== undefined) bio.append(element("span", "unit-growth", `코스트 ${unit.cost} · 동기화 ${unit.sync}`));
+      bio.append(unitStats(unit), health(unit));
       const current = showingSkills.get(unit.id)?.slot;
       const skills = element("ol", "skill-list");
-      skills.append(...(unit.skills ?? [null]).map((skill, index) => skillCard(unit, skill, index, current === index + 1)));
+      skills.append(...(unit.skills ?? [null]).map((skill, index) =>
+        skillCard(unit, skill ? skillProfile(unit, index) : null, index, current === index + 1)));
       const stats = element("div", "crew-stats");
       const rating = element("strong", "power");
       rating.append(iconValue("rating", "전투력", String(unit.power)));

@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#0e1824">
   <title>백야선</title>
   <link rel="stylesheet" href="style.css">
+  <script src="crew-data.js" defer></script>
+  <script src="crew.js" defer></script>
   <script src="game.js" defer></script>
   <script src="main.js" defer></script>
 </head>
@@ -54,9 +56,27 @@
           <h2 id="stage">북단 관제소</h2>
           <p class="message" id="message" role="status">원정을 시작하면 주사위와 전투가 자동으로 진행됩니다.</p>
           <div class="controls launch-controls" id="launch-controls">
+            <label class="starting-cost">시작 코스트
+              <select id="starting-cost">
+                <option value="8">8</option>
+                <option value="10" selected>10</option>
+                <option value="12">12</option>
+              </select>
+            </label>
             <button id="start" type="button" class="primary">원정 시작 <span aria-hidden="true">→</span></button>
             <button id="test-battle" type="button" class="control test-button">5대2 테스트</button>
           </div>
+          <section id="draft-panel" class="draft-panel" aria-labelledby="stage" hidden>
+            <div class="draft-header">
+              <span>시작 코스트</span>
+              <strong id="draft-total"></strong>
+            </div>
+            <div id="draft-meter" class="draft-meter" role="progressbar" aria-label="사용한 시작 코스트" aria-valuemin="0">
+              <div id="draft-fill" class="draft-fill"></div>
+            </div>
+            <ol id="draft-cards" class="draft-cards" aria-label="추첨된 대원"></ol>
+            <p id="draft-status" class="sr-only" role="status"></p>
+          </section>
           <ol class="test-plan" id="test-plan" aria-label="테스트 전투 순서" hidden>
             <li><span class="sr-only">동시 합</span></li>
             <li><span class="sr-only">동시 추가 공격</span></li>
@@ -100,6 +120,10 @@
             </div>
           </template>
           <ul class="enemy-list" id="enemies" aria-label="적" hidden></ul>
+          <section class="recruit-panel" id="recruit-panel" aria-labelledby="recruit-title" hidden>
+            <h3 id="recruit-title" tabindex="-1">영입 팩</h3>
+            <div id="recruit-packs" class="recruit-packs"></div>
+          </section>
           <div id="scene-notice" class="scene-notice" hidden>
             <div class="notice-card">
               <strong id="notice-title"></strong>
@@ -109,13 +133,16 @@
         </div>
       </section>
 
-      <section class="crew-panel" aria-labelledby="crew-title">
+      <section id="crew-panel" class="crew-panel" aria-labelledby="crew-title">
         <div class="section-head">
           <h2 id="crew-title">자동 편성</h2>
-        <p id="crew-count">4명 출전</p>
+        <p id="crew-count">0명 출전</p>
+        </div>
+        <div id="crew-growth" class="crew-growth" hidden>
+          <p id="sync-parts"></p>
+          <ul id="synergies" class="synergies" aria-label="출전 시너지"></ul>
         </div>
         <ol id="crew" class="crew"></ol>
-        <p class="rating-note">전투력 = 공격 × 3 + 현재 HP + 방어 × 2</p>
       </section>
     </div>
 
