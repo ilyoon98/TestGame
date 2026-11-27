@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>백야선 대원 원화</title>
+  <script defer src="../crew-data.js"></script>
+  <script defer src="../crew.js"></script>
+  <script defer src="gallery.js"></script>
   <style>
     :root { color-scheme: dark; --ink:#101f2e; --deck:#172b3b; --rule:#3b5a6c; --text:#eef4f5; --muted:#b7c9d3; --brass:#efc786; }
     *, *::before, *::after { box-sizing:border-box; }
@@ -15,6 +18,7 @@
     h1, h2, h3, p { margin:0; }
     h1 { font-size:clamp(39px,7vw,83px); line-height:1.05; letter-spacing:-.08em; font-weight:800; }
     header p { margin:18px 0 22px; color:var(--muted); }
+    #roster-counts { margin-top:-12px; }
     .sheet-links { display:flex; flex-wrap:wrap; column-gap:22px; row-gap:5px; }
     .sheet-links a { width:max-content; color:var(--brass); text-underline-offset:4px; }
     nav { display:flex; flex-wrap:wrap; gap:8px 18px; padding:17px 0 18px; border-bottom:1px solid var(--rule); }
@@ -32,11 +36,12 @@
     .name-row { display:flex; flex-wrap:wrap; align-items:baseline; column-gap:8px; }
     h3 { font-size:25px; line-height:1.2; letter-spacing:-.07em; }
     .cost { margin-inline-start:auto; color:var(--muted); font-size:12px; white-space:nowrap; }
-    .confirmed { color:var(--brass); font-size:12px; }
     .details p { flex:1; color:#d4e3e9; font-size:14px; }
+    .details .profile { flex:none; color:var(--muted); font-size:13px; }
     .details ol { display:grid; gap:2px; margin:0; padding:8px 0 0 20px; border-top:1px solid var(--rule); font-size:13px; }
     .details li::marker { color:var(--team); font:600 11px Consolas,monospace; }
     footer { padding:20px 0 26px; border-top:1px solid var(--rule); color:var(--muted); font-size:13px; }
+    @media (min-width:900px) { .characters:has(.character:nth-child(4)) { grid-template-columns:repeat(4,minmax(0,1fr)); } }
     @media (max-width:730px) { .wrap { width:calc(100% - 30px); } .characters { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:430px) { .characters { grid-template-columns:1fr; } section { margin-top:34px; } }
   </style>
@@ -45,10 +50,11 @@
   <header>
     <div class="wrap">
       <h1>백야선 대원 원화</h1>
-      <p>8팀 24명. 그림을 누르면 원본 PNG가 열립니다.</p>
+      <p>8팀 26명. 그림을 누르면 원본 이미지가 열립니다.</p>
+      <p id="roster-counts" hidden></p>
       <div class="sheet-links">
-        <a href="lineup-1.jpg">전투팀 · 서포트 팀 · 사전 준비 팀 · 추적팀</a>
-        <a href="lineup-2.jpg">뒷정리 팀 · 암살팀 · 지원팀 · 간부</a>
+        <a href="lineup-1.jpg">초기 시안 모음 1 · 전투팀·서포트 팀·사전 준비 팀·추적팀</a>
+        <a href="lineup-2.jpg">초기 시안 모음 2 · 뒷정리 팀·암살팀·지원팀·간부</a>
       </div>
     </div>
   </header>
@@ -57,34 +63,34 @@
     <section id="battle" style="--team:#e9a492" aria-labelledby="battle-title">
       <h2 id="battle-title">Battle 전투팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1001-naru.png" aria-label="나루 원본 PNG 열기">
-            <img src="1001-naru.png" alt="나루 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1001">
+          <a class="figure" href="../assets/naru-recruit.png" aria-label="바루 원본 PNG 열기">
+            <img src="../assets/naru-recruit.png" alt="바루 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>나루</h3><span class="cost">2 코스트</span></div>
-            <p>흉터 난 귀와 비뚤어진 웃음이 인상적인 늑대 타자. 야구 점퍼에 테이프를 감은 배트를 든다.</p>
-            <ol aria-label="나루 스킬"><li>철심 스윙</li><li>울프 더블</li><li>괴성 풀스윙</li></ol>
+            <div class="name-row"><h3>바루</h3><span class="cost">2 코스트</span></div>
+            <p>사람 얼굴과 늑대 귀가 특징인 타자. 야구 점퍼를 입고 테이프를 감은 배트를 든다.</p>
+            <ol aria-label="바루 스킬"><li>철심 스윙</li><li>울프 더블</li><li>괴성 풀스윙</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1002-ian.png" aria-label="이안 원본 PNG 열기">
-            <img src="1002-ian.png" alt="이안 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1002">
+          <a class="figure" href="1002-ian.png" aria-label="배온 원본 PNG 열기">
+            <img src="1002-ian.png" alt="배온 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>이안</h3><span class="cost">3 코스트</span></div>
+            <div class="name-row"><h3>배온</h3><span class="cost">3 코스트</span></div>
             <p>긴 코트를 입은 무표정한 여우 대원. 펼친 마도서의 글줄을 따라 서리 침을 날린다.</p>
-            <ol aria-label="이안 스킬"><li>각주 침</li><li>목걸이 공명</li><li>금서 관통식</li></ol>
+            <ol aria-label="배온 스킬"><li>각주 침</li><li>목걸이 공명</li><li>금서 관통식</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1003-hae.png" aria-label="해 원본 PNG 열기">
-            <img src="1003-hae.png" alt="해 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1003">
+          <a class="figure" href="1003-hae.png" aria-label="보라 원본 PNG 열기">
+            <img src="1003-hae.png" alt="보라 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>해</h3><span class="cost">1 코스트</span></div>
+            <div class="name-row"><h3>보라</h3><span class="cost">1 코스트</span></div>
             <p>붉은 일자 단발과 짧은 바시티 재킷이 특징인 표지 사수. 원형 조준기로 다음 공격의 표적을 잡는다.</p>
-            <ol aria-label="해 스킬"><li>붉은 표지탄</li><li>엄호 점사</li><li>홍선 동시 사격</li></ol>
+            <ol aria-label="보라 스킬"><li>붉은 표지탄</li><li>엄호 점사</li><li>홍선 동시 사격</li></ol>
           </div>
         </article>
       </div>
@@ -92,34 +98,44 @@
     <section id="omega" style="--team:#9cd5c6" aria-labelledby="omega-title">
       <h2 id="omega-title">Omega 서포트 팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1004-tae.png" aria-label="태 원본 PNG 열기">
-            <img src="1004-tae.png" alt="태 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1004">
+          <a class="figure" href="1004-tae.png" aria-label="오웬 원본 PNG 열기">
+            <img src="1004-tae.png" alt="오웬 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>태</h3><span class="cost">2 코스트</span></div>
+            <div class="name-row"><h3>오웬</h3><span class="cost">2 코스트</span></div>
             <p>넉넉한 후드와 각진 안경을 쓴 신호 요원. 손잡이 달린 단말기의 빛나는 점으로 표식을 보낸다.</p>
-            <ol aria-label="태 스킬"><li>스파크 핑</li><li>과부하 핀</li><li>회로 차폐</li></ol>
+            <ol aria-label="오웬 스킬"><li>스파크 핑</li><li>과부하 핀</li><li>회로 차폐</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1005-dam.png" aria-label="담 원본 PNG 열기">
-            <img src="1005-dam.png" alt="담 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1005">
+          <a class="figure" href="1005-dam.png" aria-label="오델 원본 PNG 열기">
+            <img src="1005-dam.png" alt="오델 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>담</h3><span class="cost">2 코스트</span></div>
+            <div class="name-row"><h3>오델</h3><span class="cost">2 코스트</span></div>
             <p>비대칭 재킷을 입은 여우 신호 교란수. 휴대 신호등의 반사판을 돌려 거짓 표식을 찍는다.</p>
-            <ol aria-label="담 스킬"><li>미끼 신호</li><li>거울 핀</li><li>거짓 교신</li></ol>
+            <ol aria-label="오델 스킬"><li>미끼 신호</li><li>거울 핀</li><li>거짓 교신</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1006-eun.png" aria-label="은 원본 PNG 열기">
-            <img src="1006-eun.png" alt="은 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1006">
+          <a class="figure" href="1006-eun.png" aria-label="오린 원본 PNG 열기">
+            <img src="1006-eun.png" alt="오린 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>은</h3><span class="cost">3 코스트</span></div>
+            <div class="name-row"><h3>오린</h3><span class="cost">3 코스트</span></div>
             <p>긴 민소매 코트와 가는 안경을 쓴 여우 광학 기사. 원형 렌즈 두 개로 서리빛 초점을 맞춘다.</p>
-            <ol aria-label="은 스킬"><li>빙점 산정</li><li>초점 보정</li><li>각도 역산</li></ol>
+            <ol aria-label="오린 스킬"><li>빙점 산정</li><li>초점 보정</li><li>각도 역산</li></ol>
+          </div>
+        </article>
+        <article class="character" data-crew-id="1026">
+          <a class="figure" href="trainees/otti.png" aria-label="오티 원본 PNG 열기">
+            <img src="trainees/otti.png" alt="둥근 보호 고글을 이마에 올리고 계전기를 점검하는 오티" width="832" height="1216" loading="lazy" decoding="async">
+          </a>
+          <div class="details">
+            <div class="name-row"><h3>오티</h3><span class="cost">3 코스트</span></div>
+            <p>투명 보호 고글을 이마에 올린 계전기 정비 훈련생. 고장 난 신호를 추적하고 우회 회로로 동료를 돕는다.</p>
+            <ol aria-label="오티 스킬"><li>접점 점검</li><li>차단 계전</li><li>우회 송전</li></ol>
           </div>
         </article>
       </div>
@@ -127,34 +143,44 @@
     <section id="before" style="--team:#bcbef1" aria-labelledby="before-title">
       <h2 id="before-title">Before 사전 준비 팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1007-baek.png" aria-label="백 원본 PNG 열기">
-            <img src="1007-baek.png" alt="백 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1007">
+          <a class="figure" href="../assets/baek-recruit.png" aria-label="비크 원본 PNG 열기">
+            <img src="../assets/baek-recruit.png" alt="기하학 무늬 후드와 모노클을 쓰고 탐지기를 든 비크" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>백</h3><span class="cost">4 코스트</span></div>
-            <p>조각난 색면의 후드와 모노클을 쓴 카멜레온 정찰수. 어깨 장비에 작은 신호를 띄운다.</p>
-            <ol aria-label="백 스킬"><li>은신 침</li><li>의태 해제</li><li>빈 골목 개막</li></ol>
+            <div class="name-row"><h3>비크</h3><span class="cost">4 코스트</span></div>
+            <p>기하학 무늬 후드와 모노클을 쓴 정찰수. 허리의 나선형 케이블과 위장 무늬에 카멜레온의 특징을 담았다.</p>
+            <ol aria-label="비크 스킬"><li>은신 침</li><li>의태 해제</li><li>빈 골목 개막</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1008-yul.png" aria-label="율 원본 PNG 열기">
-            <img src="1008-yul.png" alt="율 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1008">
+          <a class="figure" href="1008-yul.png" aria-label="벤 원본 PNG 열기">
+            <img src="1008-yul.png" alt="벤 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>율</h3><span class="cost">2 코스트</span></div>
+            <div class="name-row"><h3>벤</h3><span class="cost">2 코스트</span></div>
             <p>오버핏 바람막이와 고글을 쓴 족제비 훈련생. 메신저백과 금속 고리에 비상 키트를 달고 다닌다.</p>
-            <ol aria-label="율 스킬"><li>가방깃 핀</li><li>보급 릴</li><li>비상 키트 전개</li></ol>
+            <ol aria-label="벤 스킬"><li>가방깃 핀</li><li>보급 릴</li><li>비상 키트 전개</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1009-miru.png" aria-label="미루 원본 PNG 열기">
-            <img src="1009-miru.png" alt="미루 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1009">
+          <a class="figure" href="../assets/miru-mouse.png" aria-label="비아 원본 PNG 열기">
+            <img src="../assets/miru-mouse.png" alt="비아 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>미루</h3><span class="confirmed">원화 확정</span><span class="cost">1 코스트</span></div>
-            <p>밤색 직모 단발의 17세 고양이 수인 수색 훈련생. 주황색 탐지기를 들고 희미한 소리에 귀를 기울인다.</p>
-            <ol aria-label="미루 스킬"><li>소음 핀</li><li>그림자 탐침</li><li>무음 경로</li></ol>
+            <div class="name-row"><h3>비아</h3><span class="cost">1 코스트</span></div>
+            <p>밤색 직모 단발과 둥근 쥐 귀가 특징인 수색 훈련생. 주황색 탐지기를 들고 희미한 소리에 귀를 기울인다.</p>
+            <ol aria-label="비아 스킬"><li>소음 핀</li><li>그림자 탐침</li><li>무음 경로</li></ol>
+          </div>
+        </article>
+        <article class="character" data-crew-id="1025">
+          <a class="figure" href="trainees/brin.png" aria-label="브린 원본 PNG 열기">
+            <img src="trainees/brin.png" alt="자기 키보다 큰 청록색 깃발을 양손으로 든 브린" width="832" height="1216" loading="lazy" decoding="async">
+          </a>
+          <div class="details">
+            <div class="name-row"><h3>브린</h3><span class="cost">2 코스트</span></div>
+            <p>자기 키보다 큰 청록색 군기를 두 손으로 다루는 기수. 깃대를 세워 버티고, 군기를 크게 펼쳐 아군을 이끈다.</p>
+            <ol aria-label="브린 스킬"><li>기수의 버팀</li><li>교차 신호</li><li>청기 선도</li></ol>
           </div>
         </article>
       </div>
@@ -162,34 +188,34 @@
     <section id="detective" style="--team:#9ab9cd" aria-labelledby="detective-title">
       <h2 id="detective-title">Detective 추적팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1010-siwon.png" aria-label="시원 원본 PNG 열기">
-            <img src="1010-siwon.png" alt="시원 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1010">
+          <a class="figure" href="1010-siwon.png" aria-label="다인 원본 PNG 열기">
+            <img src="1010-siwon.png" alt="다인 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>시원</h3><span class="cost">1 코스트</span></div>
+            <div class="name-row"><h3>다인</h3><span class="cost">1 코스트</span></div>
             <p>짧은 트렌치를 입은 늑대 조수. 접이식 메모판을 펼치고 전자 탐침으로 증거 자리를 짚는다.</p>
-            <ol aria-label="시원 스킬"><li>증거 핀</li><li>보조 가설</li><li>단서 배열</li></ol>
+            <ol aria-label="다인 스킬"><li>증거 핀</li><li>보조 가설</li><li>단서 배열</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1011-rok.png" aria-label="록 원본 PNG 열기">
-            <img src="1011-rok.png" alt="록 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1011">
+          <a class="figure" href="1011-rok.png" aria-label="도건 원본 PNG 열기">
+            <img src="1011-rok.png" alt="도건 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>록</h3><span class="cost">3 코스트</span></div>
+            <div class="name-row"><h3>도건</h3><span class="cost">3 코스트</span></div>
             <p>턱 옆 흉터와 넓은 어깨가 특징인 늑대 행동대장. 큰 타격면과 뾰족한 끝이 달린 도구를 든다.</p>
-            <ol aria-label="록 스킬"><li>현장 강타</li><li>표식 충각</li><li>포위 사잇길</li></ol>
+            <ol aria-label="도건 스킬"><li>현장 강타</li><li>표식 충각</li><li>포위 사잇길</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1012-garam.png" aria-label="가람 원본 PNG 열기">
-            <img src="1012-garam.png" alt="가람 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1012">
+          <a class="figure" href="1012-garam.png" aria-label="델라 원본 PNG 열기">
+            <img src="1012-garam.png" alt="델라 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>가람</h3><span class="cost">3 코스트</span></div>
+            <div class="name-row"><h3>델라</h3><span class="cost">3 코스트</span></div>
             <p>긴 남색 코트와 손바닥만 한 수첩을 든 탐정. 시선과 손끝으로 단서의 위치를 가리킨다.</p>
-            <ol aria-label="가람 스킬"><li>용의선 지정</li><li>정황 대조</li><li>결정적 증거</li></ol>
+            <ol aria-label="델라 스킬"><li>용의선 지정</li><li>정황 대조</li><li>결정적 증거</li></ol>
           </div>
         </article>
       </div>
@@ -197,34 +223,34 @@
     <section id="nadir" style="--team:#c2a4cd" aria-labelledby="nadir-title">
       <h2 id="nadir-title">Nadir 뒷정리 팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1013-bit.png" aria-label="빛 원본 PNG 열기">
-            <img src="1013-bit.png" alt="빛 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1013">
+          <a class="figure" href="1013-bit.png" aria-label="누리 원본 PNG 열기">
+            <img src="1013-bit.png" alt="누리 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>빛</h3><span class="cost">4 코스트</span></div>
+            <div class="name-row"><h3>누리</h3><span class="cost">4 코스트</span></div>
             <p>울먹이는 눈과 큼직한 장갑을 한 힘 담당. 묶은 봉투를 어깨에 메고 다닌다.</p>
-            <ol aria-label="빛 스킬"><li>잔해 봉투</li><li>울먹이는 내리찍기</li><li>마지막 수거</li></ol>
+            <ol aria-label="누리 스킬"><li>잔해 봉투</li><li>울먹이는 내리찍기</li><li>마지막 수거</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1014-seol.png" aria-label="설 원본 PNG 열기">
-            <img src="1014-seol.png" alt="설 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1014">
+          <a class="figure" href="1014-seol.png" aria-label="나령 원본 PNG 열기">
+            <img src="1014-seol.png" alt="나령 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>설</h3><span class="cost">1 코스트</span></div>
+            <div class="name-row"><h3>나령</h3><span class="cost">1 코스트</span></div>
             <p>낮은 눈썹과 둥근 귀가 특징인 쥐 수인 대장. 호각과 지휘봉으로 현장을 정리한다.</p>
-            <ol aria-label="설 스킬"><li>집합 호각</li><li>지휘봉 구령</li><li>잔무 일괄 처리</li></ol>
+            <ol aria-label="나령 스킬"><li>집합 호각</li><li>지휘봉 구령</li><li>잔무 일괄 처리</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1015-jin.png" aria-label="진 원본 PNG 열기">
-            <img src="1015-jin.png" alt="진 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1015">
+          <a class="figure" href="1015-jin.png" aria-label="노엘 원본 PNG 열기">
+            <img src="1015-jin.png" alt="노엘 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>진</h3><span class="cost">3 코스트</span></div>
+            <div class="name-row"><h3>노엘</h3><span class="cost">3 코스트</span></div>
             <p>긴 앞치마를 입은 산업 청소 담당. 폭이 넓은 빗자루를 길게 휘둘러 잔해를 쓸어낸다.</p>
-            <ol aria-label="진 스킬"><li>빗자루 날</li><li>잔해 밀어내기</li><li>무흔 청소</li></ol>
+            <ol aria-label="노엘 스킬"><li>빗자루 날</li><li>잔해 밀어내기</li><li>무흔 청소</li></ol>
           </div>
         </article>
       </div>
@@ -232,34 +258,34 @@
     <section id="clear" style="--team:#9dbacf" aria-labelledby="clear-title">
       <h2 id="clear-title">Clear 암살팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1016-ryeon.png" aria-label="련 원본 PNG 열기">
-            <img src="1016-ryeon.png" alt="련 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1016">
+          <a class="figure" href="1016-ryeon.png" aria-label="카인 원본 PNG 열기">
+            <img src="1016-ryeon.png" alt="카인 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>련</h3><span class="cost">1 코스트</span></div>
+            <div class="name-row"><h3>카인</h3><span class="cost">1 코스트</span></div>
             <p>마스크 위로 흉터와 눈빛이 드러나는 저격수. 납작한 망토와 무광 장비로 실루엣을 낮춘다.</p>
-            <ol aria-label="련 스킬"><li>한숨 숨기기</li><li>안개 조준</li><li>정적의 한 발</li></ol>
+            <ol aria-label="카인 스킬"><li>한숨 숨기기</li><li>안개 조준</li><li>정적의 한 발</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1017-yeon.png" aria-label="연 원본 PNG 열기">
-            <img src="1017-yeon.png" alt="연 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1017">
+          <a class="figure" href="1017-yeon.png" aria-label="케이 원본 PNG 열기">
+            <img src="1017-yeon.png" alt="케이 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>연</h3><span class="cost">2 코스트</span></div>
+            <div class="name-row"><h3>케이</h3><span class="cost">2 코스트</span></div>
             <p>짧은 하프코트를 입은 조용한 관측수. 작은 광학 장비와 단검으로 움직인다.</p>
-            <ol aria-label="연 스킬"><li>침묵의 밑줄</li><li>관측점 절개</li><li>시야 밖 궤적</li></ol>
+            <ol aria-label="케이 스킬"><li>침묵의 밑줄</li><li>관측점 절개</li><li>시야 밖 궤적</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1018-ho.png" aria-label="호 원본 PNG 열기">
-            <img src="1018-ho.png" alt="호 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1018">
+          <a class="figure" href="1018-ho.png" aria-label="코르 원본 PNG 열기">
+            <img src="1018-ho.png" alt="코르 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>호</h3><span class="cost">4 코스트</span></div>
+            <div class="name-row"><h3>코르</h3><span class="cost">4 코스트</span></div>
             <p>넓은 낮은 어깨와 보강선이 선명한 방패가 특징인 근접 가드. 방패 옆에서 짧은 검을 꺼낸다.</p>
-            <ol aria-label="호 스킬"><li>방패 뒤의 칼</li><li>교대 가드</li><li>틈새 결착</li></ol>
+            <ol aria-label="코르 스킬"><li>방패 뒤의 칼</li><li>교대 가드</li><li>틈새 결착</li></ol>
           </div>
         </article>
       </div>
@@ -267,34 +293,34 @@
     <section id="zenith" style="--team:#add6c3" aria-labelledby="zenith-title">
       <h2 id="zenith-title">zenith 지원팀</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1019-jun.png" aria-label="준 원본 PNG 열기">
-            <img src="1019-jun.png" alt="준 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1019">
+          <a class="figure" href="../assets/jun-recruit.png" aria-label="제온 원본 PNG 열기">
+            <img src="../assets/jun-recruit.png" alt="청록색 구조복을 입고 등갑 무늬 방패를 든 제온" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>준</h3><span class="cost">4 코스트</span></div>
-            <p>큰 다각형 면의 등갑을 지닌 거북이 방어수. 팔 앞에 등갑 모양 방벽을 펼친다.</p>
-            <ol aria-label="준 스킬"><li>등갑 전개</li><li>방벽 전진</li><li>갑판 성채</li></ol>
+            <div class="name-row"><h3>제온</h3><span class="cost">4 코스트</span></div>
+            <p>청록색 구조복과 넓은 팔 보호대를 착용한 방어수. 거북 등갑의 다각형 판으로 이루어진 푸른 방패를 펼친다.</p>
+            <ol aria-label="제온 스킬"><li>등갑 전개</li><li>방벽 전진</li><li>갑판 성채</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1020-onha.png" aria-label="온하 원본 PNG 열기">
-            <img src="1020-onha.png" alt="온하 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1020">
+          <a class="figure" href="1020-onha.png" aria-label="지오 원본 PNG 열기">
+            <img src="1020-onha.png" alt="지오 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>온하</h3><span class="cost">4 코스트</span></div>
+            <div class="name-row"><h3>지오</h3><span class="cost">4 코스트</span></div>
             <p>둥근 귀와 관자놀이 줄무늬가 특징인 호랑이 구호대원. 붕대 릴을 펼쳐 동료를 치료한다.</p>
-            <ol aria-label="온하 스킬"><li>응급 간섭</li><li>회복 붕대 릴</li><li>재정비 신호</li></ol>
+            <ol aria-label="지오 스킬"><li>응급 간섭</li><li>회복 붕대 릴</li><li>재정비 신호</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1021-bae.png" aria-label="배 원본 PNG 열기">
-            <img src="1021-bae.png" alt="배 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1021">
+          <a class="figure" href="1021-bae.png" aria-label="자크 원본 PNG 열기">
+            <img src="1021-bae.png" alt="자크 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>배</h3><span class="cost">1 코스트</span></div>
+            <div class="name-row"><h3>자크</h3><span class="cost">1 코스트</span></div>
             <p>솟은 목선과 얼굴 흉터가 특징인 하이에나 구조대원. 접이식 들것과 주황색 이송 끈을 든다.</p>
-            <ol aria-label="배 스킬"><li>들것 밀치기</li><li>구호 벨트</li><li>이송로 확보</li></ol>
+            <ol aria-label="자크 스킬"><li>들것 밀치기</li><li>구호 벨트</li><li>이송로 확보</li></ol>
           </div>
         </article>
       </div>
@@ -302,39 +328,39 @@
     <section id="alfa" style="--team:#e5c595" aria-labelledby="alfa-title">
       <h2 id="alfa-title">Alfa 간부</h2>
       <div class="characters">
-        <article class="character">
-          <a class="figure" href="1022-seo.png" aria-label="서 원본 PNG 열기">
-            <img src="1022-seo.png" alt="서 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+        <article class="character" data-crew-id="1022">
+          <a class="figure" href="1022-seo.png" aria-label="아르덴 원본 PNG 열기">
+            <img src="1022-seo.png" alt="아르덴 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>서</h3><span class="cost">2 코스트</span></div>
+            <div class="name-row"><h3>아르덴</h3><span class="cost">2 코스트</span></div>
             <p>각진 뿔과 묵직한 꼬리를 지닌 드래곤 간부. 긴 라펠의 정장을 입고 소매를 정리한다.</p>
-            <ol aria-label="서 스킬"><li>용린 선긋기</li><li>재단 검식</li><li>간부 결재</li></ol>
+            <ol aria-label="아르덴 스킬"><li>용린 선긋기</li><li>재단 검식</li><li>간부 결재</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1023-dohwa.png" aria-label="도화 원본 PNG 열기">
-            <img src="1023-dohwa.png" alt="도화 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1023">
+          <a class="figure" href="1023-dohwa.png" aria-label="아델 원본 PNG 열기">
+            <img src="1023-dohwa.png" alt="아델 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>도화</h3><span class="cost">3 코스트</span></div>
+            <div class="name-row"><h3>아델</h3><span class="cost">3 코스트</span></div>
             <p>가는 안경과 흰색·회색 깃 코트가 특징인 갈매기 모티프 간부. 옷자락과 얇은 곡선 날로 기류를 그린다.</p>
-            <ol aria-label="도화 스킬"><li>깃날 검사</li><li>편대 재정렬</li><li>기류 절단</li></ol>
+            <ol aria-label="아델 스킬"><li>깃날 검사</li><li>편대 재정렬</li><li>기류 절단</li></ol>
           </div>
         </article>
-<article class="character">
-          <a class="figure" href="1024-sol.png" aria-label="솔 원본 PNG 열기">
-            <img src="1024-sol.png" alt="솔 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
+<article class="character" data-crew-id="1024">
+          <a class="figure" href="1024-sol.png" aria-label="안셀 원본 PNG 열기">
+            <img src="1024-sol.png" alt="안셀 캐릭터 시안" width="832" height="1216" loading="lazy" decoding="async">
           </a>
           <div class="details">
-            <div class="name-row"><h3>솔</h3><span class="cost">4 코스트</span></div>
+            <div class="name-row"><h3>안셀</h3><span class="cost">4 코스트</span></div>
             <p>둥근 귀와 직선 머리, 큰 정장 소매가 특징인 쥐 수인 간부. 한 손을 주머니에 둔 채 얇은 은색 검을 든다.</p>
-            <ol aria-label="솔 스킬"><li>정숙 지시</li><li>은색 재단</li><li>최종 서명</li></ol>
+            <ol aria-label="안셀 스킬"><li>정숙 지시</li><li>은색 재단</li><li>최종 서명</li></ol>
           </div>
         </article>
       </div>
     </section>
   </main>
-  <footer><p class="wrap">소속·코스트·스킬은 Skill.xlsx 기준입니다. 미루 원화는 앞서 확정한 고양이 수인 시안입니다.</p></footer>
+  <footer><p class="wrap">대원 정보는 현재 게임 명단 기준입니다.</p></footer>
 </body>
 </html>

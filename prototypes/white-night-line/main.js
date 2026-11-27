@@ -1,7 +1,9 @@
 "use strict";
 
 const byId = (id) => document.getElementById(id);
-const delay = { draft: 500, roll: 740, travel: 340, combat: 0, stop: 1750, battleResult: 2200 };
+const delay = { draft: 680, roll: 740, travel: 340, combat: 0, stop: 1750, battleResult: 2200 };
+const draftFlipTime = 620;
+const reducedDraftFlipTime = 420;
 const clashDelay = { ready: 150, approach: 320, toss: 330, reveal: 380, contact: 1050, break: 400, attackToss: 205, strike: 150, impact: 320 };
 const dieReadTime = 490;
 const dispatchTime = 560;
@@ -17,12 +19,33 @@ const phases = {
   stop: "정차", battleResult: "전투 결과", reward: "영입", won: "원정 성공", lost: "원정 종료", testDone: "테스트 완료",
 };
 const speeds = [1, 2, 4];
+const standardAngles = { carried: -18, planted: 0, swept: 57 };
+const syncMarks = ["", "Ⅰ", "Ⅱ", "Ⅲ"];
 
 function element(tag, className, value) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (value !== undefined) node.textContent = value;
   return node;
+}
+
+function makeStandard() {
+  const prop = element("span", "brin-standard");
+  prop.setAttribute("aria-hidden", "true");
+  const rig = element("span", "standard-rig");
+  rig.append(element("span", "standard-cloth"));
+  prop.append(rig);
+  return prop;
+}
+
+function standardPose(stage, lane) {
+  const firstClash = lane.exchanges === 1 && !lane.winner && !lane.draw;
+  const firstHit = lane.winner === "ally" && lane.hit?.number === 1;
+  if ((stage === "contact" && firstClash) || (stage === "strike" && firstHit)) return "swept";
+  if ((stage === "approach" && lane.skills.ally) ||
+      ((stage === "toss" || stage === "reveal") && firstClash) ||
+      (stage === "attackToss" && firstHit)) return "planted";
+  return "carried";
 }
 
 function health(unit) {
@@ -38,14 +61,25 @@ const signed = (value) => `${value > 0 ? "+" : ""}${value}`;
 
 const portraitCells = { naru: 0, ian: 1, yul: 2, seol: 3, jin: 4, onha: 5, sentry: 6, drone: 7, switch: 8,
   "test-a": 6, "test-b": 7 };
-const recruitPortraitCrops = {
-  seol: { size: "235%", position: "49% 8%" },
-  yul: { size: "225%", position: "65% 5%" },
-  ian: { size: "220%", position: "61% 0%" },
-  miru: { cardSize: "contain", faceImage: "miru-portrait.png", size: "100%", position: "center" },
-};
 const iconCells = { slash: 0, pierce: 1, blunt: 2, steam: 3, frost: 4, current: 5, hp: 6, spirit: 7,
   attack: 8, defense: 9, level: 10, coin: 11, tails: 12, broken: 13, unrevealed: 14, rating: 15 };
+const skillIconCells = { bat: 0, blade: 1, spike: 2, shield: 3, flag: 4, relay: 5, scope: 6, gun: 7,
+  aid: 8, bag: 9, whistle: 10, lamp: 11, ice: 12, valve: 13, bolt: 14, wing: 15 };
+const crewSkillIcons = new Map([
+  [1001, ["bat", "ice", "bat"]], [1002, ["spike", "bolt", "ice"]],
+  [1003, ["gun", "shield", "gun"]], [1004, ["bolt", "spike", "relay"]],
+  [1005, ["lamp", "ice", "relay"]], [1006, ["ice", "scope", "lamp"]],
+  [1007, ["spike", "scope", "lamp"]], [1008, ["bag", "shield", "aid"]],
+  [1009, ["scope", "spike", "lamp"]], [1010, ["spike", "bag", "scope"]],
+  [1011, ["bat", "spike", "shield"]], [1012, ["scope", "lamp", "bag"]],
+  [1013, ["bag", "bat", "ice"]], [1014, ["whistle", "bat", "valve"]],
+  [1015, ["blade", "shield", "valve"]], [1016, ["gun", "scope", "gun"]],
+  [1017, ["blade", "scope", "bolt"]], [1018, ["shield", "ice", "blade"]],
+  [1019, ["shield", "valve", "shield"]], [1020, ["aid", "relay", "whistle"]],
+  [1021, ["shield", "aid", "ice"]], [1022, ["blade", "shield", "valve"]],
+  [1023, ["wing", "ice", "wing"]], [1024, ["blade", "ice", "bolt"]],
+  [1025, ["flag", "whistle", "flag"]], [1026, ["scope", "relay", "aid"]],
+]);
 
 function setBitmap(node, sheet, columns, cell, variant = "simple") {
   const step = 100 / (columns - 1);
@@ -55,20 +89,15 @@ function setBitmap(node, sheet, columns, cell, variant = "simple") {
 }
 
 function setPortrait(node, unit, framing = "face") {
-  const crop = recruitPortraitCrops[unit.id];
-  if (crop) {
+  const portrait = crewPortrait(crewById[unit.id]);
+  if (portrait) {
+    const [image, size, position] = portrait;
     const isCard = framing === "card";
-    const image = !isCard && crop.faceImage ? crop.faceImage : `${unit.id}-recruit.png`;
     node.textContent = "";
-    node.style.backgroundImage = `url("assets/${image}")`;
-    node.style.backgroundSize = isCard ? (crop.cardSize ?? "100%") : crop.size;
-    node.style.backgroundPosition = isCard ? "center" : crop.position;
+    node.style.backgroundImage = `url(${JSON.stringify(image)})`;
+    node.style.backgroundSize = isCard ? "contain" : size;
+    node.style.backgroundPosition = isCard ? "center" : position;
     node.style.backgroundRepeat = "no-repeat";
-    return;
-  }
-  if (unit.portraitSheet) {
-    node.textContent = "";
-    setBitmap(node, unit.portraitSheet, 3, unit.portraitCell, "anime");
     return;
   }
   const cell = portraitCells[unit.id];
@@ -97,7 +126,9 @@ function iconValue(key, label, value) {
 }
 
 function showSpirit(node, unit) {
-  node.replaceChildren(hudIcon("spirit", "정신력"), element("span", "", signed(unit.spirit ?? 0)));
+  const spirit = signed(unit.spirit ?? 0);
+  if (!node.lastElementChild) node.append(hudIcon("spirit", "정신력"), element("span", "", spirit));
+  else if (node.lastElementChild.textContent !== spirit) node.lastElementChild.textContent = spirit;
 }
 
 function trainPosition(position) {
@@ -119,6 +150,10 @@ function clampLanePosition(left) {
 
 function clashPositions(stage, lane, group) {
   return clashOffsets(stage, lane, group).map(clampLanePosition);
+}
+
+function laneTranslation(position, anchor) {
+  return `calc(${position.replaceAll("%", "cqi")} - ${anchor.replaceAll("%", "cqi")}) 0px`;
 }
 
 function clashOffsets(stage, lane, group) {
@@ -176,44 +211,77 @@ function unitResists(unit) {
   return stats;
 }
 
-function skillCard(unit, skill, position, current) {
+function crewBadge(kind, number, mark = number) {
+  const badge = element("span", `unit-badge unit-badge-${kind}`, String(mark));
+  const label = `${kind === "cost" ? "코스트" : "동기화"} ${number}`;
+  badge.setAttribute("role", "img");
+  badge.setAttribute("aria-label", label);
+  badge.title = label;
+  return badge;
+}
+
+function skillCard(unit, skill, position) {
   const item = element("li", "coin-profile");
-  item.classList.toggle("is-current", current);
   const locked = unit.sync !== undefined && position >= unit.sync;
   item.classList.toggle("is-locked", locked);
-  const picture = element("span", "skill-picture");
-  picture.setAttribute("aria-hidden", "true");
-  if (skill && (unit.sets || unit.portraitSheet)) setBitmap(picture, "combat-icons", 4, iconCells[skill.type]);
-  else {
-    const row = portraitCells[unit.id];
-    const sheet = row < 3 ? "skills-naru-ian-yul" : "skills-seol-jin-onha";
-    const pictureIndex = skill ? position : unit.id === "seol" ? 1 : 0;
-    setBitmap(picture, sheet, 3, row % 3 * 3 + pictureIndex);
-  }
-
-  const copy = element("div", "skill-copy");
-  const heading = element("div", "skill-heading");
-  const count = coinCount(unit, skill);
-  const coins = element("span", "skill-coins");
-  coins.setAttribute("role", "img");
-  coins.setAttribute("aria-label", `코인 ${count}개`);
-  coins.append(...Array.from({ length: count }, () => hudIcon("coin")));
-  heading.append(element("strong", "", skill ? `${position + 1}. ${skill.name}` : unit.skillName), coins);
-  if (locked) heading.append(element("span", "skill-lock", `동기화 ${position + 1} 필요`));
-
-  const meta = element("div", "skill-meta");
+  const key = `${unit.id}-${position}`;
+  const name = skill?.name ?? unit.skillName;
   const type = skill?.type ?? unit.type ?? "blunt";
   const affinity = skill?.affinity ?? unit.affinity ?? "steam";
-  meta.append(element("span", "", `기본 ${baseStrength(unit, skill)} · 앞면 ${signed(coinStrength(unit, skill))}`),
-    hudIcon(type, attackTypes[type]), hudIcon(affinity, affinities[affinity]));
-  const effects = [
-    ["clashBonus", "합"], ["mark", "표식"], ["guard", "자신 보호막"], ["heal", "아군 회복"],
-    ["finishDamage", "마무리 피해"], ["followUpDamage", "일방 공격 피해"],
-  ].filter(([field]) => skill?.[field]).map(([field, label]) => `${label} ${signed(skill[field])}`);
-  if (effects.length) meta.append(element("span", "", effects.join(" · ")));
-  copy.append(heading, meta);
-  item.append(picture, copy);
-  return item;
+  const trigger = element("button", "skill-trigger");
+  trigger.type = "button";
+  trigger.dataset.skillKey = key;
+  trigger.setAttribute("aria-expanded", "false");
+  trigger.setAttribute("aria-controls", `skill-detail-${key}`);
+
+  const artwork = element("span", "skill-artwork");
+  const picture = element("span", "skill-picture");
+  picture.setAttribute("aria-hidden", "true");
+  const illustrations = crewSkillIcons.get(crewById[unit.id]?.sheetId);
+  const illustration = illustrations?.[position];
+  if (illustration) {
+    setBitmap(picture, "skill-icons", 4, skillIconCells[illustration], "painted");
+    picture.classList.toggle("is-alternate", illustrations.indexOf(illustration) !== position);
+  } else setBitmap(picture, "combat-icons", 4, iconCells[type]);
+  artwork.append(picture, hudIcon(affinity));
+  trigger.append(artwork, element("strong", "skill-name", name));
+  if (locked) {
+    const required = position + 1;
+    const badge = crewBadge("sync", required, syncMarks[required]);
+    badge.className += " skill-lock";
+    badge.title = `동기화 ${required} 필요`;
+    badge.setAttribute("aria-label", badge.title);
+    trigger.append(badge);
+  }
+
+  const detail = element("div", "skill-detail");
+  detail.id = `skill-detail-${key}`;
+  detail.hidden = true;
+  const count = coinCount(unit, skill);
+  const strength = baseStrength(unit, skill);
+  const perHead = coinStrength(unit, skill);
+  const allHeads = strength + perHead * count;
+  const range = strength === allHeads ? String(strength) : `${Math.min(strength, allHeads)}–${Math.max(strength, allHeads)}`;
+  const header = element("div", "skill-detail-heading");
+  header.append(element("strong", "", name), element("span", "skill-power", `위력 ${range}`));
+  const roll = perHead ? `코인 ${count}개 · 앞면 하나마다 위력 ${signed(perHead)}` : `코인 ${count}개 · 위력 고정`;
+  detail.append(header, element("p", "skill-type", `${attackTypes[type]} · ${affinities[affinity]}`),
+    element("p", "skill-roll", roll));
+  if (locked) detail.append(element("p", "skill-unlock", `동기화 ${syncMarks[position + 1]}에서 해금`));
+  const effects = [];
+  if (skill?.clashBonus) effects.push(`합에서 위력 ${signed(skill.clashBonus)}.`);
+  if (skill?.mark) effects.push(`첫 타격에 표식. 다른 아군이 표식 대상을 치면 추가 피해 ${skill.mark}.`);
+  if (skill?.guard) effects.push(`첫 타격에 자신에게 보호막 ${skill.guard}.`);
+  if (skill?.heal) effects.push(`첫 타격에 체력 비율이 가장 낮은 부상 아군을 ${skill.heal} 회복.`);
+  if (skill?.finishDamage) effects.push(`체력이 절반 이하인 적에게 타격마다 추가 피해 ${skill.finishDamage}.`);
+  if (skill?.followUpDamage) effects.push(`합 없이 공격할 때 타격마다 추가 피해 ${skill.followUpDamage}.`);
+  if (effects.length) {
+    const list = element("ul", "skill-effects");
+    list.append(...effects.map((text) => element("li", "", text)));
+    detail.append(list);
+  }
+  item.append(trigger, detail);
+  return { key, item, trigger, detail };
 }
 
 function clashForce(lane) {
@@ -227,6 +295,8 @@ class GameScreen {
   #tiles;
   #lastView = null;
   #crewKey = null;
+  #crewRows = new Map();
+  #waitingKey = null;
   #enemyKey = null;
   #effects = [];
   #healthBars = new Map();
@@ -237,6 +307,7 @@ class GameScreen {
   #paused = false;
   #speedIndex = 0;
   #noticePlaying = false;
+  #skillPreview = null;
 
   constructor() {
     const costPicker = byId("starting-cost");
@@ -264,6 +335,12 @@ class GameScreen {
     byId("test-battle").addEventListener("click", () => this.#reset("test"));
     byId("pause").addEventListener("click", () => this.#togglePause());
     byId("speed").addEventListener("click", () => this.#changeSpeed());
+    document.addEventListener("pointerdown", (event) => {
+      if (this.#skillPreview && !this.#skillPreview.item.contains(event.target)) this.#showSkillDetail(null);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this.#skillPreview) this.#showSkillDetail(null);
+    });
     this.#reset("ready");
   }
 
@@ -281,8 +358,11 @@ class GameScreen {
     this.#paused = false;
     this.#lastView = null;
     this.#crewKey = null;
+    this.#crewRows.clear();
+    this.#waitingKey = null;
     this.#enemyKey = null;
     this.#draftCount = null;
+    this.#showSkillDetail(null);
     const [seed] = crypto.getRandomValues(new Uint32Array(1));
     this.#run = new Expedition(seededRandom(seed), seededRandom(seed ^ 0x9e3779b9), seededRandom(seed ^ 0x85ebca6b));
     if (mode === "expedition" && this.#run.start(Number(byId("starting-cost").value || defaultStartingCost))) {
@@ -322,7 +402,7 @@ class GameScreen {
   #stepDuration(view, previous) {
     if (view.phase === "draft") {
       if (view.draftCount === 0) return 300;
-      return view.draftCount === view.crew.length ? 950 : delay.draft;
+      return view.draftCount === view.crew.length ? 1140 : delay.draft;
     }
     if (view.notice) return delay[view.phase];
     if (view.clash) {
@@ -436,7 +516,7 @@ class GameScreen {
     notice.dataset.kind = view.phase;
     byId("notice-title").textContent = view.notice?.title ?? "";
     byId("notice-detail").textContent = view.notice?.detail ?? "";
-    if (view.phase !== previous?.phase) this.#renderRewards(view.reward, view.crew);
+    if (!previous || view.phase === "reward" || previous.phase === "reward") this.#renderRewards(view);
     if (!previous || view.syncParts !== previous.syncParts || view.startingCost !== previous.startingCost
       || JSON.stringify(view.syncTarget) !== JSON.stringify(previous.syncTarget)
       || JSON.stringify(view.synergies) !== JSON.stringify(previous.synergies)) this.#renderGrowth(view);
@@ -492,12 +572,23 @@ class GameScreen {
     const spent = view.crew.slice(0, count).reduce((sum, unit) => sum + unit.cost, 0);
     const complete = count === view.crew.length;
     if (previous?.phase !== "draft") {
-      cards.replaceChildren(...view.crew.map(() => {
+      cards.replaceChildren(...view.crew.map((unit) => {
         const card = element("li", "draft-card");
         card.setAttribute("aria-label", "미공개 대원");
-        const art = element("span", "draft-portrait", "◆");
+        const turn = element("div", "draft-card-turn");
+        const back = element("div", "draft-card-face draft-card-back");
+        back.setAttribute("aria-hidden", "true");
+        back.append(element("span", "draft-card-mark", "✳"));
+        const front = element("div", "draft-card-face draft-card-front");
+        front.setAttribute("aria-hidden", "true");
+        const art = element("span", "draft-portrait");
         art.setAttribute("aria-hidden", "true");
-        card.append(art, element("div", "draft-caption"));
+        setPortrait(art, unit, "card");
+        const caption = element("div", "draft-caption");
+        caption.append(element("strong", "", unit.name), element("span", "draft-cost", `코스트 ${unit.cost}`));
+        front.append(art, caption);
+        turn.append(back, front);
+        card.append(turn);
         return card;
       }));
       status.textContent = `시작 코스트 ${budget}로 대원 네 명을 뽑습니다.`;
@@ -508,9 +599,7 @@ class GameScreen {
       const card = cards.children[count - 1];
       card.classList.toggle("is-revealed", true);
       card.removeAttribute("aria-label");
-      setPortrait(card.querySelector(".draft-portrait"), unit, "card");
-      card.querySelector(".draft-caption").replaceChildren(element("strong", "", unit.name),
-        element("span", "draft-cost", `코스트 ${unit.cost}`));
+      card.querySelector(".draft-card-front").removeAttribute("aria-hidden");
       status.textContent = `${unit.name} 영입, 코스트 ${unit.cost}. ${complete ? "출발 편성 완료." : `합계 ${spent}, 한도 ${budget}.`}`;
     }
 
@@ -558,6 +647,9 @@ class GameScreen {
   }
 
   #renderWaiting(clash) {
+    const key = JSON.stringify([clash.waitingSide, clash.waitingSlots, clash.waitingUnits.map(({ id, hp, slot, spirit }) => [id, hp, slot, spirit])]);
+    if (key === this.#waitingKey) return;
+    this.#waitingKey = key;
     const row = byId("waiting-line");
     const list = byId("waiting-crew");
     row.hidden = clash.waitingSlots === 0;
@@ -574,6 +666,7 @@ class GameScreen {
       const spirit = element("span", "combat-spirit");
       showSpirit(spirit, unit);
       item.append(icon, element("strong", "", unit.name), bar, spirit);
+      if (unit.id === "brin") item.append(makeStandard());
       return item;
     }));
   }
@@ -601,6 +694,15 @@ class GameScreen {
     const defeated = Boolean(damaged && victim.hp === 0);
     node.dataset.stage = stage;
     node.dataset.winner = highlight ?? "";
+    const standardSpace = node.querySelector(".standard-space");
+    standardSpace.hidden = lane.ally.id !== "brin" || lane.ally.hp === 0;
+    if (!standardSpace.hidden) {
+      if (!standardSpace.firstElementChild) standardSpace.append(makeStandard());
+      const standard = standardSpace.firstElementChild;
+      standard.style.left = allyPosition;
+      standard.dataset.pose = standardPose(stage, lane);
+      standard.style.setProperty("--standard-angle", `${standardAngles[standard.dataset.pose]}deg`);
+    }
     node.classList.toggle("decisive-clash", Boolean(verdict && clashForce(lane) >= 1.6));
     const result = verdict === "ally" ? "승리" : verdict === "enemy" ? "패배" : "동점";
     const announcement = node.querySelector(".clash-announcement");
@@ -645,23 +747,29 @@ class GameScreen {
     const strip = token.querySelector(".coins");
     const broken = stage === "break" && lane.broken === side;
     const count = group > 0 && side !== lane.winner ? 0 : lane.counts[side];
-    const coins = [];
+    const states = [];
     for (let i = 0; i < count + Number(broken); i += 1) {
       const isBroken = i === count;
       const current = attack && lane.winner === side && lane.hit?.number === i + 1;
       const tossing = stage === "toss" && !lane.winner && !lane.draw || stage === "attackToss" && current;
       const spent = attack && lane.winner === side && i < lane.hitsUsed && !current;
       const face = attack ? (lane.winner === side ? lane.attackFaces[i] : null) : lane.faces[side][i];
-      const coin = element("span", "coin");
       const image = isBroken ? "broken" : face === true ? "coin" : face === false ? "tails" : "unrevealed";
+      states.push({ image, isBroken, spent, tossing: Boolean(tossing), face });
+    }
+    const key = states.map(({ image, spent, tossing }) => `${image}:${Number(spent)}:${Number(tossing)}`).join("|");
+    if (strip.dataset.coins === key) return;
+    strip.dataset.coins = key;
+    const coins = states.map(({ image, isBroken, spent, tossing, face }) => {
+      const coin = element("span", "coin");
       setBitmap(coin, "combat-icons", 4, iconCells[image]);
       coin.setAttribute("aria-hidden", "true");
       coin.dataset.face = isBroken ? "파손" : face === true ? "앞면" : face === false ? "뒷면" : "미공개";
       coin.classList.toggle("coin-broken", isBroken);
       coin.classList.toggle("coin-spent", spent);
-      coin.classList.toggle("coin-tossing", Boolean(tossing));
-      coins.push(coin);
-    }
+      coin.classList.toggle("coin-tossing", tossing);
+      return coin;
+    });
     strip.replaceChildren(...coins);
     strip.hidden = coins.length === 0;
     strip.setAttribute("aria-label", `코인 ${coins.length}개, ${coins.map((coin) => coin.dataset.face).join(", ")}`);
@@ -671,12 +779,19 @@ class GameScreen {
     token.style.left = position;
     token.classList.toggle("is-guarded", unit.guard > 0);
     token.classList.toggle("is-marked", unit.marked === true);
-    token.querySelector(".combat-name").textContent = unit.name;
-    setPortrait(token.querySelector(".combat-icon"), unit);
+    const portrait = token.querySelector(".combat-icon");
+    if (portrait.dataset.fighterId !== unit.id) {
+      token.querySelector(".combat-name").textContent = unit.name;
+      setPortrait(portrait, unit);
+      portrait.dataset.fighterId = unit.id;
+    }
     const scoreNode = token.querySelector(".combat-score");
-    scoreNode.textContent = score;
-    scoreNode.setAttribute("aria-hidden", String(score === ""));
-    scoreNode.setAttribute("aria-label", `위력 ${score}`);
+    if (scoreNode.dataset.score !== String(score)) {
+      scoreNode.dataset.score = String(score);
+      scoreNode.textContent = score;
+      scoreNode.setAttribute("aria-hidden", String(score === ""));
+      scoreNode.setAttribute("aria-label", `위력 ${score}`);
+    }
     this.#renderHealthBar(token.querySelector(".combat-hp"), unit);
     showSpirit(token.querySelector(".combat-spirit"), unit);
     token.classList.toggle("is-winner", winner);
@@ -689,6 +804,8 @@ class GameScreen {
   }
 
   #renderHealthBar(bar, unit, animated = true) {
+    const previous = this.#healthBars.get(bar);
+    if (previous?.id === unit.id && previous.hp === unit.hp && previous.maxHp === unit.maxHp) return;
     if (!bar.querySelector(".hp-fill")) {
       bar.append(element("span", "hp-trail"), element("span", "hp-fill"), hudIcon("hp"), element("span", "hp-number"));
     }
@@ -702,8 +819,6 @@ class GameScreen {
     bar.querySelector(".hp-number").textContent = hpText(unit);
     bar.querySelector(".hp-fill").style.width = `${ratio}%`;
     const trail = bar.querySelector(".hp-trail");
-    const previous = this.#healthBars.get(bar);
-    if (previous?.id === unit.id && previous.ratio === ratio) return;
     const progress = previous?.effect?.effect?.getComputedTiming().progress ?? 0;
     const from = previous?.effect
       ? previous.from + (previous.ratio - previous.from) * progress : previous?.ratio;
@@ -717,12 +832,17 @@ class GameScreen {
       effect.playbackRate = this.#clockSpeed;
       if (this.#paused) effect.pause();
     }
-    if (animated) this.#healthBars.set(bar, { id: unit.id, ratio, from, effect });
+    if (animated) this.#healthBars.set(bar, { id: unit.id, hp: unit.hp, maxHp: unit.maxHp, ratio, from, effect });
   }
 
   #animate(node, keyframes, duration, easing = "ease-out", delay = 0) {
-    if (this.#motion?.matches || !node.animate) return;
-    const effect = node.animate(keyframes, { duration, easing, delay });
+    if (this.#motion?.matches) return;
+    this.#playEffect(node, keyframes, { duration, easing, delay });
+  }
+
+  #playEffect(node, keyframes, timing) {
+    if (!node.animate) return;
+    const effect = node.animate(keyframes, timing);
     effect.playbackRate = this.#clockSpeed;
     if (this.#paused) effect.pause();
     this.#effects.push(effect);
@@ -780,18 +900,34 @@ class GameScreen {
 
   #playDraftReveal(view) {
     const card = byId("draft-cards").children[view.draftCount - 1];
-    this.#animate(card, [
-      { transform: "perspective(650px) rotateY(-84deg) scale(.96)", opacity: .48 },
-      { transform: "perspective(650px) rotateY(10deg) scale(1.035)", opacity: 1, offset: .73 },
-      { transform: "perspective(650px) rotateY(0) scale(1)", opacity: 1 },
-    ], 390, "cubic-bezier(.21,.66,.28,1)");
+    const turn = card.querySelector(".draft-card-turn");
+    if (this.#motion?.matches) {
+      const timing = { duration: reducedDraftFlipTime, easing: "ease-in-out" };
+      this.#playEffect(turn, [
+        { transform: "scaleX(1)" }, { transform: "scaleX(.64)", offset: .5 }, { transform: "scaleX(1)" },
+      ], timing);
+      this.#playEffect(card.querySelector(".draft-card-back"), [
+        { opacity: 1, easing: "steps(1, end)" }, { opacity: 0, offset: .5 }, { opacity: 0 },
+      ], timing);
+      return;
+    }
+
+    this.#animate(turn, [
+      { transform: "translateY(0) rotateY(180deg) scale(1)", easing: "ease-out" },
+      { transform: "translateY(-3px) rotateY(190deg) scale(.99)", offset: .16, easing: "ease-in" },
+      { transform: "translateY(-6px) rotateY(90deg) scale(.93)", offset: .48, easing: "ease-out" },
+      { transform: "translateY(-2px) rotateY(-7deg) scale(.99)", offset: .81, easing: "ease-in-out" },
+      { transform: "translateY(0) rotateY(0deg) scale(1)" },
+    ], draftFlipTime, "linear");
     const fill = byId("draft-fill");
     const spent = view.crew.slice(0, view.draftCount - 1).reduce((sum, unit) => sum + unit.cost, 0);
-    this.#animate(fill, [{ width: `${spent / view.startingCost * 100}%` }, { width: fill.style.width }], 310);
+    const from = `${spent / view.startingCost * 100}%`;
+    this.#animate(fill, [{ width: from }, { width: from, offset: .48, easing: "ease-out" }, { width: fill.style.width }],
+      draftFlipTime, "linear");
     if (view.draftCount === view.crew.length) {
       this.#animate(byId("draft-total"), [
         { transform: "scale(1)" }, { transform: "scale(1.13)", offset: .34 }, { transform: "scale(1)" },
-      ], 420, "ease-out", 210);
+      ], 420, "ease-out", 470);
     }
   }
 
@@ -809,6 +945,11 @@ class GameScreen {
         { transform: `translate(calc(-50% + ${dx * .28}px), ${dy * .28 - 7}px) rotate(-7deg)`, offset: .62 },
         { transform: "translateX(-50%)" },
       ], dispatchTime - 20, "ease-out");
+      if (lane.winner === "ally" && lane.ally.id === "brin") {
+        this.#animate(row.querySelector(".brin-standard"), [
+          { transform: `translate(${dx}px, ${dy}px)` }, { transform: "translate(0, 0)" },
+        ], dispatchTime - 20, "ease-out");
+      }
     });
   }
 
@@ -838,12 +979,15 @@ class GameScreen {
     const to = clashPositions(stage, lane, group);
     const retreat = stage === "break" && willReengage(lane);
     const reengage = stage === "toss" && previous.stage === "break" && willReengage(lane);
+    if (lane.ally.id === "brin" && lane.ally.hp > 0 && lastLane.ally.id === "brin") {
+      this.#playStandard(node.querySelector(".brin-standard"), stage, standardPose(previous.stage, lastLane), from[0], to[0]);
+    }
     [".combatant.ally", ".combatant.foe"].forEach((selector, index) => {
       if (from[index] === to[index]) return;
       const token = node.querySelector(selector);
       const easing = retreat || reengage ? recoilEase : stage === "strike" ? "cubic-bezier(.39,0,.69,.21)" : "ease-out";
       const duration = clashDelay[stage] - (retreat || reengage ? 45 : 20);
-      this.#animate(token, [{ left: from[index] }, { left: to[index] }], duration, easing);
+      this.#animate(token, [{ translate: laneTranslation(from[index], to[index]) }, { translate: "0px 0px" }], duration, easing);
       if (retreat) {
         const tilt = index === 0 ? -10 : 10;
         this.#animate(token, [
@@ -897,10 +1041,10 @@ class GameScreen {
           const token = node.querySelector(side === "ally" ? ".combatant.ally" : ".combatant.foe");
           const duration = Math.round(270 + 55 * force);
           this.#animate(token, [
-            { left: position, transform: "translateX(-50%)" },
-            { left: shifted(1), transform: `translate(-50%, ${dy}px)`, offset: .22 },
-            { left: shifted(.4), transform: `translate(-50%, ${Math.round(dy * .4)}px)`, offset: .65 },
-            { left: position, transform: "translateX(-50%)" },
+            { translate: "0px 0px", transform: "translateX(-50%)" },
+            { translate: laneTranslation(shifted(1), position), transform: `translate(-50%, ${dy}px)`, offset: .22 },
+            { translate: laneTranslation(shifted(.4), position), transform: `translate(-50%, ${Math.round(dy * .4)}px)`, offset: .65 },
+            { translate: "0px 0px", transform: "translateX(-50%)" },
           ], duration);
           const angle = Math.round(direction * (winner ? -2 : 3) * force);
           this.#animate(token.querySelector(".combat-icon"), [
@@ -940,6 +1084,39 @@ class GameScreen {
     }
   }
 
+  #playStandard(standard, stage, previousPose, from, to) {
+    const pose = standard.dataset.pose;
+    const duration = clashDelay[stage];
+    if (from !== to) this.#animate(standard, [{ translate: laneTranslation(from, to) }, { translate: "0px 0px" }], duration - 20);
+    if (pose === previousPose) return;
+
+    const rig = standard.querySelector(".standard-rig");
+    const cloth = standard.querySelector(".standard-cloth");
+    const start = { transform: `rotate(${standardAngles[previousPose]}deg)` };
+    const end = { transform: `rotate(${standardAngles[pose]}deg)` };
+    const raised = { transform: "var(--standard-sweep-offset)" };
+    const grounded = { transform: "translate(0, 0)" };
+    const unfurled = { transform: "var(--standard-unfurled)" };
+    if (pose === "swept") {
+      const swingTime = Math.min(360, duration);
+      this.#animate(standard, [grounded, { ...raised, offset: .54 }, raised], swingTime, "ease-out");
+      this.#animate(rig, [start, { transform: "rotate(-15deg)", offset: .16 },
+        { transform: "rotate(73deg)", offset: .68 }, end], swingTime, "ease-out");
+      this.#animate(cloth, [
+        { transform: "scaleX(.8) skewY(-8deg)" },
+        { transform: "rotate(calc(var(--standard-cloth-angle) - 10deg)) scaleX(1.14) skewY(12deg)", offset: .68 },
+        unfurled,
+      ], swingTime);
+    } else {
+      const settleTime = Math.min(250, duration);
+      this.#animate(rig, [start, end], settleTime);
+      if (previousPose === "swept") {
+        this.#animate(standard, [raised, grounded], settleTime);
+        this.#animate(cloth, [unfurled, { transform: "rotate(0deg)" }], settleTime);
+      }
+    }
+  }
+
   #playClashSparks(node, force, delay = 0) {
     const sparks = node.querySelector(".clash-sparks").children;
     sparkVectors.forEach(([x, y], index) => {
@@ -954,36 +1131,153 @@ class GameScreen {
     });
   }
 
-  #renderRewards(packs, crew) {
+  #renderRewards(view) {
     const panel = byId("recruit-panel");
-    panel.hidden = !packs;
+    const { reward: packs, recruitChoice: choice, crew } = view;
+    panel.hidden = view.phase !== "reward";
+    const comparison = byId("recruit-comparison");
+    comparison.hidden = panel.hidden || !choice?.selectedId;
+    if (comparison.hidden) comparison.replaceChildren();
+    if (panel.hidden) return;
     const list = byId("recruit-packs");
-    list.replaceChildren(...(packs ?? []).map(({ field, key, label, name, costs }) => {
-      const pack = element("section", "recruit-pack");
-      const heading = element("h4", "", name);
-      const matching = crew.filter((unit) => unit.slot >= 0 && unit.hp > 0 && unit[field] === key).length;
-      const choices = element("div", "recruit-costs");
-      choices.append(...costs.map((cost) => {
-        const button = element("button", "control recruit-choice", `코스트 ${cost}`);
+    const title = byId("recruit-title");
+    const actions = byId("recruit-actions");
+    list.classList.toggle("is-identities", Boolean(choice && !choice.selectedId));
+    list.classList.toggle("is-replacements", Boolean(choice?.selectedId));
+    actions.replaceChildren();
+    if (choice?.selectedId) {
+      const incoming = crewById[choice.selectedId];
+      const recommended = choice.candidates.find(({ id }) => id === incoming.id).replacementId;
+      title.textContent = `${incoming.name} 영입 · 교체할 대원 선택`;
+      const options = new Map(choice.replacements.map((option) => [option.id, option]));
+      list.replaceChildren(...crew.map((unit) => {
+        const button = element("button", "recruit-pack replacement-choice");
         button.type = "button";
-        button.setAttribute("aria-label", `${name} 팩 코스트 ${cost} 영입`);
+        button.dataset.replacementId = unit.id;
+        const changes = options.get(unit.id).changes;
+        const gains = changes.filter(({ previous, next }) => next > previous).length;
+        const losses = changes.length - gains;
+        button.append(element("strong", "pack-name", unit.name));
+        const totals = element("span", "replacement-totals");
+        if (gains) totals.append(element("span", "synergy-gain", `+${gains}`));
+        if (losses) totals.append(element("span", "synergy-loss", `−${losses}`));
+        if (!changes.length) totals.append(element("span", "pack-count", "변화 없음"));
+        button.append(totals);
+        if (unit.id === recommended) button.append(element("span", "recruit-recommendation", "추천"));
+        button.setAttribute("aria-label", `${unit.name}${unit.id === recommended ? ", 추천" : ""}, 얻는 시너지 ${gains}개, 잃는 시너지 ${losses}개`);
         button.addEventListener("click", () => {
-          if (!this.#run.chooseReward(field, key, cost)) return;
-          this.#next();
-          byId("pause").focus({ preventScroll: true });
+          if (this.#run.previewReplacement(unit.id)) this.#renderReplacementPreview(this.#run.view);
         });
         return button;
       }));
-      pack.append(element("span", "pack-category", `${label} · 같은 계열 출전 ${matching}명`), heading, choices);
-      return pack;
-    }));
-    if (packs) byId("recruit-title").focus();
+      const confirm = element("button", "primary confirm-replacement");
+      confirm.type = "button";
+      confirm.addEventListener("click", () => this.#rewardAction(() => this.#run.replaceRecruit(this.#run.view.recruitChoice?.replacementId)));
+      actions.append(confirm);
+      this.#renderReplacementPreview(view);
+    } else if (choice) {
+      title.textContent = `${choice.name} · 인격 1명 선택`;
+      list.replaceChildren(...choice.candidates.map(({ id, reason, recommended, duplicate }) => {
+        const unit = crewById[id];
+        const button = element("button", "recruit-pack identity-choice");
+        button.type = "button";
+        const art = element("span", "identity-art");
+        art.setAttribute("aria-hidden", "true");
+        setPortrait(art, unit, "card");
+        const caption = element("span", "identity-caption");
+        caption.append(element("strong", "pack-name", unit.name), element("span", "pack-count", duplicate ? "중복 · 재료 +2" : unit.affiliation));
+        if (recommended) caption.append(element("span", "recruit-recommendation", `추천 · ${reason}`));
+        button.append(art, caption);
+        button.addEventListener("click", () => this.#rewardAction(() => this.#run.chooseIdentity(id)));
+        return button;
+      }));
+    } else {
+      title.textContent = "영입 팩 선택";
+      list.replaceChildren(...packs.map(({ field, key, label, name, cost, deployedCount, candidates, reason, recommended }) => {
+        const button = element("button", "recruit-pack recruit-choice");
+        button.type = "button";
+        button.append(element("span", "pack-category", label), element("strong", "pack-name", name),
+          element("span", "pack-cost", `${cost}코스트 확정`), element("span", "pack-count", `후보 ${candidates.length}명 · 출전 ${deployedCount}명`));
+        if (recommended) button.append(element("span", "recruit-recommendation", `추천 · ${reason}`));
+        button.setAttribute("aria-label", `${name} ${cost}코스트 확정, 후보 ${candidates.length}명, 출전 ${deployedCount}명${recommended ? `, 추천 ${reason}` : ""}`);
+        button.addEventListener("click", () => this.#rewardAction(() => this.#run.chooseReward(field, key, cost)));
+        return button;
+      }));
+    }
+    if (choice) {
+      if (choice.selectedId || packs?.length) {
+        const back = element("button", "control", choice.selectedId ? "인격 다시 고르기" : "팩 다시 고르기");
+        back.type = "button";
+        back.addEventListener("click", () => this.#rewardAction(() => this.#run.backRecruit()));
+        actions.append(back);
+      }
+      const skip = element("button", "control", "영입 건너뛰기");
+      skip.type = "button";
+      skip.addEventListener("click", () => this.#rewardAction(() => this.#run.skipRecruit()));
+      actions.append(skip);
+    }
+    title.focus({ preventScroll: true });
+  }
+
+  #renderReplacementPreview({ recruitChoice: choice, crew }) {
+    const outgoing = crew.find((unit) => unit.id === choice.replacementId);
+    const incoming = crewById[choice.selectedId];
+    const { changes } = choice.replacements.find(({ id }) => id === outgoing.id);
+    for (const button of byId("recruit-packs").querySelectorAll(".replacement-choice")) {
+      button.setAttribute("aria-pressed", String(button.dataset.replacementId === outgoing.id));
+    }
+    byId("recruit-actions").querySelector(".confirm-replacement").textContent = `교체 확정 · ${outgoing.name}`;
+
+    const cards = element("div", "replacement-cards");
+    for (const [unit, title, kind] of [[outgoing, "기존 대원", "outgoing"], [incoming, "새 인격", "incoming"]]) {
+      const card = element("article", `replacement-card replacement-${kind}`);
+      const art = element("span", "replacement-art");
+      art.setAttribute("aria-hidden", "true");
+      setPortrait(art, unit, "card");
+      const info = element("div", "replacement-info");
+      const name = element("strong", "replacement-name", unit.name);
+      const badges = element("span", "unit-badges");
+      const sync = unit.sync ?? 1;
+      badges.append(crewBadge("cost", unit.cost), crewBadge("sync", sync, syncMarks[sync]));
+      info.append(element("span", "pack-category", title), name, element("span", "pack-count", unit.affiliation),
+        badges, element("span", "pack-count", `체력 ${unit.hp ?? unit.maxHp} / ${unit.maxHp}`));
+      card.append(art, info);
+      cards.append(card);
+    }
+
+    const effects = element("div", "replacement-effects");
+    const bonusText = (bonus, unit) => bonus ? `+${bonus}${unit ?? ""}` : "미적용";
+    for (const [title, kind, positive] of [["얻는 시너지", "gain", true], ["잃는 시너지", "loss", false]]) {
+      const group = element("div", `replacement-effect-group synergy-${kind}`);
+      group.append(element("h4", "", title));
+      const matching = changes.filter(({ previous, next }) => (next > previous) === positive);
+      if (!matching.length) group.append(element("p", "pack-count", "없음"));
+      else {
+        const list = element("ul", "replacement-effect-list");
+        list.append(...matching.map(({ field, name, label, unit, previous, next }) => {
+          const item = element("li", "replacement-effect");
+          const status = previous === 0 ? "활성" : next === 0 ? "해제" : positive ? "강화" : "약화";
+          item.append(element("strong", "effect-name", `${crewSetLabels[field]} · ${name}`),
+            element("span", "effect-value", `${status} · ${label} ${bonusText(previous, unit)} → ${bonusText(next, unit)}`));
+          return item;
+        }));
+        group.append(list);
+      }
+      effects.append(group);
+    }
+    byId("recruit-comparison").replaceChildren(cards, effects);
+  }
+
+  #rewardAction(action) {
+    if (!action()) return;
+    this.#next();
+    if (byId("recruit-panel").hidden) byId("pause").focus({ preventScroll: true });
   }
 
   #renderGrowth(view) {
     byId("crew-growth").hidden = view.startingCost === null;
     const target = view.syncTarget;
-    const progress = target ? `${target.name} 동기화 ${target.level} 재료 ${view.syncParts}/${target.required}` : `동기화 재료 ${view.syncParts}`;
+    const progress = target ? `${target.name} 동기화 ${syncMarks[target.level]} 재료 ${view.syncParts}/${target.required}` : `동기화 재료 ${view.syncParts}`;
     byId("sync-parts").textContent = `시작 코스트 ${view.startingCost} · ${progress}`;
     byId("synergies").replaceChildren(...view.synergies.map(({ field, name, count, label, bonus, unit }) => {
       const item = element("li", `synergy ${field === "affiliation" ? "is-main" : ""}`);
@@ -994,36 +1288,148 @@ class GameScreen {
   }
 
   #renderCrew(crew, hitIds, showingSkills) {
-    byId("crew-count").textContent = `${crew.filter((unit) => unit.slot >= 0 && unit.hp > 0).length}명 출전`;
+    byId("crew-count").textContent = `${crew.length}/${deploymentLimit}명`;
+    const list = byId("crew");
+    const previousPreview = this.#skillPreview;
+    const focusedKey = document.activeElement?.dataset.skillKey;
+    const focusedSummary = document.activeElement?.dataset.crewSummary;
+    const previews = new Map();
     const order = (unit) => unit.slot < 0 ? crew.length : unit.slot;
     const ordered = [...crew].sort((a, b) => order(a) - order(b));
-    byId("crew").replaceChildren(...ordered.map((unit) => {
-      const row = element("li", `crew-row ${unit.slot < 0 || unit.hp === 0 ? "reserve" : ""}`);
+    const rows = ordered.map((unit) => {
+      const old = this.#crewRows.get(unit.id);
+      const entry = old && old.sync === unit.sync ? old : this.#buildCrewRow(unit, old?.details.open);
+      this.#crewRows.set(unit.id, entry);
+      const { row, state, hpValue, meter, spirit, rating } = entry;
+      row.classList.toggle("reserve", unit.slot < 0 || unit.hp === 0);
       row.classList.toggle("is-hit", hitIds.has(unit.id));
-      const portrait = element("span", "portrait");
-      portrait.setAttribute("aria-hidden", "true");
-      setPortrait(portrait, unit);
-      const bio = element("div", "crew-bio");
-      const state = unit.hp === 0 ? "이탈" : unit.slot < 0 ? "대기" : `출전 ${unit.slot + 1}`;
-      const name = element("div", "crew-name");
-      name.append(element("strong", "", unit.name), element("span", "unit-state", state));
-      const setNames = { affiliation: unit.affiliation, type: attackTypes[unit.type], affinity: affinities[unit.affinity],
-        animal: unit.animal, weapon: unit.weapon };
-      const traits = unit.sets ? unit.sets.map((field) => setNames[field]).join(" · ") : unit.identity;
-      bio.append(name, element("span", "identity", traits));
-      if (unit.sync !== undefined) bio.append(element("span", "unit-growth", `코스트 ${unit.cost} · 동기화 ${unit.sync}`));
-      bio.append(unitStats(unit), health(unit));
+      const stateText = unit.hp === 0 ? "이탈" : unit.slot < 0 ? "대기" : `출전 ${unit.slot + 1}`;
+      if (state.textContent !== stateText) state.textContent = stateText;
+      if (meter.value !== unit.hp || meter.max !== unit.maxHp) {
+        meter.value = unit.hp;
+        meter.max = unit.maxHp;
+        meter.setAttribute("aria-label", `${unit.name} 체력 ${hpText(unit)}`);
+        hpValue.textContent = hpText(unit);
+      }
+      const spiritText = signed(unit.spirit ?? 0);
+      if (spirit.textContent !== spiritText) spirit.textContent = spiritText;
+      const powerText = `전투력 ${unit.power}`;
+      if (rating.textContent !== powerText) rating.textContent = powerText;
       const current = showingSkills.get(unit.id)?.slot;
-      const skills = element("ol", "skill-list");
-      skills.append(...(unit.skills ?? [null]).map((skill, index) =>
-        skillCard(unit, skill ? skillProfile(unit, index) : null, index, current === index + 1)));
-      const stats = element("div", "crew-stats");
-      const rating = element("strong", "power");
-      rating.append(iconValue("rating", "전투력", String(unit.power)));
-      stats.append(rating, iconValue("hp", "체력", hpText(unit)));
-      row.append(portrait, bio, stats, unitResists(unit), skills);
+      entry.previews.forEach((preview, index) => {
+        preview.item.classList.toggle("is-current", current === index + 1);
+        previews.set(preview.key, preview);
+      });
       return row;
-    }));
+    });
+    for (const [id] of this.#crewRows) if (!ordered.some((unit) => unit.id === id)) this.#crewRows.delete(id);
+    for (const old of [...list.children]) if (!rows.includes(old)) old.remove();
+    rows.forEach((row, index) => {
+      if (list.children[index] !== row) list.insertBefore(row, list.children[index] ?? null);
+    });
+    const restored = previews.get(previousPreview?.key);
+    if (restored) restored.pinned = previousPreview.pinned;
+    if (focusedKey && document.activeElement !== previews.get(focusedKey)?.trigger) previews.get(focusedKey)?.trigger.focus({ preventScroll: true });
+    else if (focusedSummary && document.activeElement !== this.#crewRows.get(focusedSummary)?.summary) {
+      this.#crewRows.get(focusedSummary)?.summary.focus({ preventScroll: true });
+    }
+    this.#showSkillDetail(restored ?? null);
+  }
+
+  #buildCrewRow(unit, open = false) {
+    const row = element("li", "crew-row");
+    const portrait = element("span", "portrait");
+    portrait.setAttribute("aria-hidden", "true");
+    setPortrait(portrait, unit, "card");
+    const bio = element("span", "crew-bio");
+    const state = element("span", "unit-state");
+    const name = element("span", "crew-name");
+    name.append(element("strong", "", unit.name), state);
+    bio.append(name);
+    if (unit.sync !== undefined) {
+      const badges = element("span", "unit-badges");
+      badges.append(crewBadge("cost", unit.cost), crewBadge("sync", unit.sync, syncMarks[unit.sync]));
+      bio.append(badges);
+    }
+    const vitals = element("span", "crew-vitals");
+    const hp = iconValue("hp", "체력", hpText(unit));
+    const meter = health(unit);
+    vitals.append(hp, meter);
+    bio.append(vitals, element("span", "crew-info-label", "대원 정보"));
+    const summary = element("summary", "crew-summary");
+    summary.dataset.crewSummary = unit.id;
+    summary.append(portrait, bio);
+
+    const setNames = { affiliation: unit.affiliation, type: attackTypes[unit.type], affinity: affinities[unit.affinity],
+      animal: unit.animal, weapon: unit.weapon };
+    const details = element("details", "crew-details");
+    details.dataset.unitId = unit.id;
+    details.open = open;
+    const data = element("div", "crew-detail-body");
+    const traits = element("dl", "crew-traits");
+    for (const field of unit.sets ?? []) {
+      if (!setNames[field]) continue;
+      const trait = element("div", "crew-trait");
+      trait.append(element("dt", "", crewSetLabels[field]), element("dd", "", setNames[field]));
+      traits.append(trait);
+    }
+    if (traits.firstElementChild) data.append(traits);
+    else if (unit.identity) data.append(element("p", "", unit.identity));
+    const stats = unitStats(unit);
+    const rating = element("p", "", `전투력 ${unit.power}`);
+    data.append(stats, unitResists(unit), rating);
+    details.append(summary, data);
+
+    const skills = element("ol", "skill-list");
+    const previews = (unit.skills ?? [null]).map((skill, index) => {
+      const preview = skillCard(unit, skill ? skillProfile(unit, index) : null, index);
+      this.#bindSkillDetail(preview);
+      return preview;
+    });
+    skills.append(...previews.map(({ item }) => item));
+    row.append(details, skills);
+    return { row, state, hpValue: hp.lastElementChild, meter, spirit: stats.lastElementChild.lastElementChild,
+      summary, details, rating, sync: unit.sync, previews };
+  }
+
+  #bindSkillDetail(preview) {
+    const { item, trigger } = preview;
+    item.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse" && !this.#skillPreview?.pinned) this.#showSkillDetail(preview);
+    });
+    item.addEventListener("pointerleave", () => {
+      if (this.#skillPreview === preview && !preview.pinned && !trigger.matches(":focus-visible")) this.#showSkillDetail(null);
+    });
+    trigger.addEventListener("focus", () => {
+      if (trigger.matches(":focus-visible")) this.#showSkillDetail(preview);
+    });
+    trigger.addEventListener("blur", () => {
+      if (this.#skillPreview === preview && !preview.pinned && !item.matches(":hover")) this.#showSkillDetail(null);
+    });
+    trigger.addEventListener("click", () => {
+      const closing = this.#skillPreview === preview && preview.pinned;
+      preview.pinned = !closing;
+      this.#showSkillDetail(closing ? null : preview);
+    });
+  }
+
+  #showSkillDetail(preview) {
+    if (this.#skillPreview === preview) return;
+    if (this.#skillPreview) {
+      const { trigger, detail } = this.#skillPreview;
+      trigger.setAttribute("aria-expanded", "false");
+      detail.hidden = true;
+      this.#skillPreview.pinned = false;
+    }
+    this.#skillPreview = preview;
+    if (preview) {
+      const { trigger, detail } = preview;
+      trigger.setAttribute("aria-expanded", "true");
+      detail.hidden = false;
+      detail.classList.toggle("opens-up", false);
+      const panel = detail.getBoundingClientRect();
+      detail.classList.toggle("opens-up", panel.bottom > globalThis.innerHeight && trigger.getBoundingClientRect().top >= panel.height);
+    }
   }
 
   #renderEnemies(enemies, hitIds) {

@@ -56,6 +56,17 @@ function Read-Category($Lookup, $Value, [string]$Location) {
     return $Lookup[$Value]
 }
 
+function Read-ImageLink([string]$Value, [string]$Location) {
+    if (-not $Value) { return }
+    $url = $null
+    if ([uri]::TryCreate($Value, [UriKind]::Absolute, [ref]$url) -and
+        $url.Scheme -eq 'https' -and $url.Host -and -not $url.UserInfo) { return $url.AbsoluteUri }
+    if ($Value -match '^(assets|concept-art)/[^\\?#\x22<>|:]+$' -and
+        $Value -notmatch '(?:^|/)\.{1,2}(?:/|$)' -and
+        (Test-Path -LiteralPath (Join-Path $PSScriptRoot $Value) -PathType Leaf)) { return $Value }
+    throw "$Location 값은 HTTPS 이미지 주소나 assets/, concept-art/ 아래의 이미지 경로여야 합니다."
+}
+
 function Read-RowValues($Row, $Columns) {
     $values = @{}
     foreach ($header in $Columns.Keys) { $values[$header] = $Row.Cells[$Columns[$header]] }
@@ -210,7 +221,7 @@ function Read-CrewWorkbook([string]$Source) {
             if ($field -in $setFields) { throw "$location 활성 세트 '$tag'이 중복됩니다." }
             $setFields += $field
         }
-        [ordered]@{
+        $unit = [ordered]@{
             sheetId = [int]$id; name = $character['대원']; affiliation = $character['소속']
             cost = Read-Number $character['코스트'] "$location 코스트" 1 4
             maxHp = Read-Number $character['최대 체력'] "$location 최대 체력" 1
@@ -224,6 +235,9 @@ function Read-CrewWorkbook([string]$Source) {
             animal = $concept['동물']; weapon = $concept['무기']; artReference = $concept['원화 참고']
             sets = $setFields; skills = $skills[$id]
         }
+        $imageLink = Read-ImageLink $character['이미지 링크'] "$location 이미지 링크"
+        if ($imageLink) { $unit['portraitSource'] = $imageLink }
+        $unit
     }
 }
 

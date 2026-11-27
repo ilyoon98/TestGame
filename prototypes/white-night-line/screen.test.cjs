@@ -27,6 +27,7 @@ function simulateScreen(seed, reduced = false) {
       item.parent = this;
     }
     get lastElementChild() { return this.children.at(-1); }
+    get firstElementChild() { return this.children[0]; }
     remove() { this.parent.children = this.parent.children.filter((node) => node !== this); }
     addEventListener(event, callback) { this.handlers[event] = callback; }
     click() { if (!this.disabled) this.handlers.click(); }
@@ -57,10 +58,10 @@ function simulateScreen(seed, reduced = false) {
     }
   }
   const get = (id) => elements.get(id);
-  const document = { createElement: () => new Element(), getElementById: get, activeElement: null };
+  const document = { createElement: () => new Element(), getElementById: get, activeElement: null, addEventListener() {} };
   const makeLane = () => {
     const lane = new Element("clash-lane");
-    lane.append(...["clash-announcement", "clash-flash", "clash-sparks", "slash", "damage-number", "finish-burst"]
+    lane.append(...["clash-announcement", "standard-space", "clash-flash", "clash-sparks", "slash", "damage-number", "finish-burst"]
       .map((name) => new Element(name)));
     for (const side of ["ally", "foe"]) {
       const unit = new Element("combatant", side);
@@ -141,6 +142,11 @@ test("the default ten-cost lineup reveals one card at a time before the dice rol
     assert.equal(get("crew-panel").hidden, true);
     assert.equal(get("draft-total").textContent, "0 / 10");
     assert.equal(get("draft-cards").children.length, 4);
+    for (const card of get("draft-cards").children) {
+      assert.equal(card.attributes["aria-label"], "미공개 대원");
+      assert.equal(card.querySelector(".draft-card-front").attributes["aria-hidden"], "true");
+      assert.ok(card.querySelector(".draft-card-back"));
+    }
     let total = 0;
     for (let i = 0; i < 4; i += 1) {
       screen.step();
@@ -151,10 +157,19 @@ test("the default ten-cost lineup reveals one card at a time before the dice rol
       total += Number(latest.querySelector(".draft-cost").textContent.split(" ").at(-1));
       assert.equal(get("draft-total").textContent, `${total} / 10`);
       assert.equal(get("draft-meter").attributes["aria-valuenow"], String(total));
-      assert.match(latest.querySelector(".draft-portrait").style.backgroundImage, /-(?:anime|recruit)\.png/);
-      const flip = screen.effects.find((effect) => effect.node === latest && effect.frames[0].transform.includes("rotateY"));
-      if (reduced) assert.equal(flip, undefined);
-      else assert.ok(flip);
+      assert.match(latest.querySelector(".draft-portrait").style.backgroundImage, /(?:assets|concept-art)\/.+\.png/);
+      assert.equal(latest.querySelector(".draft-card-front").attributes["aria-hidden"], undefined);
+      const flip = screen.effects.find((effect) => effect.node === latest.querySelector(".draft-card-turn"));
+      if (reduced) {
+        assert.match(flip.frames[1].transform, /scaleX\(.64\)/);
+        const back = screen.effects.find((effect) => effect.node === latest.querySelector(".draft-card-back"));
+        assert.equal(back.frames[0].opacity, 1);
+        assert.equal(back.frames[1].opacity, 0);
+      }
+      else {
+        assert.match(flip.frames[0].transform, /rotateY\(180deg\)/);
+        assert.match(flip.frames.at(-1).transform, /rotateY\(0deg\)/);
+      }
       if (i === 0) {
         get("pause").click();
         assert.equal(screen.timers.size, 0);
@@ -173,27 +188,31 @@ test("the default ten-cost lineup reveals one card at a time before the dice rol
 });
 
 test("the detailed draft cards and battlefield portraits use different framing of the same art", () => {
-  const opening = simulateScreen(1145, true);
-  opening.get("start").click();
-  advanceUntil(opening, () => opening.get("draft-panel").classes.has("is-complete"));
-  const cards = opening.get("draft-cards").children;
+  const screen = simulateScreen(8299, true);
+  const { get } = screen;
+  get("start").click();
+  advanceUntil(screen, () => get("draft-panel").classes.has("is-complete"));
+  const roster = [
+    ["제온", "assets/jun-recruit.png"], ["도건", "concept-art/1011-rok.png"],
+    ["케이", "concept-art/1017-yeon.png"], ["다인", "concept-art/1010-siwon.png"],
+  ];
+  const cards = get("draft-cards").children;
+  roster.forEach(([name, path], index) => {
+    const card = cards[index];
+    assert.equal(card.querySelector(".draft-caption").children[0].textContent, name);
+    assert.equal(card.querySelector(".draft-portrait").style.backgroundImage, `url("${path}")`);
+    assert.equal(card.querySelector(".draft-portrait").style.backgroundSize, "contain");
+  });
 
-  const demo = simulateScreen(0, true);
-  demo.get("test-battle").click();
-  const ian = demo.get("clash-lanes").querySelectorAll(".combatant.ally")
-    .find((token) => token.querySelector(".combat-name").textContent === "배온");
-  const waiting = demo.get("waiting-crew").children;
-  for (const [id, name, portrait] of [
-    ["ian", "배온", ian.querySelector(".combat-icon")],
-    ["yul", "벤", waiting.find((unit) => unit.dataset.fighterId === "yul").querySelector(".waiting-icon")],
-    ["seol", "나령", waiting.find((unit) => unit.dataset.fighterId === "seol").querySelector(".waiting-icon")],
-  ]) {
-    const card = cards.find((item) => item.querySelector(".draft-caption").children[0].textContent === name);
-    const draftPortrait = card.querySelector(".draft-portrait");
-    assert.equal(draftPortrait.style.backgroundImage, `url("assets/${id}-recruit.png")`);
-    assert.equal(draftPortrait.style.backgroundSize, "100%");
-    assert.equal(portrait.style.backgroundImage, draftPortrait.style.backgroundImage);
-    assert.ok(parseFloat(portrait.style.backgroundSize) > 100);
+  advanceUntil(screen, () => get("clash-lanes").firstElementChild?.dataset.stage === "ready");
+  const portraits = new Map([
+    ...get("clash-lanes").querySelectorAll(".combatant.ally").map((unit) =>
+      [unit.querySelector(".combat-name").textContent, unit.querySelector(".combat-icon")]),
+    ...get("waiting-crew").children.map((unit) => [unit.children[1].textContent, unit.querySelector(".waiting-icon")]),
+  ]);
+  for (const [name, path] of roster) {
+    assert.equal(portraits.get(name).style.backgroundImage, `url("${path}")`);
+    assert.ok(parseFloat(portraits.get(name).style.backgroundSize) > 100);
   }
 });
 
@@ -204,25 +223,47 @@ test("the opening cost and reward buttons complete a recruitment interaction", (
   get("start").click();
   assert.equal(get("draft-total").textContent, "0 / 8");
   advanceUntil(screen, () => get("draft-panel").hidden);
-  assert.match(get("sync-parts").textContent, /시작 코스트 8.*동기화 2 재료 0\/2/);
+  assert.match(get("sync-parts").textContent, /시작 코스트 8.*동기화 Ⅱ 재료 0\/2/);
   for (const row of get("crew").children) {
     assert.equal(row.querySelectorAll(".coin-profile.is-locked").length, 2);
-    assert.match(row.querySelector(".unit-growth").textContent, /코스트 [1-4] · 동기화 1/);
+    const cost = row.querySelector(".unit-badge-cost");
+    assert.match(cost.textContent, /^[1-4]$/);
+    assert.equal(cost.attributes["aria-label"], `코스트 ${cost.textContent}`);
+    assert.equal(row.querySelector(".unit-badge-sync").textContent, "Ⅰ");
+    assert.equal(row.querySelector(".crew-details").open, false);
+    assert.equal(row.querySelector(".portrait").style.backgroundSize, "contain");
   }
+  const skill = get("crew").querySelector(".coin-profile");
+  const trigger = skill.querySelector(".skill-trigger");
+  const detail = skill.querySelector(".skill-detail");
+  assert.match(skill.querySelector(".skill-picture").style.backgroundImage, /skill-icons-painted\.png/);
+  assert.equal(detail.hidden, true);
+  trigger.click();
+  assert.equal(trigger.attributes["aria-expanded"], "true");
+  assert.match(detail.querySelector(".skill-power").textContent, /^위력 \d/);
+  assert.match(detail.querySelector(".skill-roll").textContent, /코인 \d개/);
+  trigger.click();
+  assert.equal(detail.hidden, true);
   advanceUntil(screen, () => !get("recruit-panel").hidden);
   assert.equal(screen.timers.size, 0);
   assert.ok(get("launch-controls").hidden);
   assert.equal(get("recruit-packs").children.length, 3);
+  assert.equal(get("recruit-packs").querySelectorAll(".recruit-choice").length, 3);
   const choice = get("recruit-packs").querySelector(".recruit-choice");
-  assert.match(choice.attributes["aria-label"], /팩 코스트 [1-4] 영입/);
+  assert.match(choice.attributes["aria-label"], /[1-4]코스트 확정, 후보 [1-3]명, 출전 [1-5]명/);
+  assert.equal(get("recruit-packs").querySelectorAll(".recruit-recommendation").length, 1);
   choice.click();
+  assert.equal(get("recruit-panel").hidden, false);
+  assert.match(get("recruit-title").textContent, /인격 1명 선택/);
+  assert.equal(get("recruit-packs").querySelectorAll(".recruit-recommendation").length, 1);
+  get("recruit-packs").querySelector(".identity-choice").click();
   assert.ok(get("recruit-panel").hidden);
   assert.match(get("notice-title").textContent, /새 대원 영입|동기화 재료 획득/);
   assert.equal(screen.timers.size, 1);
 });
 
 test("the crew view displays the active animal and weapon set effects", () => {
-  const screen = simulateScreen(2);
+  const screen = simulateScreen(119);
   const { get } = screen;
   get("starting-cost").value = "10";
   get("start").click();
@@ -230,7 +271,7 @@ test("the crew view displays the active animal and weapon set effects", () => {
   const setEffects = get("synergies").children.map((item) => item.children.map((label) => label.textContent).join(" "));
   assert.ok(setEffects.includes("동물 쥐 2명 · 앞면 확률 +3%p"));
   assert.ok(setEffects.includes("무기 도검 3명 · 첫 적중 추가 피해 +2"));
-  const crew = get("crew").children.map((row) => row.querySelector(".identity").textContent);
+  const crew = get("crew").children.map((row) => row.querySelectorAll(".crew-trait").map((trait) => trait.children[1].textContent).join(" · "));
   assert.ok(crew.includes("Alfa 간부 · 참격 · 쥐 · 도검"));
 });
 
@@ -243,7 +284,8 @@ test("simultaneous contact recoil keeps horizontal positions within each lane", 
     && effect.node.classes.has("combatant") && effect.frames.some((frame) => frame.offset === .22));
   assert.equal(rebounds.length, 4);
   for (const { frames } of rebounds) {
-    assert.ok(frames.every((frame) => frame.left.startsWith("clamp(var(--lane-edge),")));
+    assert.equal(frames[0].translate, "0px 0px");
+    assert.match(frames[1].translate, /^calc\(clamp\(var\(--lane-edge\),.*cqi/);
     assert.match(frames[1].transform, /^translate\(-50%, -?\d+px\)$/);
   }
 });

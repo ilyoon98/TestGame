@@ -73,12 +73,23 @@ function draftCrew(budget, random) {
   return units.map(makeRecruit);
 }
 
-function eligiblePacks(random) {
-  return crewGroups.map(({ field, label, names }) => {
-    const activeKeys = new Set(crewCatalog.map((unit) => unit[field]));
-    const key = drawItem(Object.keys(names).filter((name) => activeKeys.has(name)), random);
-    const costs = [...new Set(crewCatalog.filter((unit) => unit[field] === key).map((unit) => unit.cost))];
-    return { field, key, label, name: names[key], costs: costs.sort((a, b) => a - b) };
+function eligiblePacks(deployed, random) {
+  return crewGroups.flatMap(({ field, label, names }) => {
+    const counts = new Map();
+    for (const unit of deployed) counts.set(unit[field], (counts.get(unit[field]) ?? 0) + 1);
+    const options = Object.keys(names).filter((key) => counts.has(key)).flatMap((key) => {
+      const team = crewCatalog.filter((unit) => unit[field] === key);
+      const costs = [...new Set(team.map((unit) => unit.cost))].sort((a, b) => a - b);
+      return costs.map((cost) => ({ key, cost, pool: team.filter((unit) => unit.cost === cost) }));
+    });
+    if (!options.length) return [];
+    const multiple = options.filter(({ pool }) => pool.length > 1);
+    const { key, cost, pool } = drawItem(multiple.length ? multiple : options, random);
+    const candidates = [];
+    while (pool.length && candidates.length < 3) {
+      candidates.push(pool.splice(Math.floor(random() * pool.length), 1)[0].id);
+    }
+    return [{ field, key, label, name: names[key], cost, deployedCount: counts.get(key), candidateIds: candidates }];
   });
 }
 
@@ -86,6 +97,21 @@ function teamSynergies(units) {
   return crewSets.flatMap(({ values, ...set }) => {
     const count = units.filter((unit) => unit.hp !== 0 && belongsToSet(unit, set)).length;
     return count < 2 ? [] : [{ ...set, count, bonus: values[Number(count >= 3)] }];
+  });
+}
+
+function synergyChanges(before, after) {
+  const keyOf = ({ field, key }) => `${field}:${key}`;
+  const oldSets = new Map(before.map((set) => [keyOf(set), set]));
+  const newSets = new Map(after.map((set) => [keyOf(set), set]));
+  return [...new Set([...oldSets.keys(), ...newSets.keys()])].flatMap((key) => {
+    const oldSet = oldSets.get(key);
+    const newSet = newSets.get(key);
+    const previous = oldSet?.bonus ?? 0;
+    const next = newSet?.bonus ?? 0;
+    if (previous === next) return [];
+    const { field, name, label, unit } = newSet ?? oldSet;
+    return [{ field, name, label, unit, previous, next }];
   });
 }
 
@@ -135,6 +161,34 @@ const syncRequirement = (unit) => unit.sync === 1 ? 2 : 3 + Number(unit.cost >= 
 const characterLevel = (unit) => unit.level ?? 20;
 const offenseLevel = (unit) => unit.offenseLevel ?? characterLevel(unit) + unit.attack;
 const defenseLevel = (unit) => unit.defenseLevel ?? characterLevel(unit) + unit.armor * 2;
+
+function formationValue(units) {
+  return units.filter((unit) => unit.hp > 0).reduce((sum, unit) => sum + power(unit), 0)
+    + teamSynergies(units).reduce((sum, set) => sum + (set.count >= 3 ? 22 : 14), 0);
+}
+
+function recruitAdvice(crew, identity, syncParts) {
+  if (crew.some((unit) => unit.id === identity.id)) {
+    const next = rankCrew(crew).find((unit) => unit.sync < 3);
+    const ready = next && syncParts + 2 >= syncRequirement(next);
+    return { score: ready ? 9 : 2, reason: ready ? `${next.name} 동기화 가능` : "동기화 재료 +2", duplicate: true };
+  }
+  const incoming = makeRecruit(identity);
+  const base = formationValue(crew);
+  const currentSets = teamSynergies(crew);
+  const assess = (member) => {
+    const team = [...crew.filter((unit) => unit !== member), incoming];
+    const gained = teamSynergies(team).find((set) =>
+      set.bonus > (currentSets.find((current) => current.field === set.field && current.key === set.key)?.bonus ?? 0));
+    const score = formationValue(team) - base;
+    const difference = member ? power(incoming) - power(member) : 0;
+    const reason = gained ? `${gained.name} 세트 강화` : member?.hp === 0 ? `${member.name} 빈자리 보강`
+      : member ? `${member.name} 교체 시 전투력 ${difference >= 0 ? "+" : ""}${difference}` : "빈 자리 충원";
+    return { score, reason };
+  };
+  if (crew.length < deploymentLimit) return assess(null);
+  return crew.map((member) => ({ ...assess(member), replacementId: member.id })).sort((a, b) => b.score - a.score)[0];
+}
 const coinCount = (unit, skill) => skill?.coinCount ?? unit.coinCount ?? 2;
 const coinStrength = (unit, skill) => skill?.coinPower ?? unit.coinPower ?? 2;
 const baseStrength = (unit, skill) => skill?.basePower ?? unit.basePower ?? Math.ceil(unit.attack / 2);
@@ -255,8 +309,7 @@ class Battle {
 
   get view() {
     if (!this.#stage) return null;
-    const fighterView = (unit) => ({ id: unit.id, name: unit.name, icon: unit.icon ?? "✦",
-      portraitSheet: unit.portraitSheet, portraitCell: unit.portraitCell, hp: unit.hp, maxHp: unit.maxHp,
+    const fighterView = (unit) => ({ id: unit.id, name: unit.name, icon: unit.icon ?? "✦", hp: unit.hp, maxHp: unit.maxHp,
       guard: unit.guard ?? 0, marked: this.#marks.has(unit.id), spirit: unit.spirit, headsChance: headsChance(unit) });
     return { round: this.#round, group: this.#group, stage: this.#stage, waiting: this.#waiting.length,
       fieldSlots: this.#fieldOrder.length, waitingSide: this.#waitingSide, waitingSlots: this.#waitingOrder.length,
@@ -524,6 +577,7 @@ class Expedition {
   #startingCost = null;
   #syncParts = 0;
   #reward = null;
+  #recruitChoice = null;
   #synergies = [];
   #phase = "ready";
   #position = 0;
@@ -560,6 +614,7 @@ class Expedition {
       syncParts: this.#syncParts,
       syncTarget: nextSync ? { name: nextSync.name, level: nextSync.sync + 1, required: syncRequirement(nextSync) } : null,
       reward: this.#phase === "reward" ? structuredClone(this.#reward) : null,
+      recruitChoice: this.#phase === "reward" ? structuredClone(this.#recruitChoice) : null,
       synergies: fighting ? this.#synergies.map((synergy) => ({ ...synergy })) : teamSynergies(ranked.slice(0, deploymentLimit)),
       testBattle: this.#testBattle,
       journal: this.#journal.slice(),
@@ -592,14 +647,75 @@ class Expedition {
   }
 
   chooseReward(field, key, cost) {
-    if (this.#phase !== "reward") return false;
-    const pack = this.#reward.find((item) => item.field === field && item.key === key);
-    if (!pack?.costs.includes(cost)) return false;
-    const pool = crewCatalog.filter((unit) => unit[field] === key && unit.cost === cost);
-    const result = this.#recruit(drawItem(pool, this.#recruitRandom));
-    this.#reward = null;
-    this.#hold("stop", "roll", result.title, result.detail);
+    if (this.#phase !== "reward" || this.#recruitChoice) return false;
+    const pack = this.#reward?.find((item) => item.field === field && item.key === key && item.cost === cost);
+    if (!pack) return false;
+    this.#offerIdentities(pack.name, pack.candidates);
     return true;
+  }
+
+  chooseIdentity(id) {
+    if (this.#phase !== "reward" || this.#recruitChoice?.selectedId) return false;
+    const candidate = this.#recruitChoice?.candidates.find((item) => item.id === id);
+    if (!candidate) return false;
+    if (!candidate.duplicate && this.#crew.length >= deploymentLimit) {
+      const incoming = makeRecruit(crewById[id]);
+      const before = teamSynergies(this.#crew);
+      this.#recruitChoice.selectedId = id;
+      this.#recruitChoice.replacementId = candidate.replacementId;
+      this.#recruitChoice.replacements = this.#crew.map((member) => ({ id: member.id,
+        changes: synergyChanges(before, teamSynergies([...this.#crew.filter((unit) => unit !== member), incoming])),
+      }));
+    } else this.#completeRecruit(this.#recruit(crewById[id]));
+    return true;
+  }
+
+  previewReplacement(id) {
+    const choice = this.#recruitChoice;
+    if (this.#phase !== "reward" || !choice?.selectedId || !choice.replacements.some((option) => option.id === id)) return false;
+    choice.replacementId = id;
+    return true;
+  }
+
+  replaceRecruit(id) {
+    if (this.#phase !== "reward" || !this.#recruitChoice?.selectedId || id !== this.#recruitChoice.replacementId) return false;
+    const slot = this.#crew.findIndex((unit) => unit.id === id);
+    if (slot < 0) return false;
+    const outgoing = this.#crew[slot];
+    const identity = crewById[this.#recruitChoice.selectedId];
+    this.#crew[slot] = makeRecruit(identity);
+    this.#skillBags.delete(id);
+    const sync = this.#grantSync(0);
+    this.#completeRecruit({ title: "대원 교체", detail: [`${outgoing.name} → ${identity.name} · 코스트 ${identity.cost}`, sync].filter(Boolean).join(" · ") });
+    return true;
+  }
+
+  backRecruit() {
+    if (this.#phase !== "reward" || !this.#recruitChoice) return false;
+    if (this.#recruitChoice.selectedId) {
+      this.#recruitChoice.selectedId = null;
+      this.#recruitChoice.replacementId = null;
+      this.#recruitChoice.replacements = [];
+    }
+    else if (this.#reward?.length) this.#recruitChoice = null;
+    else return false;
+    return true;
+  }
+
+  skipRecruit() {
+    if (this.#phase !== "reward" || !this.#recruitChoice) return false;
+    this.#completeRecruit({ title: "편성 유지", detail: "현재 대원으로 출발합니다." });
+    return true;
+  }
+
+  #offerIdentities(name, candidates) {
+    this.#recruitChoice = { name, candidates, selectedId: null, replacementId: null, replacements: [] };
+  }
+
+  #completeRecruit(result) {
+    this.#reward = null;
+    this.#recruitChoice = null;
+    this.#hold("stop", "roll", result.title, result.detail);
   }
 
   advance() {
@@ -637,8 +753,10 @@ class Expedition {
       this.#hold("stop", "roll", "보급 완료", `${recovery} · ${this.#grantSync(1)}`);
     } else if (tile.kind === "recruit") {
       const identity = crewById[routeRecruits[this.#position]];
-      const result = this.#recruit(identity);
-      this.#hold("stop", "roll", result.title, result.detail);
+      if (this.#crew.length >= deploymentLimit && !this.#crew.some((unit) => unit.id === identity.id)) {
+        this.#phase = "reward";
+        this.#offerIdentities("정거장 영입", [{ id: identity.id, ...recruitAdvice(this.#crew, identity, this.#syncParts), recommended: true }]);
+      } else this.#completeRecruit(this.#recruit(identity));
     } else {
       const allies = rankCrew(this.#crew).slice(0, deploymentLimit);
       this.#deploy(allies, threats(this.#position), this.#combatRandom);
@@ -692,8 +810,17 @@ class Expedition {
       } else {
         this.#heal(3);
         this.#resultClash = previous;
-        this.#reward = eligiblePacks(this.#recruitRandom);
-        this.#hold("battleResult", "reward", "승리", this.#grantSync(1));
+        const detail = this.#grantSync(1);
+        const deployed = rankCrew(this.#crew).slice(0, deploymentLimit);
+        this.#reward = eligiblePacks(deployed, this.#recruitRandom).map(({ candidateIds, ...pack }) => {
+          const candidates = candidateIds.map((id) => ({ id, ...recruitAdvice(this.#crew, crewById[id], this.#syncParts) }))
+            .sort((a, b) => b.score - a.score);
+          candidates[0].recommended = true;
+          return { ...pack, candidates, reason: candidates[0].reason, recommended: false };
+        });
+        const bestPack = this.#reward.reduce((best, pack) => !best || pack.candidates[0].score > best.candidates[0].score ? pack : best, null);
+        if (bestPack) bestPack.recommended = true;
+        this.#hold("battleResult", this.#reward.length ? "reward" : "roll", "승리", detail);
       }
     } else {
       this.#battle.startRound();
@@ -702,7 +829,7 @@ class Expedition {
 
   #recruit(identity) {
     if (this.#crew.some((unit) => unit.id === identity.id)) {
-      return { title: "동기화 재료 획득", detail: `${identity.name} 중복 영입 · ${this.#grantSync(2)}` };
+      return { title: "동기화 재료 획득", detail: `${identity.name} 중복 영입 · 코스트 ${identity.cost} · ${this.#grantSync(2)}` };
     }
     this.#crew.push(makeRecruit(identity));
     const detail = `${identity.name} · 코스트 ${identity.cost} · ${identity.affiliation}`;
